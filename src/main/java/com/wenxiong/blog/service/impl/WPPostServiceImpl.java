@@ -1,0 +1,271 @@
+package com.wenxiong.blog.service.impl;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+
+import net.sf.json.JSONObject;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import com.wenxiong.blog.Comment;
+import com.wenxiong.blog.WPPost;
+import com.wenxiong.blog.WPPostMeta;
+import com.wenxiong.blog.commons.service.impl.BaseServiceImpl;
+import com.wenxiong.blog.dao.CommentDao;
+import com.wenxiong.blog.dao.WPPostDao;
+import com.wenxiong.blog.dao.WPPostMetaDao;
+import com.wenxiong.blog.dto.ProductEvaluationDto;
+import com.wenxiong.blog.dto.TmallCommentsDto;
+import com.wenxiong.blog.service.WPPostService;
+import com.wenxiong.crawl.taobao.TmallCrawlerImpl;
+import com.wenxiong.utils.HtmlTagsUtils;
+import com.wenxiong.utils.HttpClientUtils;
+import com.wenxiong.utils.HttpDataProviderCandidate;
+import com.wenxiong.utils.WordPressUtils;
+
+@Service("wpPostService")
+public class WPPostServiceImpl extends BaseServiceImpl<WPPostDao, WPPost> implements WPPostService {
+
+
+
+	WPPostDao					wpPostDao;
+
+	@Autowired
+	WPPostMetaDao				wpPostMetaDao;
+
+	@Autowired
+	CommentDao					commentDao;
+
+	private static final Logger	LOG				= Logger.getLogger("crawl_name");
+
+	@Autowired
+	TmallCrawlerImpl			tmallCrawler;
+
+	@Autowired
+	HttpClientUtils				httpClientUtils;
+
+	public WPPostDao getWpPostDao() {
+		return wpPostDao;
+	}
+
+	@Autowired
+	public void setWpPostDao(WPPostDao wpPostDao) {
+		super.setBaseDao(wpPostDao);
+		this.wpPostDao = wpPostDao;
+	}
+
+	//
+	@Override
+	public Map<String, Object> addOneArticle(String tmallUrl, Long userId) {
+		tmallUrl = tmallUrl.trim();
+
+		WPPostMeta query = new WPPostMeta();
+		query.setMetaKey(WPPostMeta.META_Key_TMALL_URL);
+		query.setMetaValue(tmallUrl);
+		List<WPPostMeta> results = wpPostMetaDao.getByDomainObjectSelective(query);
+
+		Map<String, Object> map = tmallCrawler.getKeyValue(tmallUrl);
+		map.put(KEY_ORIGIN_URL, tmallUrl);
+		map.put(KEY_USER, userId);
+
+		if (map.get(KEY_USER) == null || map.get("title") == null || map.get("gallery") == null
+				|| map.get("content") == null) {
+			LOG.info("user or title or gallery or content may be null, for tamll url:" + tmallUrl);
+			throw new RuntimeException("crawl data failed!!!");
+		}
+
+		if (!CollectionUtils.isEmpty(results)) {
+			// update
+			Long articeId = Long.valueOf(results.get(0).getMetaValue());
+			map.put(KEY_ARTICLE_ID, articeId);
+			map.put("exist", true);
+			//first remove all average_score
+			wpPostMetaDao.deleteByCondition("meta_key = ? and post_id = ?", WPPostMeta.META_KEY_AVERAGE_SCORE, articeId);
+			
+			Long postId = addWPPostByTmall(map);
+			TmallCommentsDto tmallCommentsDto = tmallCrawler.getComments(tmallUrl);
+			if (!CollectionUtils.isEmpty(tmallCommentsDto.getComments())) {
+				commentDao.deleteByCondition("comment_post_ID = ?", results.get(0).getMetaValue());
+				addComments(tmallCommentsDto, postId);
+			}
+			LOG.info("finished update posted:" + postId + ", tmall url:" + tmallUrl);
+		} else {
+			// add new one
+			map.put("exist", false);
+			LOG.info("add new  an acticle, tmall url:" + tmallUrl);
+			Long postId = addWPPostByTmall(map);
+			map.put(KEY_ARTICLE_ID, postId);
+			TmallCommentsDto tmallCommentsDto = tmallCrawler.getComments(tmallUrl);
+			if (!CollectionUtils.isEmpty(tmallCommentsDto.getComments())) {
+				addComments(tmallCommentsDto, postId);
+			}
+//			postFeatureFileAndUpdateAttachment(postId, (String) map.get("first_picture"));
+			LOG.info("finished posted:" + postId + ", tmall url:" + tmallUrl);
+		}
+
+		return map;
+	}
+
+	/**
+	 * @param tmallCommentsDto
+	 */
+	private void addComments(TmallCommentsDto tmallCommentsDto, Long postId) {
+		List<Comment> comments = tmallCommentsDto.getComments();
+		for (Comment c : comments) {
+			c.setCommentID(commentDao.getId());
+			c.setCommentPostID(postId);
+			c.setUserId(0L);
+			commentDao.add(c);
+		}
+		long cnt = commentDao.countByCondition("comment_post_ID = ?", postId);
+		WPPost changedValue = new WPPost();
+		changedValue.setCommentCount(cnt);
+		wpPostDao.updateSelectiveByCondition(changedValue, "ID = ?", postId);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Long addWPPostByTmall(Map<String, Object> map) {
+		Long author = (Long) map.get(KEY_USER);
+		if (author == null) {
+			author = 1L;
+		}
+		if (map.get(KEY_ARTICLE_ID) != null) {
+			// update
+			WPPost post = new WPPost();
+			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+			post.setPostModified(timestamp);
+			post.setPostModifiedGmt(timestamp);
+
+			return Long.valueOf(map.get(KEY_ARTICLE_ID).toString());
+		} else {
+
+			WPPost post = new WPPost();
+			List<String> gallery = (List<String>) map.get("gallery");
+			final Long newPostId = this.getId();
+			post.setId(newPostId);
+			post.setPostTitle((String) map.get("title") + "");
+			StringBuilder builder = new StringBuilder();
+			for (int i = 1; i < gallery.size(); i++) {
+				builder.append(HtmlTagsUtils.PICTURE_PREFIX + gallery.get(i) + HtmlTagsUtils.PICTURE_POSTFIX);
+			}
+			String content = (String) map.get("content");
+
+			builder.append(content);
+			builder.append(HtmlTagsUtils.JUMP_TO_BUY_prefix + (String) map.get("origin")
+					+ HtmlTagsUtils.JUMP_TO_BUY_postfix);
+//			this.add(post);
+//			post.setPostContent("");
+			
+			post.setPostContent(builder.toString());
+			post.setCommentCount(0L);
+			post.setCommentStatus("open");
+			post.setGuid(WPPost.GUID_PREFIX + newPostId);
+			post.setMenuOrder(0);
+			post.setPingStatus("open");
+			post.setPostAuthor(author);
+			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+			post.setPostDate(timestamp);
+			post.setPostDateGmt(timestamp);
+			post.setPostModified(timestamp);
+			post.setPostModifiedGmt(timestamp);
+			post.setPostName("post_name");
+			post.setPostParent(0L);
+			post.setPostStatus("publish");
+			post.setPostType("post");
+			post.setToPing("");
+			post.setPinged("");
+			post.setPostExcerpt("");
+			post.setPostContentFiltered("");
+			post.setPostPassword("");
+			post.setPostMimeType("");
+			this.add(post);
+
+			WPPostMeta wpPostMeta = new WPPostMeta();
+			wpPostMeta.setMetaId(wpPostMetaDao.getId());
+			wpPostMeta.setPostId(post.getId());
+			wpPostMeta.setMetaKey(WPPostMeta.META_Key_TMALL_URL);
+			wpPostMeta.setMetaValue(String.valueOf(map.get("origin")));
+			wpPostMetaDao.add(wpPostMeta);
+			
+			WPPostMeta averageScore = new WPPostMeta();
+			averageScore.setMetaId(wpPostMetaDao.getId());
+			averageScore.setPostId(post.getId());
+			averageScore.setMetaKey(WPPostMeta.META_KEY_AVERAGE_SCORE);
+			averageScore.setMetaValue(String.valueOf(map.get(ProductEvaluationDto.TAG_AVARAGE_SCORE)));
+			wpPostMetaDao.add(averageScore);
+			
+			return newPostId;
+		}
+
+	}
+
+	@Override
+	public boolean postFeatureFileAndUpdateAttachment(Long postId, String firstPicture) {
+		LOG.info("add feature for " + postId);
+		int retry = 3;
+		if (StringUtils.isNotBlank(firstPicture)) {
+			Long fileMetaIdValue = null;
+			while (retry-- > 0) {
+				try {
+					// add a picture to server
+					HttpClient httpClient = httpClientUtils.getTaobaoHttpManager();
+					String html = HttpClientUtils.getHtmlByGetMethod(
+							httpClient,
+							HttpDataProviderCandidate.getHomePage(WordPressUtils.origin + "/wp-admin/post.php?post="
+									+ postId + "&action=edit"));
+					String nonce = WordPressUtils.getUploadFileNonce(html);
+					String result = HttpClientUtils.getHtmlByPostMethod(httpClient,
+							HttpDataProviderCandidate.getPostPictureData(firstPicture, String.valueOf(postId), nonce));
+
+					JSONObject jsonObject = JSONObject.fromObject(result);
+					if (new Boolean(true).equals(jsonObject.getBoolean("success"))) {
+						fileMetaIdValue = jsonObject.getJSONObject("data").getLong("id");
+						WPPostMeta feature = new WPPostMeta();
+						Long metaId = wpPostMetaDao.getId();
+						feature.setMetaId(metaId);
+						feature.setMetaKey(WPPostMeta.META_Key_SET_FEATURE);
+						feature.setPostId(postId);
+						feature.setMetaValue(String.valueOf(fileMetaIdValue));
+						wpPostMetaDao.add(feature);
+					}
+				} catch (Exception e) {
+					if (retry <= 0) {
+						LOG.error(e.getMessage() + ",add feature for " + postId + " failed!", e);
+						throw new RuntimeException("post data failed!!!");
+					}
+					continue;
+				}
+				// no exception
+				break;
+			}
+		}
+		return true;
+	}
+
+	public static void main(String[] args) throws Exception {
+		HttpClientUtils httpClientUtils = new HttpClientUtils();
+		HttpClient httpClient = httpClientUtils.getTaobaoHttpManager();
+
+		String html = HttpClientUtils.getHtmlByGetMethod(
+				httpClient,
+				HttpDataProviderCandidate.getHomePage(WordPressUtils.origin
+						+ "/wp-admin/post.php?post=1000005&action=edit"));
+		String nonce = WordPressUtils.getUploadFileNonce(html);
+		System.out.println(nonce);
+		String result = HttpClientUtils
+				.getHtmlByPostMethod(
+						httpClient,
+						HttpDataProviderCandidate
+								.getPostPictureData(
+										"http://f.hiphotos.baidu.com/album/w%3D2048/sign=a06e8c9991ef76c6d0d2fc2ba92efcfa/b03533fa828ba61eed6096974034970a314e59ff.jpg",
+										"1000005", nonce));
+
+		System.out.println(result);
+	}
+}

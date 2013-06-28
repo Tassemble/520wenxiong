@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%p [%t] %c{1}.%M(%L) | %m%n" />
+		</layout>
+	</appender>
+	
+	<appender name="DailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="threshold" value="info" />
+		<param name="file" value="D:\work\wenxionglogs\standalone\default.log" />
+		<param name="append" value="true" />
+		<param name="datePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="crawl_appender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="threshold" value="info" />
+		<param name="file" value="D:\work\wenxionglogs\standalone\crawl_appender.log" />
+		<param name="append" value="true" />
+		<param name="datePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
+		</layout>
+	</appender>
+
+	<logger name="crawl_name" additivity="false">
+		     <level value="info" />
+		     <appender-ref ref="CONSOLE" />     
+		<appender-ref ref="crawl_appender" />
+	</logger>
+	
+	
+	<root>
+		<level value="info" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+</log4j:configuration>
