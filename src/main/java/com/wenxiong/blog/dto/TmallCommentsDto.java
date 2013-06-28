@@ -11,12 +11,24 @@ public class TmallCommentsDto {
 
 	Long						rateCount;
 	
-	
-	
 
-	public static final long	commentLimitCount	= 50;
+	public static final int baseLimitCount = 50;
 	
 	
+	public int commentLimitCount;
+	
+	public static final int	RANDOM_COMMENT_COUNT_RANGE	= 50;
+	
+	
+	
+	public int getCommentLimitCount() {
+		return commentLimitCount;
+	}
+
+	public void setCommentLimitCount(int commentLimitCount) {
+		this.commentLimitCount = commentLimitCount;
+	}
+
 	public static final long	commentWordsLength	= 20;
 
 	public List<Comment> getComments() {

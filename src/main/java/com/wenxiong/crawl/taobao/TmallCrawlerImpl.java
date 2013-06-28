@@ -20,6 +20,7 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -94,6 +95,7 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		map.put(KEY_COMMENTS, getComments(url));
 		
 		// put all scores
+		
 		map.putAll(getProductEvaluation(url));
 
 		return map;
@@ -109,6 +111,7 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		TmallCommentsDto commentsDto = new TmallCommentsDto();
 		List<Comment> comments = Lists.newArrayList();
 		commentsDto.setComments(comments);
+		commentsDto.setCommentLimitCount(TmallCommentsDto.baseLimitCount + RandomUtils.nextInt(TmallCommentsDto.RANDOM_COMMENT_COUNT_RANGE));
 
 		TmallCommentURLDto commentURLDto = new TmallCommentURLDto();
 		commentURLDto.setCurrentPage(1);
@@ -154,7 +157,7 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		JSONObject paginator = jsonObject.getJSONObject("rateDetail").getJSONObject("paginator");
 		commentsDto.setRateCount(paginator.getLong("items"));
 		JSONArray rateList = jsonObject.getJSONObject("rateDetail").getJSONArray("rateList");
-		processComments(comments, rateList);
+		processComments(comments, rateList, commentsDto);
 
 		long totalPages = paginator.getLong("lastPage");
 		commentURLDto.setTotalPages(totalPages);
@@ -164,9 +167,9 @@ public class TmallCrawlerImpl implements TmallCrawler {
 	 * @param comments
 	 * @param rateList
 	 */
-	private void processComments(List<Comment> comments, JSONArray rateList) {
+	private void processComments(List<Comment> comments, JSONArray rateList, TmallCommentsDto commentsDto) {
 		for (int i = 0; i < rateList.size(); i++) {
-			if (comments.size() >= TmallCommentsDto.commentLimitCount) {
+			if (commentsDto.isCommentsFull()) {
 				break;
 			}
 			Comment comment = new Comment();

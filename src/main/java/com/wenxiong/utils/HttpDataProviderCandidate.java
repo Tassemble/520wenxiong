@@ -26,7 +26,7 @@ public class HttpDataProviderCandidate {
 
 	private static final Logger	LOG		= Logger.getLogger(HttpDataProviderCandidate.class);
 
-	public static final String	cookie	= "wordpress_5530fe0d8b284b037ddb3549e5c5e1dd=admin%7C1372383087%7C7c8f4a6c57ba77d5219ea41d53dc6407; __unam=7639673-13f481a86e0-9829727-4; wp-settings-1=editor%3Dtinymce%26libraryContent%3Dbrowse%26align%3Dcenter%26imgsize%3Dfull%26wplink%3D0%26widgets_access%3Don%26hidetb%3D1%26cats%3Dpop; wp-settings-time-1=1371387980; wp-settings-6=; wp-settings-time-6=1371952190; PHPSESSID=vnslkq5lvvnlbud2tsle6pi0j7; wordpress_test_cookie=WP+Cookie+check; wordpress_logged_in_5530fe0d8b284b037ddb3549e5c5e1dd=admin%7C1372383087%7Cb69d890bd082c16dacf74f8aa55752b6";
+	public static final String	cookie	= "wordpress_5530fe0d8b284b037ddb3549e5c5e1dd=admin%7C1372568307%7Cd85977aa4cf9e6efd05665b13e9be8a8; PHPSESSID=58b65q2gi35ql2t799h1pqe9r4; wp-settings-1=editor%3Dtinymce%26libraryContent%3Dbrowse%26align%3Dcenter%26imgsize%3Dfull%26wplink%3D0%26widgets_access%3Don%26hidetb%3D1%26cats%3Dpop; wp-settings-time-1=1372395479; wordpress_test_cookie=WP+Cookie+check; wordpress_logged_in_5530fe0d8b284b037ddb3549e5c5e1dd=admin%7C1372568307%7C5c67dba8bf3058e8a54c7d327c2ae314";
 
 	public static HttpDataProvider getHomePage(final String url) {
 		return new HttpDataProvider() {

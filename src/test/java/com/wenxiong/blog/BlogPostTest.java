@@ -20,7 +20,6 @@ import com.wenxiong.blog.dao.UserDao;
 import com.wenxiong.blog.dao.WPPostDao;
 import com.wenxiong.blog.dto.TmallCommentsDto;
 import com.wenxiong.blog.service.WPPostService;
-import com.wenxiong.blog.service.impl.WPPostServiceImpl;
 import com.wenxiong.crawl.taobao.TmallCrawler;
 
 public class BlogPostTest extends BaseTestCase {
@@ -69,6 +68,12 @@ public class BlogPostTest extends BaseTestCase {
 
 	@Autowired
 	WPPostService	w;
+	
+	
+	@Test
+	public void addOnePicture() {
+		w.postFeatureFileAndUpdateAttachment(1000369L, "http://img03.taobaocdn.com/bao/uploaded/i7/T1W4OBXjRYXXapIpI2_042727.jpg");
+	}
 
 	@Test
 	public void addFromTmall() {
@@ -81,28 +86,66 @@ public class BlogPostTest extends BaseTestCase {
 //		list.add("http://detail.tmall.com/item.htm?id=23276317000");
 		//http://detail.tmall.com/item.htm?id=12477082411
 		//较特殊
-		list.add("http://detail.tmall.com/item.htm?id=17591486947");
-		list.add("http://detail.tmall.com/item.htm?id=17800833586");
-		list.add("http://detail.tmall.com/item.htm?id=17934559000");
-		list.add("http://detail.tmall.com/item.htm?id=18094512615");
-		list.add("http://detail.tmall.com/item.htm?id=18175012358");
-		list.add("http://detail.tmall.com/item.htm?id=18178264888");
-		list.add("http://detail.tmall.com/item.htm?id=18538535300");
-		list.add("http://detail.tmall.com/item.htm?id=18551079499");
-		list.add("http://detail.tmall.com/item.htm?id=19044768424");
-		list.add("http://detail.tmall.com/item.htm?id=19142628353");
-		list.add("http://detail.tmall.com/item.htm?id=19261156464");
-		list.add("http://detail.tmall.com/item.htm?id=19666683771");
-		list.add("http://detail.tmall.com/item.htm?id=19921940964");
-		list.add("http://detail.tmall.com/item.htm?id=19943339050");
-		list.add("http://detail.tmall.com/item.htm?id=19997175046");
-		list.add("http://detail.tmall.com/item.htm?id=20268188355");
-		list.add("http://detail.tmall.com/item.htm?id=20331664552");
-		list.add("http://detail.tmall.com/item.htm?id=20440956651");
-		list.add("http://detail.tmall.com/item.htm?id=20741060824");
-		list.add("http://detail.tmall.com/item.htm?id=22027048602");
-		list.add("http://detail.tmall.com/item.htm?id=22292864951");
-		list.add("http://detail.tmall.com/item.htm?id=23189912162");
+//		list.add("http://detail.tmall.com/item.htm?id=10406559071");
+//		list.add("http://detail.tmall.com/item.htm?id=10768078157");
+//		list.add("http://detail.tmall.com/item.htm?id=12276869145");
+		list.add("http://detail.tmall.com/item.htm?id=12667271883");
+		list.add("http://detail.tmall.com/item.htm?id=13796196429");
+		list.add("http://detail.tmall.com/item.htm?id=14420853455");
+		list.add("http://detail.tmall.com/item.htm?id=14446170595");
+		list.add("http://detail.tmall.com/item.htm?id=14561790361");
+		list.add("http://detail.tmall.com/item.htm?id=14585461370");
+		list.add("http://detail.tmall.com/item.htm?id=15088715443");
+		list.add("http://detail.tmall.com/item.htm?id=15441633722");
+		list.add("http://detail.tmall.com/item.htm?id=15474308086");
+		list.add("http://detail.tmall.com/item.htm?id=15799008996");
+		list.add("http://detail.tmall.com/item.htm?id=15856841347");
+		list.add("http://detail.tmall.com/item.htm?id=15904818681");
+		list.add("http://detail.tmall.com/item.htm?id=15907829443");
+		list.add("http://detail.tmall.com/item.htm?id=16159413035");
+		list.add("http://detail.tmall.com/item.htm?id=16207792815");
+		list.add("http://detail.tmall.com/item.htm?id=16210510312");
+		list.add("http://detail.tmall.com/item.htm?id=16284140557");
+		list.add("http://detail.tmall.com/item.htm?id=16383339730");
+		list.add("http://detail.tmall.com/item.htm?id=16554890376");
+		list.add("http://detail.tmall.com/item.htm?id=16556851426");
+		list.add("http://detail.tmall.com/item.htm?id=16629471864");
+		list.add("http://detail.tmall.com/item.htm?id=16975217475");
+		list.add("http://detail.tmall.com/item.htm?id=17011469985");
+		list.add("http://detail.tmall.com/item.htm?id=17160601507");
+		list.add("http://detail.tmall.com/item.htm?id=17286698452");
+		list.add("http://detail.tmall.com/item.htm?id=17502692390");
+		list.add("http://detail.tmall.com/item.htm?id=18011447176");
+		list.add("http://detail.tmall.com/item.htm?id=18218113370");
+		list.add("http://detail.tmall.com/item.htm?id=18304051437");
+		list.add("http://detail.tmall.com/item.htm?id=18428062779");
+		list.add("http://detail.tmall.com/item.htm?id=18447750330");
+		list.add("http://detail.tmall.com/item.htm?id=18498652004");
+		list.add("http://detail.tmall.com/item.htm?id=18670941799");
+		list.add("http://detail.tmall.com/item.htm?id=18729569421");
+		list.add("http://detail.tmall.com/item.htm?id=18786701681");
+		list.add("http://detail.tmall.com/item.htm?id=19031852417");
+		list.add("http://detail.tmall.com/item.htm?id=19126383160");
+		list.add("http://detail.tmall.com/item.htm?id=19420171694");
+		list.add("http://detail.tmall.com/item.htm?id=19574903315");
+		list.add("http://detail.tmall.com/item.htm?id=19820267320");
+		list.add("http://detail.tmall.com/item.htm?id=20539091390");
+		list.add("http://detail.tmall.com/item.htm?id=20555704866");
+		list.add("http://detail.tmall.com/item.htm?id=21433488941");
+		list.add("http://detail.tmall.com/item.htm?id=21435152482");
+		list.add("http://detail.tmall.com/item.htm?id=22859624167");
+		list.add("http://detail.tmall.com/item.htm?id=23024188641");
+		list.add("http://detail.tmall.com/item.htm?id=23418232905");
+		list.add("http://detail.tmall.com/item.htm?id=24927564753");
+		list.add("http://detail.tmall.com/item.htm?id=25408028446");
+		list.add("http://detail.tmall.com/item.htm?id=25638752198");
+		list.add("http://detail.tmall.com/item.htm?id=4538941360");
+		list.add("http://detail.tmall.com/item.htm?id=4581558320");
+		list.add("http://detail.tmall.com/item.htm?id=5879373417");
+		list.add("http://detail.tmall.com/item.htm?id=7180180409");
+		list.add("http://detail.tmall.com/item.htm?id=7675092517");
+		list.add("http://detail.tmall.com/item.htm?id=9417821947");
+		list.add("http://detail.tmall.com/item.htm?id=9942835188");
 			
 
 		List<User> users = userDao.getAll();

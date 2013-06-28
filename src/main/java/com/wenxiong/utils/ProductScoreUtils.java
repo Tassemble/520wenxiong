@@ -42,6 +42,12 @@ public class ProductScoreUtils {
 	public static String getStyleScore(List<ProductEvaluationDto> dto) {
 		ProductEvaluationDto goodOne = ProductEvaluationDto.getById(dto, ProductEvaluationDto.STYLE_ID, true);
 		ProductEvaluationDto badOne = ProductEvaluationDto.getById(dto, ProductEvaluationDto.STYLE_ID, false);
+		if (goodOne == null || badOne == null) {
+			
+			//暂未评分
+			return "8.0";
+		}
+		
 		float good = goodOne.getCount() * GOOD_RATIO;
 		float bad = badOne.getCount() * BAD_RATIO;
 		float result = 10 * good / (good + bad);
