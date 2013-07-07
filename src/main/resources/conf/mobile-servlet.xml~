@@ -8,29 +8,26 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
 
-	<bean id="webApplicationPropertyConfigurer"
+
+
+	<bean id="springMVCPropertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
-				<value>classpath:biz.properites</value>
+				<value>classpath:springMVC.properties</value>
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
 	</bean>
-	
-	<bean id="WebConfig" class="com.wenxiong.web.WebConfig">
-		<property name="host"> 
-			<value>http://wenxiong.com</value>
-		</property>
-		</bean>
 
-
-
-	<context:component-scan base-package="com.wenxiong.crawl.taobao"></context:component-scan>
-	<context:component-scan base-package="com.wenxiong.utils"></context:component-scan>
-	
+	<aop:aspectj-autoproxy />
 	<context:annotation-config />
+	<context:component-scan base-package="com.wenxiong"></context:component-scan>
+	
+	<mvc:annotation-driven />
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+	</bean>
 
-		
 
 </beans>

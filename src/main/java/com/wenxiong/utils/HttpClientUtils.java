@@ -156,7 +156,9 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 		}
 
 		HttpEntity entity = response.getEntity();
+		
 		String result = EntityUtils.toString(entity, "UTF-8");
+		post.abort();
 		return result;
 	}
 

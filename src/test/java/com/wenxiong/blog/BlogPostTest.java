@@ -21,6 +21,7 @@ import com.wenxiong.blog.dao.WPPostDao;
 import com.wenxiong.blog.dto.TmallCommentsDto;
 import com.wenxiong.blog.service.WPPostService;
 import com.wenxiong.crawl.taobao.TmallCrawler;
+import com.wenxiong.utils.WordPressUtils;
 
 public class BlogPostTest extends BaseTestCase {
 
@@ -72,7 +73,7 @@ public class BlogPostTest extends BaseTestCase {
 	
 	@Test
 	public void addOnePicture() {
-		w.postFeatureFileAndUpdateAttachment(1000369L, "http://img03.taobaocdn.com/bao/uploaded/i7/T1W4OBXjRYXXapIpI2_042727.jpg");
+		w.postFeatureFileAndUpdateAttachment(1000484L, "http://img04.taobaocdn.com/bao/uploaded/i4/12768032654388004/T1_7EMXXxcXXXXXXXX_!!0-item_pic.jpg");
 	}
 
 	@Test
@@ -86,66 +87,65 @@ public class BlogPostTest extends BaseTestCase {
 //		list.add("http://detail.tmall.com/item.htm?id=23276317000");
 		//http://detail.tmall.com/item.htm?id=12477082411
 		//较特殊
-//		list.add("http://detail.tmall.com/item.htm?id=10406559071");
-//		list.add("http://detail.tmall.com/item.htm?id=10768078157");
-//		list.add("http://detail.tmall.com/item.htm?id=12276869145");
-		list.add("http://detail.tmall.com/item.htm?id=12667271883");
-		list.add("http://detail.tmall.com/item.htm?id=13796196429");
-		list.add("http://detail.tmall.com/item.htm?id=14420853455");
-		list.add("http://detail.tmall.com/item.htm?id=14446170595");
-		list.add("http://detail.tmall.com/item.htm?id=14561790361");
-		list.add("http://detail.tmall.com/item.htm?id=14585461370");
-		list.add("http://detail.tmall.com/item.htm?id=15088715443");
-		list.add("http://detail.tmall.com/item.htm?id=15441633722");
-		list.add("http://detail.tmall.com/item.htm?id=15474308086");
-		list.add("http://detail.tmall.com/item.htm?id=15799008996");
-		list.add("http://detail.tmall.com/item.htm?id=15856841347");
-		list.add("http://detail.tmall.com/item.htm?id=15904818681");
-		list.add("http://detail.tmall.com/item.htm?id=15907829443");
-		list.add("http://detail.tmall.com/item.htm?id=16159413035");
-		list.add("http://detail.tmall.com/item.htm?id=16207792815");
-		list.add("http://detail.tmall.com/item.htm?id=16210510312");
+		list.add("http://detail.tmall.com/item.htm?id=10903889586");
+		list.add("http://detail.tmall.com/item.htm?id=12201055754");
+		list.add("http://detail.tmall.com/item.htm?id=12231501071");
+		list.add("http://detail.tmall.com/item.htm?id=12640352127");
+		list.add("http://detail.tmall.com/item.htm?id=13797324741");
+		list.add("http://detail.tmall.com/item.htm?id=13906081482");
+		list.add("http://detail.tmall.com/item.htm?id=14145897987");
+		list.add("http://detail.tmall.com/item.htm?id=14164669330");
+		list.add("http://detail.tmall.com/item.htm?id=14282243189");
+		list.add("http://detail.tmall.com/item.htm?id=14521915637");
+		list.add("http://detail.tmall.com/item.htm?id=15107828722");
+		list.add("http://detail.tmall.com/item.htm?id=15119634776");
+		list.add("http://detail.tmall.com/item.htm?id=15472112055");
+		list.add("http://detail.tmall.com/item.htm?id=15589327206");
+		list.add("http://detail.tmall.com/item.htm?id=15634978328");
+		list.add("http://detail.tmall.com/item.htm?id=15716817987");
+		list.add("http://detail.tmall.com/item.htm?id=16066179416");
+		list.add("http://detail.tmall.com/item.htm?id=16112061070");
+		list.add("http://detail.tmall.com/item.htm?id=16180742282");
 		list.add("http://detail.tmall.com/item.htm?id=16284140557");
-		list.add("http://detail.tmall.com/item.htm?id=16383339730");
-		list.add("http://detail.tmall.com/item.htm?id=16554890376");
-		list.add("http://detail.tmall.com/item.htm?id=16556851426");
-		list.add("http://detail.tmall.com/item.htm?id=16629471864");
-		list.add("http://detail.tmall.com/item.htm?id=16975217475");
-		list.add("http://detail.tmall.com/item.htm?id=17011469985");
-		list.add("http://detail.tmall.com/item.htm?id=17160601507");
-		list.add("http://detail.tmall.com/item.htm?id=17286698452");
-		list.add("http://detail.tmall.com/item.htm?id=17502692390");
-		list.add("http://detail.tmall.com/item.htm?id=18011447176");
+		list.add("http://detail.tmall.com/item.htm?id=17076028666");
+		list.add("http://detail.tmall.com/item.htm?id=17100778232");
+		list.add("http://detail.tmall.com/item.htm?id=17308390773");
+		list.add("http://detail.tmall.com/item.htm?id=17349653500");
+		list.add("http://detail.tmall.com/item.htm?id=17390733367");
+		list.add("http://detail.tmall.com/item.htm?id=17391825213");
+		list.add("http://detail.tmall.com/item.htm?id=17495988392");
+		list.add("http://detail.tmall.com/item.htm?id=17568242789");
+		list.add("http://detail.tmall.com/item.htm?id=17568465508");
+		list.add("http://detail.tmall.com/item.htm?id=17926675800");
+		list.add("http://detail.tmall.com/item.htm?id=18197572902");
 		list.add("http://detail.tmall.com/item.htm?id=18218113370");
-		list.add("http://detail.tmall.com/item.htm?id=18304051437");
+		list.add("http://detail.tmall.com/item.htm?id=18265654079");
+		list.add("http://detail.tmall.com/item.htm?id=18358740171");
 		list.add("http://detail.tmall.com/item.htm?id=18428062779");
-		list.add("http://detail.tmall.com/item.htm?id=18447750330");
+		list.add("http://detail.tmall.com/item.htm?id=18476375245");
 		list.add("http://detail.tmall.com/item.htm?id=18498652004");
-		list.add("http://detail.tmall.com/item.htm?id=18670941799");
-		list.add("http://detail.tmall.com/item.htm?id=18729569421");
-		list.add("http://detail.tmall.com/item.htm?id=18786701681");
-		list.add("http://detail.tmall.com/item.htm?id=19031852417");
-		list.add("http://detail.tmall.com/item.htm?id=19126383160");
-		list.add("http://detail.tmall.com/item.htm?id=19420171694");
-		list.add("http://detail.tmall.com/item.htm?id=19574903315");
-		list.add("http://detail.tmall.com/item.htm?id=19820267320");
-		list.add("http://detail.tmall.com/item.htm?id=20539091390");
-		list.add("http://detail.tmall.com/item.htm?id=20555704866");
-		list.add("http://detail.tmall.com/item.htm?id=21433488941");
-		list.add("http://detail.tmall.com/item.htm?id=21435152482");
-		list.add("http://detail.tmall.com/item.htm?id=22859624167");
-		list.add("http://detail.tmall.com/item.htm?id=23024188641");
-		list.add("http://detail.tmall.com/item.htm?id=23418232905");
-		list.add("http://detail.tmall.com/item.htm?id=24927564753");
-		list.add("http://detail.tmall.com/item.htm?id=25408028446");
-		list.add("http://detail.tmall.com/item.htm?id=25638752198");
-		list.add("http://detail.tmall.com/item.htm?id=4538941360");
-		list.add("http://detail.tmall.com/item.htm?id=4581558320");
-		list.add("http://detail.tmall.com/item.htm?id=5879373417");
-		list.add("http://detail.tmall.com/item.htm?id=7180180409");
-		list.add("http://detail.tmall.com/item.htm?id=7675092517");
-		list.add("http://detail.tmall.com/item.htm?id=9417821947");
-		list.add("http://detail.tmall.com/item.htm?id=9942835188");
+		list.add("http://detail.tmall.com/item.htm?id=18993052858");
+		list.add("http://detail.tmall.com/item.htm?id=19202076430");
+		list.add("http://detail.tmall.com/item.htm?id=19408911422");
+		list.add("http://detail.tmall.com/item.htm?id=19630967681");
+		list.add("http://detail.tmall.com/item.htm?id=20268859304");
+		list.add("http://detail.tmall.com/item.htm?id=20286436806");
+		list.add("http://detail.tmall.com/item.htm?id=20503452072");
+		list.add("http://detail.tmall.com/item.htm?id=20626276623");
+		list.add("http://detail.tmall.com/item.htm?id=21056320229");
+		list.add("http://detail.tmall.com/item.htm?id=24030332564");
+		list.add("http://detail.tmall.com/item.htm?id=24527884302");
+		list.add("http://detail.tmall.com/item.htm?id=24579428608");
+		list.add("http://detail.tmall.com/item.htm?id=25478052228");
+		list.add("http://detail.tmall.com/item.htm?id=25610264060");
+		list.add("http://detail.tmall.com/item.htm?id=4448491963");
+		list.add("http://detail.tmall.com/item.htm?id=4600800900");
+		list.add("http://detail.tmall.com/item.htm?id=5930224305");
+		list.add("http://detail.tmall.com/item.htm?id=6148263287");
+		list.add("http://detail.tmall.com/item.htm?id=7700593110");
+		list.add("http://detail.tmall.com/item.htm?id=8217086571");
+		list.add("http://detail.tmall.com/item.htm?id=8852034747");
+		list.add("http://detail.tmall.com/item.htm?id=9833220752");
 			
 
 		List<User> users = userDao.getAll();
@@ -244,6 +244,11 @@ public class BlogPostTest extends BaseTestCase {
 		for (Entry<String, Object> entry : map.entrySet()) {
 			System.err.println(entry.getKey() + ", " + entry.getValue());
 		}
+	}
+	
+	@Test
+	public void getPrice() {
+		WordPressUtils.printJson(tmallCrawler.getTmallProductDto("http://detail.tmall.com/item.htm?id=12738735995"));
 	}
 
 }

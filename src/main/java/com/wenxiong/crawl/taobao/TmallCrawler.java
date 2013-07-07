@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.wenxiong.blog.dto.TmallCommentsDto;
+import com.wenxiong.blog.dto.TmallProductDto;
 
 public interface TmallCrawler {
 	
@@ -50,11 +51,7 @@ public interface TmallCrawler {
 	TmallCommentsDto getComments(String url);
 	
 	Map<String, Object> getProductEvaluation(String tmallUrl);
-	
-	
-	
-	
-	
-	
+
+	TmallProductDto getTmallProductDto(String tmallUrl);
 
 }

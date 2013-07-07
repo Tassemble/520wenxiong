@@ -1,29 +1,33 @@
 package com.wenxiong.blog.dto;
 
 public class TmallProductDto {
-	
+
 	/**
 	 * 天猫上的productId
 	 */
-	private Long productId;
-	
-	private Double price;
+	private Long	productId;
+
+	private Double	price;
 	/**
-	 * startTime & endTime 是空 说明是没有优惠
-	 * eg:限时特惠
+	 * startTime & endTime 是空 说明是没有优惠 eg:限时特惠
 	 */
-	private String promotionType;
-	private Long promotionStartTime;
-	private Long promotionEndTime;
+	private String	promotionType;
+	private Long	promotionStartTime;
+	private Long	promotionEndTime;
 	/**
 	 * 促销价格
 	 */
-	private Double promotionPrice;
-	
+	private Double	promotionPrice;
+
 	/**
 	 * 是否包邮
 	 */
-	private Boolean postageFree = false;
+	private Boolean	postageFree	= false;
+	
+	public TmallProductDto(Long productId) {
+		super();
+		this.productId = productId;
+	}
 
 	public Long getProductId() {
 		return productId;
@@ -80,9 +84,12 @@ public class TmallProductDto {
 	public void setPostageFree(Boolean postageFree) {
 		this.postageFree = postageFree;
 	}
-	
-	
-	
-	
-	
+
+	public String getProductInfoUrl() {
+		return "http://mdskip.taobao.com/core/initItemDetail.htm?itemId=" + productId;
+	}
+
+	public String getProductReferer() {
+		return "http://detail.tmall.com/item.htm?id=" + productId;
+	}
 }

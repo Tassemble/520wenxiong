@@ -47,9 +47,11 @@ public class WordPressUtils {
 		}
 	}
 	
-    public static <T> T getFromJson(String json, Type type) {
-        return g.fromJson(json, type);
-    }
+//    public static <T> T getFromJson(String json, Type type) {
+//        return g.fromJson(json, type);
+//    }
+    
+    
     public static String toJson(Object o) {
         return g.toJson(o);
     }

@@ -11,7 +11,7 @@
 	
 	<appender name="DailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="threshold" value="info" />
-		<param name="file" value="D:/work/wenxiong/logs/default.log" />
+		<param name="file" value="D:\work\wenxionglogs\standalone\default.log" />
 		<param name="append" value="true" />
 		<param name="datePattern" value="'.'yyyy-MM-dd" />
 		<layout class="org.apache.log4j.PatternLayout">
@@ -21,7 +21,7 @@
 
 	<appender name="crawl_appender" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="threshold" value="info" />
-		<param name="file" value="D:/work/wenxiong/logs/crawl_appender.log" />
+		<param name="file" value="D:\work\wenxionglogs\standalone\crawl_appender.log" />
 		<param name="append" value="true" />
 		<param name="datePattern" value="'.'yyyy-MM-dd" />
 		<layout class="org.apache.log4j.PatternLayout">

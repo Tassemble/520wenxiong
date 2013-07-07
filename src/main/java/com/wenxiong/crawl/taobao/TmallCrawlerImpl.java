@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -43,7 +44,9 @@ import com.wenxiong.blog.dto.GatherEffect;
 import com.wenxiong.blog.dto.ProductEvaluationDto;
 import com.wenxiong.blog.dto.TmallCommentURLDto;
 import com.wenxiong.blog.dto.TmallCommentsDto;
+import com.wenxiong.blog.dto.TmallProductDto;
 import com.wenxiong.utils.HttpClientUtils;
+import com.wenxiong.utils.HttpDataProviderCandidate;
 import com.wenxiong.utils.ProductScoreUtils;
 import com.wenxiong.utils.TmallCrawlerUtils;
 import com.wenxiong.utils.WordPressUtils;
@@ -51,11 +54,11 @@ import com.wenxiong.utils.WordPressUtils;
 @Component("tmallCrawler")
 public class TmallCrawlerImpl implements TmallCrawler {
 
-	private static final Logger	LOG	= Logger.getLogger(TmallCrawlerImpl.class);
-	public static Pattern	pattern	= Pattern.compile("^background-image:url\\((http://.*.jpg)_[0-9]+x[0-9]+.jpg\\)$");
-	public static Pattern	imgPattern	= Pattern.compile("^(http://.*.jpg)_[0-9]+x[0-9]+.jpg$");
-	
-	
+	private static final Logger	LOG			= Logger.getLogger(TmallCrawlerImpl.class);
+	public static Pattern		pattern		= Pattern
+													.compile("^background-image:url\\((http://.*.jpg)_[0-9]+x[0-9]+.jpg\\)$");
+	public static Pattern		imgPattern	= Pattern.compile("^(http://.*.jpg)_[0-9]+x[0-9]+.jpg$");
+
 	@Autowired
 	HttpClientUtils				httpClientUtils;
 
@@ -93,10 +96,12 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		map.put("content", getDetailContent(html));
 
 		map.put(KEY_COMMENTS, getComments(url));
-		
+
 		// put all scores
-		
+
 		map.putAll(getProductEvaluation(url));
+		
+		map.put(KEY_PRODUCT, getTmallProductDto(url));
 
 		return map;
 	}
@@ -111,7 +116,8 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		TmallCommentsDto commentsDto = new TmallCommentsDto();
 		List<Comment> comments = Lists.newArrayList();
 		commentsDto.setComments(comments);
-		commentsDto.setCommentLimitCount(TmallCommentsDto.baseLimitCount + RandomUtils.nextInt(TmallCommentsDto.RANDOM_COMMENT_COUNT_RANGE));
+		commentsDto.setCommentLimitCount(TmallCommentsDto.baseLimitCount
+				+ RandomUtils.nextInt(TmallCommentsDto.RANDOM_COMMENT_COUNT_RANGE));
 
 		TmallCommentURLDto commentURLDto = new TmallCommentURLDto();
 		commentURLDto.setCurrentPage(1);
@@ -273,8 +279,6 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		return urls;
 	}
 
-	
-
 	public static void main1(String[] args) throws ClientProtocolException, IOException {
 		TmallCrawlerImpl crawler = new TmallCrawlerImpl();
 		List<String> list = Arrays.asList("14813675863", "15551958002", "12201055754");
@@ -297,9 +301,9 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		Map<String, Object> map = null;
 		try {
 			Long itemId = TmallCrawlerUtils.fetchIDfromTmallURL(tmallUrl);
-			
+
 			map = Maps.newHashMap();
-			String evaluationUrl =TmallCrawlerUtils.getRateURL(itemId);
+			String evaluationUrl = TmallCrawlerUtils.getRateURL(itemId);
 
 			HttpClient httpClient = httpClientUtils.getTaobaoHttpManager();
 			String html = HttpClientUtils.getHtmlByGetMethod(httpClient, evaluationUrl);
@@ -338,4 +342,54 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		return map;
 	}
 
+	
+	@Override
+	public TmallProductDto getTmallProductDto(String tmallUrl) {
+		TmallProductDto dto = null;
+		try {
+			Long itemId = TmallCrawlerUtils.fetchIDfromTmallURL(tmallUrl);
+			if (itemId == null)
+				return null;
+			dto = new TmallProductDto(itemId);
+			HttpClient httpClient = httpClientUtils.getTaobaoHttpManager();
+
+			String html = HttpClientUtils.getHtmlByGetMethod(httpClient,
+					HttpDataProviderCandidate.getWithReferer(dto.getProductInfoUrl(), dto.getProductReferer()));
+			if (StringUtils.isBlank(html)) {
+				LOG.error("http request:" + dto.getProductInfoUrl() + ", return null");
+				return null;
+			}
+
+			JSONObject jsonObject = JSONObject.fromObject(html);
+			if (StringUtils.isBlank(jsonObject.getString("isSuccess"))
+					&& jsonObject.getString("isSuccess").equalsIgnoreCase("true")) {
+				LOG.error("http request:" + dto.getProductInfoUrl() + " get data failed");
+				return null;
+			}
+
+			JSONObject items = jsonObject.getJSONObject("defaultModel").getJSONObject("itemPriceResultDO")
+					.getJSONObject("priceInfo");
+			Set set = items.entrySet();
+			for (Object object : set) {
+				jsonObject = JSONObject.fromObject(object).getJSONObject("value");
+				dto.setPrice(jsonObject.getDouble("price"));
+				if (jsonObject.getJSONArray("promotionList") != null) {
+					JSONObject promotion = JSONObject.fromObject(jsonObject.getJSONArray("promotionList").get(0));
+					dto.setPostageFree(promotion.getBoolean("postageFree"));
+					dto.setPromotionPrice(promotion.getDouble("price"));
+					if (!promotion.getString("endTime").equals("null")
+							&& !promotion.getString("startTime").equals("null")) {
+						dto.setPromotionEndTime(promotion.getLong("endTime"));
+						dto.setPromotionStartTime(promotion.getLong("startTime"));
+					}
+					dto.setPromotionType(promotion.getString("type"));
+				}
+				break;
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+			return null;
+		}
+		return dto;
+	}
 }

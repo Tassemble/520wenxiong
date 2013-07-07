@@ -7,6 +7,7 @@ public class WPPostMeta {
 	public static final String META_Key_SET_FEATURE = "_thumbnail_id";
 	public static final String META_Key_TMALL_URL = "tmall_url";
 	public static final String META_KEY_AVERAGE_SCORE = "average_score";
+	public static final String META_KEY_PRODUCT_DATA = "product_data";
 	
 	
 	

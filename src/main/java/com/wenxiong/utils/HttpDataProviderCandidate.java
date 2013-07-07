@@ -26,9 +26,12 @@ public class HttpDataProviderCandidate {
 
 	private static final Logger	LOG		= Logger.getLogger(HttpDataProviderCandidate.class);
 
-	public static final String	cookie	= "wordpress_5530fe0d8b284b037ddb3549e5c5e1dd=admin%7C1372568307%7Cd85977aa4cf9e6efd05665b13e9be8a8; PHPSESSID=58b65q2gi35ql2t799h1pqe9r4; wp-settings-1=editor%3Dtinymce%26libraryContent%3Dbrowse%26align%3Dcenter%26imgsize%3Dfull%26wplink%3D0%26widgets_access%3Don%26hidetb%3D1%26cats%3Dpop; wp-settings-time-1=1372395479; wordpress_test_cookie=WP+Cookie+check; wordpress_logged_in_5530fe0d8b284b037ddb3549e5c5e1dd=admin%7C1372568307%7C5c67dba8bf3058e8a54c7d327c2ae314";
+	public static String cookie	= null;
 
-	public static HttpDataProvider getHomePage(final String url) {
+	public static final String username = "admin";
+	public static final String password = "chq_163";
+	
+	public static HttpDataProvider getHomePage(final String url, final String cookie) {
 		return new HttpDataProvider() {
 			@Override
 			public String getUrl() {
@@ -68,8 +71,8 @@ public class HttpDataProviderCandidate {
 			public HttpEntity getHttpEntity() {
 				try {
 					List<NameValuePair> list = new ArrayList<NameValuePair>();
-					list.add(new BasicNameValuePair("log", "xxxxxxxxxxxxxxxxxxxxxxxxx"));
-					list.add(new BasicNameValuePair("pwd", "xxxxxxxxxxxxxxxxxxxxxxxxx"));
+					list.add(new BasicNameValuePair("log", username));
+					list.add(new BasicNameValuePair("pwd", password));
 					list.add(new BasicNameValuePair("wp-submit", "登录"));
 					list.add(new BasicNameValuePair("redirect_to", WordPressUtils.origin + "/wp-admin/"));
 					list.add(new BasicNameValuePair("testcookie", "1"));
@@ -101,7 +104,7 @@ public class HttpDataProviderCandidate {
 		};
 	}
 
-	public static HttpDataProvider getPostPictureData(final String pictureURL, final String postId, final String wpNonce) {
+	public static HttpDataProvider getPostPictureData(final String pictureURL, final String postId, final String wpNonce, final String cookie) {
 		return new HttpDataProvider() {
 
 			@Override
@@ -162,7 +165,32 @@ public class HttpDataProviderCandidate {
 
 				headers.add(new BasicHeader("Host", WordPressUtils.host));
 				headers.add(new BasicHeader("Origin", WordPressUtils.origin));
+				
+				return headers;
+			}
+		};
+	}
+	
+	public static HttpDataProvider getWithReferer(final String url, final String referUrl) {
+		return new HttpDataProvider() {
 
+			@Override
+			public String getUrl() {
+				return url;
+			}
+
+			@Override
+			public HttpEntity getHttpEntity() {
+				return null;
+			}
+
+			@Override
+			public List<Header> getHeaders() {
+				Header header = new BasicHeader(
+						"Referer",
+						referUrl);
+				List<Header> headers = new ArrayList<Header>();
+				headers.add(header);
 				return headers;
 			}
 		};
