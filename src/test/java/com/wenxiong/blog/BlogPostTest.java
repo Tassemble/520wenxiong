@@ -35,6 +35,28 @@ public class BlogPostTest extends BaseTestCase {
 	@Autowired
 	WPPostService				postService;
 
+
+	@Autowired
+	WPPostDao	dao;
+
+	@Autowired
+	WPPostService	w;
+	
+	
+
+	@Autowired
+	TmallCrawler	tmallCrawler;
+
+	@Autowired
+	CommentDao		commentDao;
+
+	@Autowired
+	WPPostDao		wpPostDao;
+
+	@Autowired
+	UserDao			userDao;
+
+	
 	@Test
 	public void test() throws Exception {
 		postService.add(new WPPost());
@@ -56,9 +78,6 @@ public class BlogPostTest extends BaseTestCase {
 		// blogPostDao.updateSelectiveById(post);
 	}
 
-	@Autowired
-	WPPostDao	dao;
-
 	@Test
 	@Rollback
 	public void print() {
@@ -68,8 +87,7 @@ public class BlogPostTest extends BaseTestCase {
 		dao.testInsert("insert into IDGenerator (ID) values ( " + (id + 1) + " )");
 	}
 
-	@Autowired
-	WPPostService	w;
+
 
 	@Test
 	public void addOnePicture() {
@@ -132,18 +150,6 @@ public class BlogPostTest extends BaseTestCase {
 			break;
 		}
 	}
-
-	@Autowired
-	TmallCrawler	tmallCrawler;
-
-	@Autowired
-	CommentDao		commentDao;
-
-	@Autowired
-	WPPostDao		wpPostDao;
-
-	@Autowired
-	UserDao			userDao;
 
 	@Test
 	public void testAddUsers() {
