@@ -399,7 +399,9 @@ public class TmallCrawlerImpl implements TmallCrawler {
 
 	@Override
 	public List<String> searchWithPhases(String phases, int pageIndex) {
+		List<String> list = Lists.newArrayList();
 		try {
+			int totalPage = 0;
 			int pageSize = 60;
 			int from = pageIndex * pageSize;
 
@@ -414,15 +416,27 @@ public class TmallCrawlerImpl implements TmallCrawler {
 				html = HttpClientUtils.getHtmlByGetMethod(httpClientUtils.getTaobaoHttpManager(), tmallSearchUrl);
 			}
 			Document document = Jsoup.parse(html);
+			Elements hiddens = document.select("form[name=filterPageForm] > input[name=totalPage]");
+			for (Element element : hiddens) {
+				if (element.attr("value") != null) {
+					totalPage = Integer.valueOf(element.attr("value"));
+					break;
+				}
+			}
+			LOG.info("current page/total page is " + pageIndex + "/" + totalPage);
+			if (totalPage < pageIndex) {
+				return list;
+			}
+
 			Elements products = document.select("div#J_ItemList > div");
-			List<String> list = Lists.newArrayList();
+
 			for (Element product : products) {
 				list.add(product.attr("data-id"));
 			}
 			return list;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
-			return null;
+			return list;
 		}
 	}
 

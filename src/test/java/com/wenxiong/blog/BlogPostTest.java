@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -19,7 +20,6 @@ import com.wenxiong.blog.dao.CommentDao;
 import com.wenxiong.blog.dao.UserDao;
 import com.wenxiong.blog.dao.WPPostDao;
 import com.wenxiong.blog.dto.TmallCommentsDto;
-import com.wenxiong.blog.dto.TmallProductDto;
 import com.wenxiong.blog.service.WPPostService;
 import com.wenxiong.crawl.taobao.TmallCrawler;
 import com.wenxiong.utils.TmallCrawlerUtils;
@@ -35,28 +35,24 @@ public class BlogPostTest extends BaseTestCase {
 	@Autowired
 	WPPostService				postService;
 
+	@Autowired
+	WPPostDao					dao;
 
 	@Autowired
-	WPPostDao	dao;
+	WPPostService				w;
 
 	@Autowired
-	WPPostService	w;
-	
-	
+	TmallCrawler				tmallCrawler;
 
 	@Autowired
-	TmallCrawler	tmallCrawler;
+	CommentDao					commentDao;
 
 	@Autowired
-	CommentDao		commentDao;
+	WPPostDao					wpPostDao;
 
 	@Autowired
-	WPPostDao		wpPostDao;
+	UserDao						userDao;
 
-	@Autowired
-	UserDao			userDao;
-
-	
 	@Test
 	public void test() throws Exception {
 		postService.add(new WPPost());
@@ -87,8 +83,6 @@ public class BlogPostTest extends BaseTestCase {
 		dao.testInsert("insert into IDGenerator (ID) values ( " + (id + 1) + " )");
 	}
 
-
-
 	@Test
 	public void addOnePicture() {
 		w.postFeatureFileAndUpdateAttachment(1000595L,
@@ -106,34 +100,46 @@ public class BlogPostTest extends BaseTestCase {
 		// list.add("http://detail.tmall.com/item.htm?id=23276317000");
 		// http://detail.tmall.com/item.htm?id=12477082411
 		// 较特殊
-		List<String> ids = tmallCrawler.searchWithPhases("文胸 薄款", 3);
-		for (String string : ids) {
-			list.add(TmallCrawlerUtils.TMALL_URL_PREFIX + string);
-		}
-
-		List<User> users = userDao.getAll();
-
-		for (String url : list) {
-			try {
-				User user = null;
-				while (true) {
-					user = users.get(RandomUtils.nextInt(users.size()));
-					if (user.getId().equals(1L) || user.getId().equals(2L)) {
-						continue;
-					}
-					break;
-				}
-				Map<String, Object> map = w.addOneArticle(url, user.getId());
-				if (map != null && map.get("exist") != null) {
-					boolean exist = (Boolean) map.get("exist");
-					if (!exist) {
-						w.postFeatureFileAndUpdateAttachment((Long) map.get(WPPostService.KEY_ARTICLE_ID),
-								(String) map.get("first_picture"));
-					}
-				}
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
+		List<String> ids = null;
+		for (int indexPage = 1;; indexPage++) {
+			LOG.info("current page is " + indexPage);
+			ids = tmallCrawler.searchWithPhases("文胸 薄款", indexPage);
+			if (CollectionUtils.isEmpty(ids)) {
+				return;
 			}
+
+			for (String string : ids) {
+				list.add(TmallCrawlerUtils.TMALL_URL_PREFIX + string);
+			}
+
+			List<User> users = userDao.getAll();
+
+			for (String url : list) {
+				try {
+					User user = null;
+					while (true) {
+						user = users.get(RandomUtils.nextInt(users.size()));
+						if (user.getId().equals(1L) || user.getId().equals(2L)) {
+							continue;
+						}
+						break;
+					}
+					Map<String, Object> map = w.addOneArticle(url, user.getId());
+					if (map != null && map.get("exist") != null) {
+						boolean exist = (Boolean) map.get("exist");
+						if (!exist) {
+							w.postFeatureFileAndUpdateAttachment((Long) map.get(WPPostService.KEY_ARTICLE_ID),
+									(String) map.get("first_picture"));
+						}
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			// clean
+			list.clear();
+
 		}
 	}
 
@@ -153,8 +159,8 @@ public class BlogPostTest extends BaseTestCase {
 
 	@Test
 	public void testAddUsers() {
-		Map<String, String> map = ImmutableMap.of("sweet", "sweet", "meme", "meme", "ppGirl", "ppGirl", 
-				 "xuexu", "xuexu", "heyGL", "heyGL");
+		Map<String, String> map = ImmutableMap.of("sweet", "sweet", "meme", "meme", "ppGirl", "ppGirl", "xuexu",
+				"xuexu", "heyGL", "heyGL");
 		for (Entry<String, String> entry : map.entrySet()) {
 			User user = new User();
 			user.setId(userDao.getId());
