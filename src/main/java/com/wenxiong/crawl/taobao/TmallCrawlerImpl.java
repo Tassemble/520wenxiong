@@ -1,6 +1,9 @@
 package com.wenxiong.crawl.taobao;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -100,7 +103,7 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		// put all scores
 
 		map.putAll(getProductEvaluation(url));
-		
+
 		map.put(KEY_PRODUCT, getTmallProductDto(url));
 
 		return map;
@@ -342,7 +345,6 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		return map;
 	}
 
-	
 	@Override
 	public TmallProductDto getTmallProductDto(String tmallUrl) {
 		TmallProductDto dto = null;
@@ -391,5 +393,43 @@ public class TmallCrawlerImpl implements TmallCrawler {
 			return null;
 		}
 		return dto;
+	}
+
+	static boolean	isMock	= false;
+
+	@Override
+	public List<String> searchWithPhases(String phases, int pageIndex) {
+		try {
+			int pageSize = 60;
+			int from = pageIndex * pageSize;
+
+			String tmallSearchUrl = String.format(
+					"http://list.tmall.com/search_product.htm?s=%s&n=%s&q=%s&sort=s&style=g&type=pc", from, pageSize,
+					URLEncoder.encode(phases, "GB2312"));
+			String html;
+			if (isMock) {
+				HttpClient client = new DefaultHttpClient();
+				html = EntityUtils.toString(client.execute(new HttpGet(tmallSearchUrl)).getEntity());
+			} else {
+				html = HttpClientUtils.getHtmlByGetMethod(httpClientUtils.getTaobaoHttpManager(), tmallSearchUrl);
+			}
+			Document document = Jsoup.parse(html);
+			Elements products = document.select("div#J_ItemList > div");
+			List<String> list = Lists.newArrayList();
+			for (Element product : products) {
+				list.add(product.attr("data-id"));
+			}
+			return list;
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+	public static void main(String[] args) {
+		isMock = true;
+		TmallCrawlerImpl crawlerImpl = new TmallCrawlerImpl();
+		List<String> ids = crawlerImpl.searchWithPhases("文胸 薄款", 1);
+		WordPressUtils.printJson(ids);
 	}
 }

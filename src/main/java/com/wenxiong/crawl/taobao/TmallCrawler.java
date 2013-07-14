@@ -53,5 +53,8 @@ public interface TmallCrawler {
 	Map<String, Object> getProductEvaluation(String tmallUrl);
 
 	TmallProductDto getTmallProductDto(String tmallUrl);
+	
+	
+	List<String> searchWithPhases(String phases, int pageIndex);
 
 }
