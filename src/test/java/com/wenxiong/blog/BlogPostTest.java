@@ -91,8 +91,8 @@ public class BlogPostTest extends BaseTestCase {
 
 	@Test
 	public void addOnePicture() {
-		w.postFeatureFileAndUpdateAttachment(1000484L,
-				"http://img04.taobaocdn.com/bao/uploaded/i4/12768032654388004/T1_7EMXXxcXXXXXXXX_!!0-item_pic.jpg");
+		w.postFeatureFileAndUpdateAttachment(1000595L,
+				"http://img01.taobaocdn.com/bao/uploaded/i1/12702024626922807/T1sKJnFbXcXXXXXXXX_!!0-item_pic.jpg");
 	}
 
 	@Test

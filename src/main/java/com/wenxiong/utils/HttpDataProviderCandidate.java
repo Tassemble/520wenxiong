@@ -21,6 +21,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
+import org.aspectj.apache.bcel.classfile.Field;
 
 public class HttpDataProviderCandidate {
 
@@ -121,7 +122,11 @@ public class HttpDataProviderCandidate {
 						throw new RuntimeException("last slash can't find for picture url:" + pictureURL);
 					}
 					final String fileName = pictureURL.substring(index + 1, pictureURL.length());
-					File tmpFile = new File("./picture_fold/" + fileName);
+					File folder = new File("." + File.separator + "picture_fold" +File.separator);
+					if (folder.exists()) {
+						LOG.error("folder not find!!");
+					}
+					File tmpFile = new File("." + File.separator + "picture_fold" +File.separator +  fileName);
 					FileOutputStream stream = new FileOutputStream(tmpFile);
 					IOUtils.copy(new URL(pictureURL).openStream(), stream);
 					MultipartEntity entity = new MultipartEntity();
