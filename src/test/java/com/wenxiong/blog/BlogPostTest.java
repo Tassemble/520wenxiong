@@ -101,46 +101,46 @@ public class BlogPostTest extends BaseTestCase {
 		// http://detail.tmall.com/item.htm?id=12477082411
 		// 较特殊
 		List<String> ids = null;
-		for (int indexPage = 1;; indexPage++) {
-			LOG.info("current page is " + indexPage);
-			ids = tmallCrawler.searchWithPhases("文胸 薄款", indexPage);
-			if (CollectionUtils.isEmpty(ids)) {
-				return;
-			}
-
-			for (String string : ids) {
-				list.add(TmallCrawlerUtils.TMALL_URL_PREFIX + string);
-			}
-
-			List<User> users = userDao.getAll();
-
-			for (String url : list) {
-				try {
-					User user = null;
-					while (true) {
-						user = users.get(RandomUtils.nextInt(users.size()));
-						if (user.getId().equals(1L) || user.getId().equals(2L)) {
-							continue;
-						}
-						break;
-					}
-					Map<String, Object> map = w.addOneArticle(url, user.getId());
-					if (map != null && map.get("exist") != null) {
-						boolean exist = (Boolean) map.get("exist");
-						if (!exist) {
-							w.postFeatureFileAndUpdateAttachment((Long) map.get(WPPostService.KEY_ARTICLE_ID),
-									(String) map.get("first_picture"));
-						}
-					}
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-
-			// clean
-			list.clear();
-
+		// for (int indexPage = 1;; indexPage++) {
+		int nextOne = RandomUtils.nextInt(80) + 1;
+		ids = tmallCrawler.searchWithPhases("文胸 薄款", nextOne);
+		if (CollectionUtils.isEmpty(ids)) {
+			return;
 		}
+
+		for (String string : ids) {
+			list.add(TmallCrawlerUtils.TMALL_URL_PREFIX + string);
+		}
+
+		List<User> users = userDao.getAll();
+
+		for (String url : list) {
+			try {
+				User user = null;
+				while (true) {
+					user = users.get(RandomUtils.nextInt(users.size()));
+					if (user.getId().equals(1L) || user.getId().equals(2L)) {
+						continue;
+					}
+					break;
+				}
+				Map<String, Object> map = w.addOneArticle(url, user.getId());
+				if (map != null && map.get("exist") != null) {
+					boolean exist = (Boolean) map.get("exist");
+					if (!exist) {
+						w.postFeatureFileAndUpdateAttachment((Long) map.get(WPPostService.KEY_ARTICLE_ID),
+								(String) map.get("first_picture"));
+					}
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+
+		// clean
+		list.clear();
+
+		// }
 	}
 
 	@Test
