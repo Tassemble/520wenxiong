@@ -90,11 +90,6 @@ public class GameProtocolHandler implements IoHandler {
 			
 			
 			if (isValid(json.getString("username"), json.getString("password"))) {
-				if (GameMemory.userContainer.containsKey(json.getString("username"))) {
-					session.write(WordPressUtils.toJson(new ReturnDto(200, "logon failed, you have logon in other place")));
-					
-					return;
-				}
 				LOG.info("validate ok for username:" + json.getString("username"));
 				OnlineUserDto dto = new OnlineUserDto();
 				dto.setSession(session);
