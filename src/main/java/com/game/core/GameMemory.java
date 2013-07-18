@@ -19,6 +19,10 @@ public class GameMemory {
 	}
 	
 	
+	public static void addNewUserToOnlineUserList() {
+		
+	}
+	
 	public static void put(Long key, OnlineUserDto value) {
 		userContainer.put(key, value);
 	}

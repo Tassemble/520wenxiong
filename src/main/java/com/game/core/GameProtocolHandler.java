@@ -68,6 +68,9 @@ public class GameProtocolHandler implements IoHandler {
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("receive message from session:" + session.getId() + ", message:"  + message.toString());
+		}
 		//特殊输出，如果是单纯字节的话========================start
 		JSONObject json = null;
 		String action = null;
