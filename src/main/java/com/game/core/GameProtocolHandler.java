@@ -16,8 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import com.game.core.dto.JsonDto;
 import com.game.core.dto.JsonDto.BaseJsonData;
+import com.game.core.dto.JsonDto.FastJoinData;
 import com.game.core.dto.JsonDto.LoginData;
 import com.game.core.dto.OnlineUserDto;
+import com.game.core.dto.OnlineUserVo;
 import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
 import com.game.core.utils.CellLocker;
@@ -186,12 +188,13 @@ public class GameProtocolHandler implements IoHandler {
 			// check user status
 			//
 			checkUserStatus(user);
-			int userNumLimit = json.getInt("userNumLimit");
+			FastJoinData joinData = (FastJoinData)data;
+			int userNumLimit = joinData.getMaxplayersnum();
 
 			RoomDto room = null;
 			for (Entry<String, RoomDto> entry : GameMemory.room.entrySet()) {
-				if (entry.getValue().getCntNow() < entry.getValue().getUserNumLimit()
-						&& entry.getValue().getUserNumLimit() == userNumLimit
+				if (entry.getValue().getCntNow() < entry.getValue().getMaxplayersnum()
+						&& entry.getValue().getMaxplayersnum() == userNumLimit
 						&& RoomDto.ROOM_STATUS_OPEN == entry.getValue().getRoomStatus()) {
 					room = entry.getValue();
 					break;
@@ -199,7 +202,8 @@ public class GameProtocolHandler implements IoHandler {
 			}
 			if (room == null) {// create new room
 				room = new RoomDto();
-				room.setUserNumLimit(json.getInt("userNumLimit"));
+				room.setMaxplayersnum(joinData.getMaxplayersnum());
+				room.setMinplayersnum(joinData.getMinplayersnum());
 				room.increaseCnt();
 				room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
 				List<OnlineUserDto> users = Lists.newArrayList();
@@ -237,10 +241,47 @@ public class GameProtocolHandler implements IoHandler {
 					session,
 					WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
 							+ " enter room(" + room.getId() + "), num of players: " + room.getCntNow())), user);
+			
+			if (room.isFull()) {
+				forwardMessage(room.getId(), 
+						WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, "room is full, game started!")));
+				
+			}
 			return;
 		}
 
+		
+		
+		if (OnlineUserDto.ACTION_GET_FRIENDLIST.equals(action)) {
+			List<OnlineUserVo> users = Lists.newArrayList();
+			for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
+				users.add(new OnlineUserVo(entry.getValue()));
+			}
+			ReturnDto ret = new ReturnDto(200, action, action);
+			ret.setResult(users);
+			session.write(WordPressUtils.toJson(ret));
+			return;
+		}
+		
+		
 		throw new NotImplementedException();
+	}
+
+	private void forwardMessage(String roomId, String json) {
+		if (roomId == null) {
+			return;
+		}
+		
+		RoomDto room = GameMemory.getRoom().get(roomId);
+		if (room == null) {
+			return;
+		}
+		List<OnlineUserDto> users = room.getUsers();
+		for (OnlineUserDto u : users) {
+			u.getSession().write(json);
+		}
+		
+		
 	}
 
 	private void checkUserStatus(OnlineUserDto user) {

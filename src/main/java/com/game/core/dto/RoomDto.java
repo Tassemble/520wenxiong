@@ -13,7 +13,9 @@ public class RoomDto {
 	
 	private static AtomicLong	idGenerator	= new AtomicLong(1);
 	private Object				roomLock	= new Object();
-	int							userNumLimit;
+	private Integer	maxplayersnum;
+	
+	private Integer	minplayersnum;
 
 	String						id;
 
@@ -45,7 +47,7 @@ public class RoomDto {
 	}
 
 	public void increaseCnt() {
-		if (cntNow.get() < userNumLimit) {
+		if (cntNow.get() < maxplayersnum) {
 			cntNow.addAndGet(1);
 		} else {
 			throw new RuntimeException("enter room failed");
@@ -63,12 +65,21 @@ public class RoomDto {
 		}
 	}
 
-	public int getUserNumLimit() {
-		return userNumLimit;
+
+	public Integer getMaxplayersnum() {
+		return maxplayersnum;
 	}
 
-	public void setUserNumLimit(int userNumLimit) {
-		this.userNumLimit = userNumLimit;
+	public void setMaxplayersnum(Integer maxplayersnum) {
+		this.maxplayersnum = maxplayersnum;
+	}
+
+	public Integer getMinplayersnum() {
+		return minplayersnum;
+	}
+
+	public void setMinplayersnum(Integer minplayersnum) {
+		this.minplayersnum = minplayersnum;
 	}
 
 	public static String getRoomId() {
@@ -84,7 +95,7 @@ public class RoomDto {
 	}
 	
 	public boolean isFull() {
-		return cntNow.get() == userNumLimit;
+		return cntNow.get() == maxplayersnum;
 	}
 
 	

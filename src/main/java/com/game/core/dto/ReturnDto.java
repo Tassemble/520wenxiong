@@ -9,6 +9,8 @@ public class ReturnDto {
 	String action;
 	int code;
 	String message;
+	Object result;
+	
 	public int getCode() {
 		return code;
 	}
@@ -31,6 +33,12 @@ public class ReturnDto {
 		super();
 		this.code = code;
 		this.message = message;
+	}
+	public Object getResult() {
+		return result;
+	}
+	public void setResult(Object result) {
+		this.result = result;
 	}
 	
 	

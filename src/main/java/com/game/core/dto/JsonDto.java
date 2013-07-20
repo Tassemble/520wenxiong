@@ -56,15 +56,27 @@ public class JsonDto {
 	}
 
 	public static class FastJoinData extends BaseJsonData {
-		private Integer	userNumLimit;
+		private Integer	maxplayersnum;
+		
+		private Integer	minplayersnum;
 
-		public Integer getUserNumLimit() {
-			return userNumLimit;
+		public Integer getMaxplayersnum() {
+			return maxplayersnum;
 		}
 
-		public void setUserNumLimit(Integer userNumLimit) {
-			this.userNumLimit = userNumLimit;
+		public void setMaxplayersnum(Integer maxplayersnum) {
+			this.maxplayersnum = maxplayersnum;
 		}
+
+		public Integer getMinplayersnum() {
+			return minplayersnum;
+		}
+
+		public void setMinplayersnum(Integer minplayersnum) {
+			this.minplayersnum = minplayersnum;
+		}
+		
+		
 
 	}
 
@@ -126,17 +138,16 @@ public class JsonDto {
 		// g.fromJson("{\"action\":\"forward\", \"friendList\":[\"a\", \"b\", \"c\"], \"data\":\"hello i am here\"}",
 		// JsonDto.ForwardData.class);
 		BaseJsonData json = (BaseJsonData) WordPressUtils.getFromJson(
-				"{\"action\":\"forward\", \"friendList\":[\"a\", \"b\", \"c\"], \"data\":\"hello i am here\"}",
-				getClassByAction("forward"));
-		ForwardData data = (ForwardData) json;
-		System.out.println("action:" + data.getAction() + ", username:" + data.getFriendList());
+				"{\"action\":\"getFriendList\"}",
+				getClassByAction("getFriendList"));
+		System.out.println("action:" + json.getAction());
 	}
 
 	// login
 	// logout
 	// game-start
 	// fast-join
-	// /forward
+	// /forward	
 	// getFriendList
 	// invite
 	public static Class<?> getClassByAction(String action) {
@@ -153,7 +164,7 @@ public class JsonDto {
 		}
 
 		if (action.equalsIgnoreCase("game-start")) {
-			return JsonDto.class;
+			return JsonDto.BaseJsonData.class;
 		}
 
 		if (action.equalsIgnoreCase("fast-join")) {
@@ -168,9 +179,14 @@ public class JsonDto {
 			return JsonDto.GameInviteData.class;
 		}
 		if (action.equalsIgnoreCase("game-start")) {
-			return JsonDto.class;
+			return JsonDto.BaseJsonData.class;
 		}
-
+		
+		if (action.equalsIgnoreCase("getFriendList")) {
+			return JsonDto.BaseJsonData.class;
+		}
+		
+		
 		throw new IllegalArgumentException("action:" + action);
 
 	}

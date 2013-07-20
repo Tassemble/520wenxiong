@@ -8,22 +8,22 @@ public class OnlineUserDto {
 	public static final String ACTION_GAME_START = "game-start"; 
 	public static final String ACTION_FAST_JOIN = "fast-join"; 
 	public static final String ACTION_FORWARD = "forward"; 
-	public static final String ACTION_GET_FRIENDLIST = "login"; 
+	public static final String ACTION_GET_FRIENDLIST = "getFriendList"; 
 	public static final String ACTION_INVITE = "invite"; 
 	public static final String ACTION_SYSTEM_BROADCAST = "system-broadcast"; 
 	
 	
-	public static final int STATUS_ONLINE = 1; 
-	public static final int STATUS_OFFLINE = 2; 
-	public static final int STATUS_PLAYING = 3; 
-	public static final int STATUS_IN_ROOM = 4; 
+	public static final String STATUS_ONLINE = "online"; 
+	public static final String STATUS_OFFLINE = "offline"; 
+	public static final String STATUS_PLAYING = "playing"; 
+	public static final String STATUS_IN_ROOM = "in_room"; 
 	
 	
 	String roomId;
 	
 	String username;
 	
-	int status;
+	String status;
 	
 	IoSession session;
 	
@@ -53,11 +53,12 @@ public class OnlineUserDto {
 		this.username = username;
 	}
 
-	public int getStatus() {
+
+	public String getStatus() {
 		return status;
 	}
 
-	public void setStatus(int status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 
