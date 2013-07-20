@@ -1,6 +1,11 @@
 package com.game.core.dto;
 
 public class ReturnDto {
+	public static final int ALREADY_LOGON_CODE = -100;
+	public static final int ALREADY_LOGON_CODE_WITH_OTHER_REMOTE_CLIENT = -101;
+	
+	
+	
 	String action;
 	int code;
 	String message;

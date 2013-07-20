@@ -5,6 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class RoomDto {
+	
+	
+	public static final int ROOM_STATUS_OPEN = 1;
+	public static final int ROOM_STATUS_CLOSED = 0;
+	
+	
 	private static AtomicLong	idGenerator	= new AtomicLong(1);
 	private Object				roomLock	= new Object();
 	int							userNumLimit;
@@ -13,6 +19,18 @@ public class RoomDto {
 
 	List<OnlineUserDto>			users;
 	AtomicInteger				cntNow		= new AtomicInteger(0);
+
+	
+	int roomStatus;
+	
+	
+	public int getRoomStatus() {
+		return roomStatus;
+	}
+
+	public void setRoomStatus(int roomStatus) {
+		this.roomStatus = roomStatus;
+	}
 
 	public List<OnlineUserDto> getUsers() {
 		return users;
@@ -27,12 +45,10 @@ public class RoomDto {
 	}
 
 	public void increaseCnt() {
-		synchronized (roomLock) {
-			if (cntNow.get() < userNumLimit) {
-				cntNow.addAndGet(1);
-			} else {
-				throw new RuntimeException("enter room failed");
-			}
+		if (cntNow.get() < userNumLimit) {
+			cntNow.addAndGet(1);
+		} else {
+			throw new RuntimeException("enter room failed");
 		}
 	}
 
@@ -40,6 +56,9 @@ public class RoomDto {
 		synchronized (roomLock) {
 			if (cntNow.get() >= 1) {
 				cntNow.addAndGet(-1);
+			}
+			if (cntNow.get() < 0 ){
+				cntNow.set(0);
 			}
 		}
 	}
@@ -63,5 +82,14 @@ public class RoomDto {
 	public void setId(String id) {
 		this.id = id;
 	}
+	
+	public boolean isFull() {
+		return cntNow.get() == userNumLimit;
+	}
 
+	
+	public boolean isEmpty() {
+		return cntNow.get() == 0;
+	}
+	
 }
