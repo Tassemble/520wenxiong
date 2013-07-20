@@ -13,6 +13,8 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.game.core.dto.JsonDto;
+import com.game.core.dto.JsonDto.BaseJsonData;
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
@@ -79,15 +81,14 @@ public class GameProtocolHandler implements IoHandler {
 			action = json.getString("action");
 		} catch (Exception e) {
 			LOG.warn("parse json exeception");
-		}
-		
+		}		
 		
 		OnlineUserDto user = GameMemory.userContainer.get(session.getId());
 		if (user == null) {
 			
 			//is login?
 			if (StringUtils.isBlank(action) || !action.equals(OnlineUserDto.ACTION_LOGIN)) {
-				session.write(WordPressUtils.toJson(new ReturnDto(403, "no authentication")));
+				session.write(WordPressUtils.toJson(new ReturnDto(403, action,"no authentication")));
 				return;
 			}
 			
@@ -101,19 +102,25 @@ public class GameProtocolHandler implements IoHandler {
 				GameMemory.userContainer.put(session.getId(), dto);
 				
 				//TODO 实现验证用户名和密码
-				session.write(WordPressUtils.toJson(new ReturnDto(200, "logon successfully")));
+				
+				session.write(WordPressUtils.toJson(new ReturnDto(200,action, "logon successfully")));
 				return;
 			}
 			
-			session.write(WordPressUtils.toJson(new ReturnDto(-1, "logon failed")));
+			session.write(WordPressUtils.toJson(new ReturnDto(-1, action,"logon failed")));
 			return;
 
 		}
 
+		
+		BaseJsonData data = null;
 		if (StringUtils.isBlank(action)) {
 			//特殊处理
 			forwardMessage(session, message, user);
 			return;
+		} else {
+			
+			data = (BaseJsonData) WordPressUtils.getFromJson(message.toString(),  JsonDto.getClassByAction(action));
 		}
 		
 		//特殊输出，如果是单纯字节的话========================end
@@ -123,7 +130,7 @@ public class GameProtocolHandler implements IoHandler {
 		
 		
 		if (OnlineUserDto.ACTION_LOGIN.equals(action)) {
-			session.write(WordPressUtils.toJson(new ReturnDto(200, "you have already logon")));
+			session.write(WordPressUtils.toJson(new ReturnDto(200, action,"you have already logon")));
 			return;
 		}
 		
@@ -164,8 +171,8 @@ public class GameProtocolHandler implements IoHandler {
 				user.setRoomId(room.getId());
 				user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
 			}
-			session.write(WordPressUtils.toJson(new ReturnDto(200, "enter room(" + room.getId() + "), num of players: " + room.getCntNow())));
-			forwardMessage(session, WordPressUtils.toJson(new ReturnDto(200, user.getUsername() + " enter room(" + room.getId() + "), num of players: " + room.getCntNow())), user);
+			session.write(WordPressUtils.toJson(new ReturnDto(200, action, "enter room(" + room.getId() + "), num of players: " + room.getCntNow())));
+			forwardMessage(session, WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername() + " enter room(" + room.getId() + "), num of players: " + room.getCntNow())), user);
 			return;
 		}
 		

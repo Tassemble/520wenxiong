@@ -10,6 +10,7 @@ public class OnlineUserDto {
 	public static final String ACTION_FORWARD = "forward"; 
 	public static final String ACTION_GET_FRIENDLIST = "login"; 
 	public static final String ACTION_INVITE = "invite"; 
+	public static final String ACTION_SYSTEM_BROADCAST = "system-broadcast"; 
 	
 	
 	public static final int STATUS_ONLINE = 1; 
