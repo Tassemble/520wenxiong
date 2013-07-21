@@ -10,7 +10,7 @@ import com.wenxiong.blog.dto.GatherEffect;
 import com.wenxiong.blog.dto.ProductEvaluationDto;
 
 public class ProductScoreUtils {
-	static DecimalFormat	decimalFormat	= new DecimalFormat("#.#");
+	static DecimalFormat	decimalFormat	= new DecimalFormat("0.0");
 	static final int BAD_RATIO = 3;
 	static final int GOOD_RATIO = 2;
 	/**
