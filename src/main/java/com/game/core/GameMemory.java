@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.mina.util.ConcurrentHashSet;
 
 import com.game.core.dto.OnlineUserDto;
@@ -29,6 +30,9 @@ public class GameMemory {
 	
 	
 	public static RoomDto getRoomByRoomId(String id) {
+		if (StringUtils.isBlank(id)) {
+			return null;
+		}
 		return room.get(id);
 	}
 	

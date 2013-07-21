@@ -58,25 +58,24 @@ public class GameProtocolHandler implements IoHandler {
 			return;
 		}
 		RoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
-		if (room == null) {
-			return;
-		}
-		List<String> key =Arrays.asList(String.valueOf(room.getId()));
-		try {
-			locker.lock("", key);
-			room.getUsers().remove(user);
-			room.decreaseCnt();
-			
-			if (room.isEmpty()) {
-				room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
-			} else {
-				forwardMessage(
-						session,
-						WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
-								+ " quit game (" + room.getId() + "), num of players: " + room.getCntNow())), user);
+		if (room != null) {
+			List<String> key =Arrays.asList(String.valueOf(room.getId()));
+			try {
+				locker.lock("", key);
+				room.getUsers().remove(user);
+				room.decreaseCnt();
+				
+				if (room.isEmpty()) {
+					room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
+				} else {
+					forwardMessage(
+							session,
+							WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
+									+ " quit game (" + room.getId() + "), num of players: " + room.getCntNow())), user);
+				}
+			} finally {
+				locker.unLock("", key);
 			}
-		} finally {
-			locker.unLock("", key);
 		}
 		GameMemory.onlineUsers.remove(user.getUsername());
 		GameMemory.removeSessionUserByKey(session.getId());

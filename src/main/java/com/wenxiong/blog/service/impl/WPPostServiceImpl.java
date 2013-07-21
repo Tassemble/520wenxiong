@@ -167,8 +167,7 @@ public class WPPostServiceImpl extends BaseServiceImpl<WPPostDao, WPPost> implem
 //			String content = (String) map.get("content");
 //
 //			builder.append(content);
-//			builder.append(HtmlTagsUtils.JUMP_TO_BUY_prefix + (String) map.get("origin")
-//					+ HtmlTagsUtils.JUMP_TO_BUY_postfix);
+
 			// this.add(post);
 			// post.setPostContent("");
 			if (map.get(ProductEvaluationDto.TAG_AVARAGE_SCORE) != null) {
@@ -186,6 +185,10 @@ public class WPPostServiceImpl extends BaseServiceImpl<WPPostDao, WPPost> implem
 			}else {
 				builder.append("<br></br>基于用户评价后的产品款式智能得分：8.0 分");
 			}
+			builder.append(HtmlTagsUtils.JUMP_TO_BUY_prefix + (String) map.get("origin")
+					+ HtmlTagsUtils.JUMP_TO_BUY_postfix);
+			
+			
 			TmallCommentsDto dtos = (TmallCommentsDto) map.get(TmallCrawler.KEY_COMMENTS);
 			if (!CollectionUtils.isEmpty(dtos.getComments())) {
 				builder.append("<br></br>" + dtos.getComments().get(0).getCommentAuthor());
