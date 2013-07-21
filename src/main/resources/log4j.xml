@@ -8,7 +8,7 @@
 			<param name="ConversionPattern" value="%p [%t] %c{1}.%M(%L) | %m%n" />
 		</layout>
 	</appender>
-	
+
 	<appender name="DailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="threshold" value="info" />
 		<param name="file" value="D:/work/wenxiong/logs/default.log" />
@@ -30,12 +30,12 @@
 	</appender>
 
 	<logger name="crawl_name" additivity="false">
-		     <level value="info" />
-		     <appender-ref ref="CONSOLE" />     
+		<level value="info" />
+		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="crawl_appender" />
 	</logger>
-	
-	
+
+
 	<appender name="game_appender" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="threshold" value="debug" />
 		<param name="file" value="game.log" />
@@ -47,13 +47,14 @@
 	</appender>
 
 	<logger name="com.game" additivity="false">
-		     <level value="debug" />
+		<level value="debug" />
 		<appender-ref ref="game_appender" />
 	</logger>
-	
-	
+
+
 	<root>
 		<level value="warn" />
+		<appender-ref ref="CONSOLE" />
 	</root>
 
 </log4j:configuration>
