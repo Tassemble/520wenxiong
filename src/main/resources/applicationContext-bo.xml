@@ -26,7 +26,6 @@
 
 
 	<bean id="cellLocker" class="com.game.core.utils.CellLocker" lazy-init="false">
-		<!-- concurrencyLevel : 最大并发数 -->
 		<constructor-arg type="int" value="500" />
 	</bean>
 
