@@ -14,11 +14,11 @@ import com.game.core.dto.RoomDto;
 
 public class GameMemory {
 
-	static Map<Long, OnlineUserDto> sessionUsers;
+	public static Map<Long, OnlineUserDto> sessionUsers;
 	
-	static Map<String, OnlineUserDto> onlineUsers;
+	public static Map<String, OnlineUserDto> onlineUsers;
 	
-	static Map<String, RoomDto> room;
+	public static Map<String, RoomDto> room;
 	
 	static {
 		//key is session id , value is user

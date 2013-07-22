@@ -25,6 +25,11 @@
 	</bean>
 
 
+	<bean id="cellLocker" class="com.game.core.utils.CellLocker" lazy-init="false">
+		<!-- concurrencyLevel : 最大并发数 -->
+		<constructor-arg type="int" value="500" />
+	</bean>
+
 
 
 	<bean id="gameProtocolHandler" class="com.game.core.GameProtocolHandler"></bean>
@@ -70,6 +75,7 @@
 
 	<context:component-scan base-package="com.wenxiong.crawl.taobao"></context:component-scan>
 	<context:component-scan base-package="com.wenxiong.utils"></context:component-scan>
+	<context:component-scan base-package="com.game"></context:component-scan>
 
 	<context:annotation-config />
 

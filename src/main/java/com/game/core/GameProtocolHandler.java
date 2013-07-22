@@ -1,11 +1,14 @@
 package com.game.core;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.service.IoHandler;
@@ -13,10 +16,12 @@ import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.game.core.dispatcher.BaseAction;
 import com.game.core.dto.JsonDto;
 import com.game.core.dto.JsonDto.BaseJsonData;
-import com.game.core.dto.JsonDto.FastJoinData;
 import com.game.core.dto.JsonDto.LoginData;
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.OnlineUserVo;
@@ -32,9 +37,13 @@ import com.wenxiong.utils.WordPressUtils;
  */
 public class GameProtocolHandler implements IoHandler {
 
-	private static final Logger	LOG		= LoggerFactory.getLogger(GameProtocolHandler.class);
+	private static final Logger	LOG	= LoggerFactory.getLogger(GameProtocolHandler.class);
 
-	CellLocker<List<String>>	locker	= new CellLocker<List<String>>(65536);
+	@Autowired
+	CellLocker<List<String>>	locker;
+
+	@Autowired
+	ListableBeanFactory			listableBeanFactory;
 
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -50,28 +59,27 @@ public class GameProtocolHandler implements IoHandler {
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
 		// TODO Auto-generated method stub
-		
+
 		//
-		//locker.lock("", key);
+		// locker.lock("", key);
 		OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
 		if (user == null) {
 			return;
 		}
 		RoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
 		if (room != null) {
-			List<String> key =Arrays.asList(String.valueOf(room.getId()));
+			List<String> key = Arrays.asList(String.valueOf(room.getId()));
 			try {
 				locker.lock("", key);
 				room.getUsers().remove(user);
 				room.decreaseCnt();
-				
+
 				if (room.isEmpty()) {
 					room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
 				} else {
-					forwardMessage(
-							session,
-							WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
-									+ " quit game (" + room.getId() + "), num of players: " + room.getCntNow())), user);
+					MessageSenderHelper.forwardMessage(session, WordPressUtils.toJson(new ReturnDto(200,
+							OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername() + " quit game (" + room.getId()
+									+ "), num of players: " + room.getCntNow())), user);
 				}
 			} finally {
 				locker.unLock("", key);
@@ -100,7 +108,6 @@ public class GameProtocolHandler implements IoHandler {
 
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
-
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("receive message from session:" + session.getId() + ", message:" + message.toString());
 		}
@@ -161,7 +168,7 @@ public class GameProtocolHandler implements IoHandler {
 		BaseJsonData data = null;
 		if (StringUtils.isBlank(action)) {
 			// 特殊处理
-			forwardMessage(session, message, user);
+			MessageSenderHelper.forwardMessage(session, message, user);
 			return;
 		} else {
 
@@ -179,78 +186,29 @@ public class GameProtocolHandler implements IoHandler {
 		}
 
 		if (OnlineUserDto.ACTION_FORWARD.equals(action)) {
-			forwardMessage(session, message, user);
+			MessageSenderHelper.forwardMessage(session, message, user);
 			return;
 		}
 
-		if (OnlineUserDto.ACTION_FAST_JOIN.equals(action)) {
-			// check user status
-			//
-			checkUserStatus(user);
-			FastJoinData joinData = (FastJoinData)data;
-			int userNumLimit = joinData.getMaxplayersnum();
-
-			RoomDto room = null;
-			for (Entry<String, RoomDto> entry : GameMemory.room.entrySet()) {
-				if (entry.getValue().getCntNow() < entry.getValue().getMaxplayersnum()
-						&& entry.getValue().getMaxplayersnum() == userNumLimit
-						&& RoomDto.ROOM_STATUS_OPEN == entry.getValue().getRoomStatus()) {
-					room = entry.getValue();
-					break;
-				}
-			}
-			if (room == null) {// create new room
-				room = new RoomDto();
-				room.setMaxplayersnum(joinData.getMaxplayersnum());
-				room.setMinplayersnum(joinData.getMinplayersnum());
-				room.increaseCnt();
-				room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
-				List<OnlineUserDto> users = Lists.newArrayList();
-				users.add(user);
-				String id = RoomDto.getRoomId();
-				user.setRoomId(id);
-				user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
-				room.setId(id);
-				room.setUsers(users);
-				GameMemory.room.put(id, room);
-			} else {
-				// LOCK HERE
-				List<String> key = Arrays.asList(String.valueOf(room.getId()));
-				try {
-					locker.lock("", key);
-					room.increaseCnt();
-					room.getUsers().add(user);
-					user.setRoomId(room.getId());
-					user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
-					
-					if (room.isFull()) {
-						//start game
-						room.setRoomStatus(RoomDto.ROOM_STATUS_CLOSED);
-						for (OnlineUserDto userDto : room.getUsers()) {
-							userDto.setStatus(OnlineUserDto.STATUS_PLAYING);
-						}
+		Map<String, BaseAction> processorMap = listableBeanFactory.getBeansOfType(BaseAction.class);
+		if (processorMap != null) {
+			Collection<BaseAction> processors = processorMap.values();
+			if (!CollectionUtils.isEmpty(processors)) {
+				for (BaseAction processor : processors) {
+					if (processor.getAction().equals(action)) {
+						processor.doAction(session, data);
+						return;//one time process one thing
 					}
-				} finally {
-					locker.unLock("", key);
 				}
 			}
-			session.write(WordPressUtils.toJson(new ReturnDto(200, action, "enter room(" + room.getId()
-					+ "), num of players: " + room.getCntNow())));
-			forwardMessage(
-					session,
-					WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
-							+ " enter room(" + room.getId() + "), num of players: " + room.getCntNow())), user);
-			
-			if (room.isFull()) {
-				forwardMessage(room.getId(), 
-						WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, "room is full, game started!")));
-				
-			}
-			return;
 		}
 
-		
-		
+//		if (OnlineUserDto.ACTION_FAST_JOIN.equals(action)) {
+//
+//			doFastJoinAction(session, data);
+//			return;
+//		}
+
 		if (OnlineUserDto.ACTION_GET_FRIENDLIST.equals(action)) {
 			List<OnlineUserVo> users = Lists.newArrayList();
 			for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
@@ -261,61 +219,18 @@ public class GameProtocolHandler implements IoHandler {
 			session.write(WordPressUtils.toJson(ret));
 			return;
 		}
-		
-		
+
 		throw new NotImplementedException();
-	}
-
-	private void forwardMessage(String roomId, String json) {
-		if (roomId == null) {
-			return;
-		}
-		
-		RoomDto room = GameMemory.getRoom().get(roomId);
-		if (room == null) {
-			return;
-		}
-		List<OnlineUserDto> users = room.getUsers();
-		for (OnlineUserDto u : users) {
-			u.getSession().write(json);
-		}
-		
-		
-	}
-
-	private void checkUserStatus(OnlineUserDto user) {
-		// TODO Auto-generated method stub
-		if (user.getStatus() != OnlineUserDto.STATUS_ONLINE) {
-			throw new RuntimeException("user status error");
-		}
 	}
 
 	/**
 	 * @param session
-	 * @param message
+	 * @param action
 	 * @param user
+	 * @param data
 	 */
-	private void forwardMessage(IoSession session, Object message, OnlineUserDto user) {
-		LOG.info("forward message to other clients");
-		// forward to same room clients
-		if (user.getRoomId() == null) {
-			session.write(WordPressUtils.toJson(new ReturnDto(-1,
-					"current user has not joined room, discard messages!!")));
-			return;
-		}
+	private void doFastJoinAction(IoSession session, BaseJsonData data) {
 
-		RoomDto room = GameMemory.getRoom().get(user.getRoomId());
-		if (room == null) {
-			session.write(WordPressUtils.toJson(new ReturnDto(-1,
-					"current user has not joined room, discard messages!!")));
-			return;
-		}
-		List<OnlineUserDto> users = room.getUsers();
-		for (OnlineUserDto u : users) {
-			if (!u.getUsername().equals(user.getUsername())) {
-				u.getSession().write(message);
-			}
-		}
 	}
 
 	private void validateAction(String action) {
@@ -343,8 +258,11 @@ public class GameProtocolHandler implements IoHandler {
 	}
 
 	@Override
-	public void messageSent(IoSession session, Object paramObject) throws Exception {
-		// TODO Auto-generated method stub
+	public void messageSent(IoSession session, Object message) throws Exception {
+		if (LOG.isDebugEnabled()) {
+			if (message != null)
+				LOG.debug("sent:" + message.toString());
+		}
 
 	}
 

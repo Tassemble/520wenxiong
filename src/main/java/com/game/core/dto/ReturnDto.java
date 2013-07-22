@@ -33,6 +33,7 @@ public class ReturnDto {
 		super();
 		this.code = code;
 		this.message = message;
+		this.action = "unkonw";
 	}
 	public Object getResult() {
 		return result;
