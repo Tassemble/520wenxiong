@@ -20,7 +20,7 @@ public class GameMain {
 
 	private static final Logger LOG = LoggerFactory.getLogger(GameMain.class);
 	
-	static ApplicationContext ctx;
+	public static ApplicationContext ctx;
 	
 	static {
 		ctx = new ClassPathXmlApplicationContext(
@@ -28,11 +28,24 @@ public class GameMain {
 	}
 	
 	public static void main(String[] args) throws IOException {
-        IoAcceptor acceptor = (IoAcceptor) ctx.getBean("ioAcceptor");
-        LOG.info("Calculator server has started up....    Local Address: "
-                + acceptor.getLocalAddress().toString()
-                + " Default Local Address: "
-                + acceptor.getDefaultLocalAddress().toString());
+        startWithSpring();
+	}
+
+	/**
+	 * 
+	 */
+	public static void startWithSpring() {
+		IoAcceptor acceptor = (IoAcceptor) ctx.getBean("ioAcceptor");
+		try {
+			while (acceptor.isActive()) {
+				TimeUnit.SECONDS.sleep(1);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			acceptor.unbind();
+		}
 	}
 
 	/**
