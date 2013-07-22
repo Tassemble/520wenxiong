@@ -13,6 +13,8 @@ public class ProductScoreUtils {
 	static DecimalFormat	decimalFormat	= new DecimalFormat("0.0");
 	static final int BAD_RATIO = 3;
 	static final int GOOD_RATIO = 2;
+	
+	public static final String DEFAULT_SCORE = "7.0";
 	/**
 	 * 总体得分
 	 * 
@@ -29,8 +31,12 @@ public class ProductScoreUtils {
 				bad += eva.getCount() * BAD_RATIO;
 			}
 		}
-		float result = 10 * good / (good + bad);
-		return decimalFormat.format(result);
+		if (good + bad <= 0) {
+			return DEFAULT_SCORE;
+		} else {
+			float result = 10 * good / (good + bad);
+			return decimalFormat.format(result);
+		}
 	}
 
 	/**
