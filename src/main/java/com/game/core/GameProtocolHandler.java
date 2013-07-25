@@ -116,6 +116,7 @@ public class GameProtocolHandler implements IoHandler {
 		String action = null;
 		try {
 			json = JSONObject.fromObject(message);
+			
 			action = json.getString("action");
 		} catch (Exception e) {
 			LOG.warn("parse json exeception");
@@ -185,10 +186,10 @@ public class GameProtocolHandler implements IoHandler {
 			return;
 		}
 
-		if (OnlineUserDto.ACTION_FORWARD.equals(action)) {
-			MessageSenderHelper.forwardMessage(session, message, user);
-			return;
-		}
+//		if (OnlineUserDto.ACTION_FORWARD.equals(action)) {
+//			MessageSenderHelper.forwardMessage(session, message, user);
+//			return;
+//		}
 
 		Map<String, BaseAction> processorMap = listableBeanFactory.getBeansOfType(BaseAction.class);
 		if (processorMap != null) {

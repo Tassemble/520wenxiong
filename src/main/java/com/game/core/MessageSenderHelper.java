@@ -27,9 +27,13 @@ public class MessageSenderHelper {
 		for (OnlineUserDto u : users) {
 			u.getSession().write(json);
 		}
-
 	}
 	
+	
+	public static void forwardMessage(IoSession session, Object message) {
+		
+		session.write(message);
+	}
 	
 	/**
 	 * @param session

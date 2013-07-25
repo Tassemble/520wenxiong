@@ -7,30 +7,30 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RoomDto {
 	
 	
-	public static final int ROOM_STATUS_OPEN = 1;
-	public static final int ROOM_STATUS_CLOSED = 0;
+	public static final String ROOM_STATUS_OPEN = "open";
+	public static final String ROOM_STATUS_CLOSED = "closed";
 	
 	
-	private static AtomicLong	idGenerator	= new AtomicLong(1);
-	private Object				roomLock	= new Object();
+	private static transient AtomicLong	idGenerator	= new AtomicLong(1);
+	private transient Object				roomLock	= new Object();
 	private Integer	maxplayersnum;
 	
 	private Integer	minplayersnum;
 
 	String						id;
 
-	List<OnlineUserDto>			users;
-	AtomicInteger				cntNow		= new AtomicInteger(0);
+	transient List<OnlineUserDto>			users;
+	transient AtomicInteger				cntNow		= new AtomicInteger(0);
 
 	
-	int roomStatus;
+	String roomStatus;
 	
 	
-	public int getRoomStatus() {
+	public String getRoomStatus() {
 		return roomStatus;
 	}
 
-	public void setRoomStatus(int roomStatus) {
+	public void setRoomStatus(String roomStatus) {
 		this.roomStatus = roomStatus;
 	}
 
@@ -96,6 +96,10 @@ public class RoomDto {
 	
 	public boolean isFull() {
 		return cntNow.get() == maxplayersnum;
+	}
+	
+	public boolean isReadyToStart() {
+		return cntNow.get() == minplayersnum;
 	}
 
 	

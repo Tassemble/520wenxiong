@@ -2,6 +2,7 @@ package com.game.core.dispatcher;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.mina.core.session.IoSession;
@@ -17,6 +18,7 @@ import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.wenxiong.utils.WordPressUtils;
 
 
@@ -70,7 +72,7 @@ public class FastJoinAction implements BaseAction{
 				user.setRoomId(room.getId());
 				user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
 
-				if (room.isFull()) {
+				if (room.isReadyToStart()) {
 					// start game
 					room.setRoomStatus(RoomDto.ROOM_STATUS_CLOSED);
 					for (OnlineUserDto userDto : room.getUsers()) {
@@ -81,16 +83,26 @@ public class FastJoinAction implements BaseAction{
 				locker.unLock("", key);
 			}
 		}
-		session.write(WordPressUtils.toJson(new ReturnDto(200, action, "enter room(" + room.getId()
-				+ "), num of players: " + room.getCntNow())));
+		Map<String, Object> extAttrs = Maps.newHashMap();
+		extAttrs.put("players", room.getUsers());
+		extAttrs.put("room", room);
+		ReturnDto returnDto = new ReturnDto(200, action, "you enter room(" + room.getId()
+				+ "), num of players: " + room.getCntNow());
+		returnDto.setExtAttrs(extAttrs);
+		
+		session.write(WordPressUtils.toJson(returnDto));
+		
+		returnDto = new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
+				+ " enter room(" + room.getId() + "), num of players: " + room.getCntNow());
+		extAttrs = Maps.newHashMap();
+		extAttrs.put("newPlayer", user);
+		returnDto.setExtAttrs(extAttrs);
 		MessageSenderHelper.forwardMessage(
 				session,
-				WordPressUtils.toJson(new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
-						+ " enter room(" + room.getId() + "), num of players: " + room.getCntNow())), user);
-
-		if (room.isFull()) {
+				WordPressUtils.toJson(returnDto), user);
+		if (room.isReadyToStart()) {
 			MessageSenderHelper.forwardMessage(room.getId(), WordPressUtils.toJson(new ReturnDto(200,
-					OnlineUserDto.ACTION_SYSTEM_BROADCAST, "room is full, game started!")));
+					OnlineUserDto.ACTION_SYSTEM_BROADCAST, "players can play game now, game started!")));
 
 		}		
 		

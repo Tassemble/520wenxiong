@@ -1,11 +1,12 @@
 package com.game.core.dto;
 
+
 public class ReturnDto {
 	public static final int ALREADY_LOGON_CODE = -100;
 	public static final int ALREADY_LOGON_CODE_WITH_OTHER_REMOTE_CLIENT = -101;
 	
 	
-	
+	Object extAttrs = null;
 	String action;
 	int code;
 	String message;
@@ -40,6 +41,12 @@ public class ReturnDto {
 	}
 	public void setResult(Object result) {
 		this.result = result;
+	}
+	public Object getExtAttrs() {
+		return extAttrs;
+	}
+	public void setExtAttrs(Object extAttrs) {
+		this.extAttrs = extAttrs;
 	}
 	
 	

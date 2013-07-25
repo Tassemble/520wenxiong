@@ -25,7 +25,7 @@ public class OnlineUserDto {
 	
 	String status;
 	
-	IoSession session;
+	transient IoSession session;
 	
 	
 
