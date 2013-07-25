@@ -56,24 +56,14 @@ public class JsonDto {
 	}
 
 	public static class FastJoinData extends BaseJsonData {
-		private Integer	maxplayersnum;
-		
-		private Integer	minplayersnum;
+		private Integer	playersNum;
 
-		public Integer getMaxplayersnum() {
-			return maxplayersnum;
+		public Integer getPlayersNum() {
+			return playersNum;
 		}
 
-		public void setMaxplayersnum(Integer maxplayersnum) {
-			this.maxplayersnum = maxplayersnum;
-		}
-
-		public Integer getMinplayersnum() {
-			return minplayersnum;
-		}
-
-		public void setMinplayersnum(Integer minplayersnum) {
-			this.minplayersnum = minplayersnum;
+		public void setPlayersNum(Integer playersNum) {
+			this.playersNum = playersNum;
 		}
 		
 		

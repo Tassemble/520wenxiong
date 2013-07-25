@@ -39,7 +39,7 @@
 	</bean>
 
 	<bean id="loggingFilter" class="org.apache.mina.filter.logging.LoggingFilter" />
-
+	<bean id="authIoFilter" class="com.game.core.AuthIoFilter" />
 	<!-- The filter chain. -->
 	<bean id="filterChainBuilder"
 		class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
@@ -47,6 +47,7 @@
 			<map>
 				<entry key="loggingFilter" value-ref="loggingFilter" />
 				<entry key="codecFilter" value-ref="protocolCodecFilter" />
+				<entry key="authIoFilter" value-ref="authIoFilter" />
 			</map>
 		</property>
 	</bean>

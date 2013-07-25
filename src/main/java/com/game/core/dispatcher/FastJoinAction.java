@@ -37,12 +37,12 @@ public class FastJoinAction implements BaseAction{
 		OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
 		checkUserStatus(user);
 		FastJoinData joinData = (FastJoinData) data;
-		int userNumLimit = joinData.getMaxplayersnum();
+		int userNumLimit = joinData.getPlayersNum();
 
 		RoomDto room = null;
 		for (Entry<String, RoomDto> entry : GameMemory.room.entrySet()) {
-			if (entry.getValue().getCntNow() < entry.getValue().getMaxplayersnum()
-					&& entry.getValue().getMaxplayersnum() == userNumLimit
+			if (entry.getValue().getCntNow() < entry.getValue().getPlayersNum()
+					&& entry.getValue().getPlayersNum() == userNumLimit
 					&& RoomDto.ROOM_STATUS_OPEN == entry.getValue().getRoomStatus()) {
 				room = entry.getValue();
 				break;
@@ -50,8 +50,7 @@ public class FastJoinAction implements BaseAction{
 		}
 		if (room == null) {// create new room
 			room = new RoomDto();
-			room.setMaxplayersnum(joinData.getMaxplayersnum());
-			room.setMinplayersnum(joinData.getMinplayersnum());
+			room.setPlayersNum(userNumLimit);
 			room.increaseCnt();
 			room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
 			List<OnlineUserDto> users = Lists.newArrayList();
@@ -97,9 +96,8 @@ public class FastJoinAction implements BaseAction{
 		extAttrs = Maps.newHashMap();
 		extAttrs.put("newPlayer", user);
 		returnDto.setExtAttrs(extAttrs);
-		MessageSenderHelper.forwardMessage(
-				session,
-				WordPressUtils.toJson(returnDto), user);
+		MessageSenderHelper.forwardMessageInRoom(
+				WordPressUtils.toJson(returnDto));
 		if (room.isReadyToStart()) {
 			MessageSenderHelper.forwardMessage(room.getId(), WordPressUtils.toJson(new ReturnDto(200,
 					OnlineUserDto.ACTION_SYSTEM_BROADCAST, "players can play game now, game started!")));

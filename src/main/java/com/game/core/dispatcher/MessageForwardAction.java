@@ -22,8 +22,7 @@ public class MessageForwardAction implements BaseAction {
 				MessageSenderHelper.forwardMessage(friendSession, data.getData());
 			}
 		} else {
-			MessageSenderHelper.forwardMessage(session, data.getData(),
-					GameMemory.getOnlineUserBySessionId(session.getId()));
+			MessageSenderHelper.forwardMessageInRoom(data.getData());
 		}
 	}
 

@@ -40,7 +40,10 @@ public class MessageSenderHelper {
 	 * @param message
 	 * @param user
 	 */
-	public static void forwardMessage(IoSession session, Object message, OnlineUserDto user) {
+	public static void forwardMessageInRoom(Object message) {
+		IoSession session = GameMemory.LOCAL_SESSION.get();
+		OnlineUserDto user = GameMemory.LOCAL_USER.get();
+		
 		LOG.info("forward message to other clients");
 		// forward to same room clients
 		if (user.getRoomId() == null) {

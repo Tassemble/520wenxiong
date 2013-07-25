@@ -11,6 +11,7 @@ import org.apache.mina.util.ConcurrentHashSet;
 
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.RoomDto;
+import com.wenxiong.utils.WordPressUtils;
 
 
 public class GameMemory {
@@ -21,7 +22,10 @@ public class GameMemory {
 	
 	public static Map<String, RoomDto> room;
 	
-	static ThreadLocal<OnlineUserDto> LocalUser = new ThreadLocal<OnlineUserDto>();
+	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
+	static ThreadLocal<IoSession> LOCAL_SESSION = new ThreadLocal<IoSession>();
+	
+	static ThreadLocal<OnlineUserDto> LOCAL_USER = new ThreadLocal<OnlineUserDto>();
 	
 	static {
 		//key is session id , value is user
@@ -31,11 +35,11 @@ public class GameMemory {
 		room = new ConcurrentHashMap<String, RoomDto>();
 	}
 	
-	
-	
-	public static OnlineUserDto getOnlineUser() {
-		return LocalUser.get();
+	public static void write(Object message) {
+		String strMessage = WordPressUtils.toJson(message);
+		LOCAL_SESSION.get().write(strMessage);
 	}
+	
 	
 	public static OnlineUserDto getOnlineUserBySessionId(Long id) {
 		return sessionUsers.get(id);

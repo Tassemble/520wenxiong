@@ -13,9 +13,8 @@ public class RoomDto {
 	
 	private static transient AtomicLong	idGenerator	= new AtomicLong(1);
 	private transient Object				roomLock	= new Object();
-	private Integer	maxplayersnum;
+	private Integer	playersNum;
 	
-	private Integer	minplayersnum;
 
 	String						id;
 
@@ -47,7 +46,7 @@ public class RoomDto {
 	}
 
 	public void increaseCnt() {
-		if (cntNow.get() < maxplayersnum) {
+		if (cntNow.get() < playersNum) {
 			cntNow.addAndGet(1);
 		} else {
 			throw new RuntimeException("enter room failed");
@@ -66,20 +65,13 @@ public class RoomDto {
 	}
 
 
-	public Integer getMaxplayersnum() {
-		return maxplayersnum;
+
+	public Integer getPlayersNum() {
+		return playersNum;
 	}
 
-	public void setMaxplayersnum(Integer maxplayersnum) {
-		this.maxplayersnum = maxplayersnum;
-	}
-
-	public Integer getMinplayersnum() {
-		return minplayersnum;
-	}
-
-	public void setMinplayersnum(Integer minplayersnum) {
-		this.minplayersnum = minplayersnum;
+	public void setPlayersNum(Integer playersNum) {
+		this.playersNum = playersNum;
 	}
 
 	public static String getRoomId() {
@@ -95,11 +87,11 @@ public class RoomDto {
 	}
 	
 	public boolean isFull() {
-		return cntNow.get() == maxplayersnum;
+		return cntNow.get() == playersNum;
 	}
 	
 	public boolean isReadyToStart() {
-		return cntNow.get() == minplayersnum;
+		return cntNow.get() == playersNum;
 	}
 
 	

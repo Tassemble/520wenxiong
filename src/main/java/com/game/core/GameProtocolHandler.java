@@ -77,9 +77,9 @@ public class GameProtocolHandler implements IoHandler {
 				if (room.isEmpty()) {
 					room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
 				} else {
-					MessageSenderHelper.forwardMessage(session, WordPressUtils.toJson(new ReturnDto(200,
+					MessageSenderHelper.forwardMessageInRoom(WordPressUtils.toJson(new ReturnDto(200,
 							OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername() + " quit game (" + room.getId()
-									+ "), num of players: " + room.getCntNow())), user);
+									+ "), num of players: " + room.getCntNow())));
 				}
 			} finally {
 				locker.unLock("", key);
@@ -116,60 +116,15 @@ public class GameProtocolHandler implements IoHandler {
 		String action = null;
 		try {
 			json = JSONObject.fromObject(message);
-			
 			action = json.getString("action");
 		} catch (Exception e) {
 			LOG.warn("parse json exeception");
 		}
 
-		OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
-		if (user == null) {
-
-			// is login?
-			if (StringUtils.isBlank(action) || !action.equals(OnlineUserDto.ACTION_LOGIN)) {
-				session.write(WordPressUtils.toJson(new ReturnDto(403, action, "no authentication")));
-				return;
-			}
-
-			LoginData loginData = (LoginData) WordPressUtils.getFromJson(message.toString(),
-					JsonDto.getClassByAction(action));
-
-			if (isValid(loginData)) {// TODO 实现验证用户名和密码
-
-				OnlineUserDto dto = new OnlineUserDto();
-				dto.setSession(session);
-				dto.setStatus(OnlineUserDto.STATUS_ONLINE);
-				dto.setUsername(loginData.getUsername());
-
-				if (GameMemory.onlineUsers.containsValue(dto)) {
-					OnlineUserDto oldUser = GameMemory.onlineUsers.get(dto.getUsername());
-					if (session.getId() != oldUser.getSession().getId()) {
-						session.write(WordPressUtils.toJson(new ReturnDto(
-								ReturnDto.ALREADY_LOGON_CODE_WITH_OTHER_REMOTE_CLIENT, action,
-								"you have already logon in remote clinet")));
-					} else {
-						session.write(WordPressUtils.toJson(new ReturnDto(ReturnDto.ALREADY_LOGON_CODE, action,
-								"you have already logon")));
-					}
-					return;
-				}
-				LOG.info("validate ok for username:" + loginData.getUsername());
-				GameMemory.onlineUsers.put(loginData.getUsername(), dto);
-				GameMemory.sessionUsers.put(session.getId(), dto);
-
-				session.write(WordPressUtils.toJson(new ReturnDto(200, action, "logon successfully")));
-				return;
-			}
-
-			session.write(WordPressUtils.toJson(new ReturnDto(-1, action, "logon failed")));
-			return;
-
-		}
-
 		BaseJsonData data = null;
 		if (StringUtils.isBlank(action)) {
 			// 特殊处理
-			MessageSenderHelper.forwardMessage(session, message, user);
+			MessageSenderHelper.forwardMessageInRoom(message);
 			return;
 		} else {
 
@@ -186,10 +141,10 @@ public class GameProtocolHandler implements IoHandler {
 			return;
 		}
 
-//		if (OnlineUserDto.ACTION_FORWARD.equals(action)) {
-//			MessageSenderHelper.forwardMessage(session, message, user);
-//			return;
-//		}
+		// if (OnlineUserDto.ACTION_FORWARD.equals(action)) {
+		// MessageSenderHelper.forwardMessage(session, message, user);
+		// return;
+		// }
 
 		Map<String, BaseAction> processorMap = listableBeanFactory.getBeansOfType(BaseAction.class);
 		if (processorMap != null) {
@@ -198,17 +153,17 @@ public class GameProtocolHandler implements IoHandler {
 				for (BaseAction processor : processors) {
 					if (processor.getAction().equals(action)) {
 						processor.doAction(session, data);
-						return;//one time process one thing
+						return;// one time process one thing
 					}
 				}
 			}
 		}
 
-//		if (OnlineUserDto.ACTION_FAST_JOIN.equals(action)) {
-//
-//			doFastJoinAction(session, data);
-//			return;
-//		}
+		// if (OnlineUserDto.ACTION_FAST_JOIN.equals(action)) {
+		//
+		// doFastJoinAction(session, data);
+		// return;
+		// }
 
 		if (OnlineUserDto.ACTION_GET_FRIENDLIST.equals(action)) {
 			List<OnlineUserVo> users = Lists.newArrayList();
@@ -245,17 +200,6 @@ public class GameProtocolHandler implements IoHandler {
 		}
 		throw new RuntimeException("action is not invalidate");
 
-	}
-
-	private boolean isValid(LoginData data) {
-		if (data == null) {
-			return false;
-		}
-
-		if (StringUtils.isNotBlank(data.getUsername())) {
-			return true;
-		}
-		return true;
 	}
 
 	@Override
