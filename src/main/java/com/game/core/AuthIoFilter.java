@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.game.core;
 
 import net.sf.json.JSONObject;
@@ -11,15 +8,26 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.game.core.dto.JsonDto;
+import com.game.core.dto.ActionNameEnum;
+import com.game.core.dto.BaseActionDataDto;
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.ReturnDto;
-import com.game.core.dto.JsonDto.LoginData;
+import com.game.core.dto.BaseActionDataDto.LoginData;
 import com.wenxiong.utils.WordPressUtils;
 
 /**
+ * 用户的登录认证在filter中，同时，由于decode的操作不一定一直都是同一线程，但是顺序肯定是
+ * 有先后的，这就可以在业务层面中，一进入到filter中时就设置一个threadlocal的变量，一旦执行完
+ * filter后就移除这个threadlocal <p>
+ * threadlocal这里设置了两个
+ * <ul>
+ * <li>一个是存放用户的threadlocal</li>
+ * <li>一个是存放IoSession的threadlocal</li>
+ * </ul>
+ * <p>
  * @author CHQ
- * 
+ * @since  1.0.0
+ * @date   2013-7-28
  */
 public class AuthIoFilter extends IoFilterAdapter {
 
@@ -44,13 +52,13 @@ public class AuthIoFilter extends IoFilterAdapter {
 			if (user == null) {
 
 				// is login?
-				if (StringUtils.isBlank(action) || !action.equals(OnlineUserDto.ACTION_LOGIN)) {
+				if (StringUtils.isBlank(action) || !action.equals(ActionNameEnum.ACTION_LOGIN.getAction())) {
 					session.write(WordPressUtils.toJson(new ReturnDto(403, action, "no authentication")));
 					return;
 				}
 
 				LoginData loginData = (LoginData) WordPressUtils.getFromJson(message.toString(),
-						JsonDto.getClassByAction(action));
+						BaseActionDataDto.getClassByAction(action));
 
 				if (isValid(loginData)) {// TODO 实现验证用户名和密码
 
@@ -58,7 +66,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 					dto.setSession(session);
 					dto.setStatus(OnlineUserDto.STATUS_ONLINE);
 					dto.setUsername(loginData.getUsername());
-
+					dto.setNickname(loginData.getUsername());
 					if (GameMemory.onlineUsers.containsValue(dto)) {
 						OnlineUserDto oldUser = GameMemory.onlineUsers.get(dto.getUsername());
 						if (session.getId() != oldUser.getSession().getId()) {
@@ -84,6 +92,12 @@ public class AuthIoFilter extends IoFilterAdapter {
 				return;
 
 			} else {
+				
+				if (ActionNameEnum.ACTION_LOGIN.getAction().equals(action)) {
+					session.write(WordPressUtils.toJson(new ReturnDto(200, action, "you have already logon")));
+					return;
+				}
+				
 				GameMemory.LOCAL_USER.set(user);
 			}
 

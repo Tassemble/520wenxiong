@@ -17,7 +17,7 @@ public class WordPressUtils {
 	
 	
 	private static Gson						g	= new GsonBuilder().serializeNulls().create();
-	Gson gson = new Gson();
+	private static Gson gson = new Gson();
 	
 	public static final String origin = "http://520wenxiong.com";
 	public static final String host = "520wenxiong.com";
@@ -59,7 +59,7 @@ public class WordPressUtils {
     
     
     public static String toJson(Object o) {
-        return g.toJson(o);
+        return gson.toJson(o);
     }
 
     public static <T> List<T> fromJson(String json, Type type) {

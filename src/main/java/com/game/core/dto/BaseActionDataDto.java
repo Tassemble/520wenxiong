@@ -4,12 +4,23 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.game.core.exception.NoSuchActionException;
 import com.google.gson.Gson;
 import com.wenxiong.utils.WordPressUtils;
 
-public class JsonDto {
+public class BaseActionDataDto {
+	protected String	action;
 
-	public static class LoginData extends BaseJsonData {
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}
+	
+	
+	public static class LoginData extends BaseActionDataDto {
 		private String	username;
 		private String	password;
 
@@ -30,7 +41,20 @@ public class JsonDto {
 		}
 	}
 
-	public static class LogoutData extends BaseJsonData {
+	public static class LogoutData extends BaseActionDataDto {
+		private String	username;
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+	}
+	
+	
+	public static class QuitGame extends BaseActionDataDto {
 		private String	username;
 
 		public String getUsername() {
@@ -42,7 +66,8 @@ public class JsonDto {
 		}
 	}
 
-	public static class RoomCreateData extends BaseJsonData {
+
+	public static class RoomCreateData extends BaseActionDataDto {
 		private Integer	userNumLimit;
 
 		public Integer getUserNumLimit() {
@@ -55,8 +80,9 @@ public class JsonDto {
 
 	}
 
-	public static class FastJoinData extends BaseJsonData {
+	public static class FastJoinData extends BaseActionDataDto {
 		private Integer	playersNum;
+		private int timeoutInSeconds;
 
 		public Integer getPlayersNum() {
 			return playersNum;
@@ -65,14 +91,21 @@ public class JsonDto {
 		public void setPlayersNum(Integer playersNum) {
 			this.playersNum = playersNum;
 		}
-		
-		
+
+		public int getTimeoutInSeconds() {
+			return timeoutInSeconds;
+		}
+
+		public void setTimeoutInSeconds(int timeoutInSeconds) {
+			this.timeoutInSeconds = timeoutInSeconds;
+		}
+
 
 	}
 
 	// {"action":"forward", "friendList":["a", "b", "c"],
 	// "data":"hello i am here"}
-	public static class ForwardData extends BaseJsonData {
+	public static class ForwardData extends BaseActionDataDto {
 		List<String>	friendList;
 		private String	data;
 
@@ -94,7 +127,7 @@ public class JsonDto {
 	}
 
 	// {"action":"invite", "friendList":["userA", "userB", "userC"]}
-	public static class GameInviteData extends BaseJsonData {
+	public static class GameInviteData extends BaseActionDataDto {
 		List<String>	friendList;
 
 		public List<String> getFriendList() {
@@ -107,27 +140,13 @@ public class JsonDto {
 
 	}
 
-	// {"action":"getFriendList"}
-	// {"action":"game-start"}
-	public static class BaseJsonData {
-		private String	action;
-
-		public String getAction() {
-			return action;
-		}
-
-		public void setAction(String action) {
-			this.action = action;
-		}
-	}
-
 	public static void main(String[] args) {
 		Gson g = new Gson();
 		// new TypeToken<OpenCoursePlay>(){}.getType()
 		// ForwardData data =
 		// g.fromJson("{\"action\":\"forward\", \"friendList\":[\"a\", \"b\", \"c\"], \"data\":\"hello i am here\"}",
 		// JsonDto.ForwardData.class);
-		BaseJsonData json = (BaseJsonData) WordPressUtils.getFromJson(
+		BaseActionDataDto json = (BaseActionDataDto) WordPressUtils.getFromJson(
 				"{\"action\":\"getFriendList\"}",
 				getClassByAction("getFriendList"));
 		System.out.println("action:" + json.getAction());
@@ -144,41 +163,11 @@ public class JsonDto {
 		if (StringUtils.isBlank(action)) {
 			return null;
 		}
-
-		if (action.equalsIgnoreCase("login")) {
-			return JsonDto.LoginData.class;
+		Class<?> actionClass = ActionNameEnum.getActionClass(action);
+		if (actionClass == null) {
+			throw new NoSuchActionException(action);
 		}
-
-		if (action.equalsIgnoreCase("logout")) {
-			return JsonDto.LogoutData.class;
-		}
-
-		if (action.equalsIgnoreCase("game-start")) {
-			return JsonDto.BaseJsonData.class;
-		}
-
-		if (action.equalsIgnoreCase("fast-join")) {
-			return JsonDto.FastJoinData.class;
-		}
-
-		if (action.equalsIgnoreCase("forward")) {
-			return JsonDto.ForwardData.class;
-		}
-
-		if (action.equalsIgnoreCase("invite")) {
-			return JsonDto.GameInviteData.class;
-		}
-		if (action.equalsIgnoreCase("game-start")) {
-			return JsonDto.BaseJsonData.class;
-		}
-		
-		if (action.equalsIgnoreCase("getFriendList")) {
-			return JsonDto.BaseJsonData.class;
-		}
-		
-		
-		throw new IllegalArgumentException("action:" + action);
-
+		return actionClass;
 	}
 
 }

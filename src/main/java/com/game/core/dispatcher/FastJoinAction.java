@@ -1,9 +1,8 @@
 package com.game.core.dispatcher;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +10,15 @@ import org.springframework.stereotype.Component;
 
 import com.game.core.GameMemory;
 import com.game.core.MessageSenderHelper;
-import com.game.core.dto.JsonDto.BaseJsonData;
-import com.game.core.dto.JsonDto.FastJoinData;
+import com.game.core.dto.ActionNameEnum;
+import com.game.core.dto.BaseActionDataDto;
+import com.game.core.dto.BaseActionDataDto.FastJoinData;
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
+import com.game.core.dto.RoomDto.TimeoutCallback;
 import com.game.core.utils.CellLocker;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 import com.wenxiong.utils.WordPressUtils;
 
 
@@ -29,10 +29,7 @@ public class FastJoinAction implements BaseAction{
 	CellLocker<List<String>>	locker;
 	
 	@Override
-	public void doAction(IoSession session, BaseJsonData data) {
-		String action = this.getAction();
-		
-		
+	public void doAction(IoSession session, BaseActionDataDto data) {
 		// check user status
 		OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
 		checkUserStatus(user);
@@ -49,59 +46,67 @@ public class FastJoinAction implements BaseAction{
 			}
 		}
 		if (room == null) {// create new room
-			room = new RoomDto();
-			room.setPlayersNum(userNumLimit);
+			//这里不需要同步，原因是在没有创建好房间的时候，其他用户是看到这个房间的
+			room = new RoomDto(userNumLimit);
 			room.increaseCnt();
 			room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
-			List<OnlineUserDto> users = Lists.newArrayList();
+			List<OnlineUserDto> users = new CopyOnWriteArrayList<OnlineUserDto>();
 			users.add(user);
-			String id = RoomDto.getRoomId();
+			String id = RoomDto.generateRoomId();
 			user.setRoomId(id);
 			user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
 			room.setId(id);
 			room.setUsers(users);
+			room.addUserCallback(new TimeoutCallback(user.getUsername(), joinData.getTimeoutInSeconds()));
 			GameMemory.room.put(id, room);
 		} else {
 			// LOCK HERE
-			List<String> key = Arrays.asList(String.valueOf(room.getId()));
-			try {
-				locker.lock("", key);
-				room.increaseCnt();
-				room.getUsers().add(user);
-				user.setRoomId(room.getId());
-				user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
-
-				if (room.isReadyToStart()) {
-					// start game
-					room.setRoomStatus(RoomDto.ROOM_STATUS_CLOSED);
-					for (OnlineUserDto userDto : room.getUsers()) {
-						userDto.setStatus(OnlineUserDto.STATUS_PLAYING);
-					}
-				}
-			} finally {
-				locker.unLock("", key);
-			}
+//			List<String> key = Arrays.asList(String.valueOf(room.getId()));
+//			try {
+//				locker.lock("", key);
+//				room.increaseCnt();
+//				room.getUsers().add(user);
+//				user.setRoomId(room.getId());
+//				user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
+//
+//				if (room.isReadyToStart()) {
+//					// start game
+//					room.setRoomStatus(RoomDto.ROOM_STATUS_CLOSED);
+//					for (OnlineUserDto userDto : room.getUsers()) {
+//						userDto.setStatus(OnlineUserDto.STATUS_PLAYING);
+//					}
+//				}
+//			} finally {
+//				locker.unLock("", key);
+//			}
+			
+			room.doUserJoin(user.getUsername());
+			room.addUserCallback(new TimeoutCallback(user.getUsername(), joinData.getTimeoutInSeconds()));
 		}
-		Map<String, Object> extAttrs = Maps.newHashMap();
-		extAttrs.put("players", room.getUsers());
-		extAttrs.put("room", room);
-		ReturnDto returnDto = new ReturnDto(200, action, "you enter room(" + room.getId()
-				+ "), num of players: " + room.getCntNow());
-		returnDto.setExtAttrs(extAttrs);
 		
-		session.write(WordPressUtils.toJson(returnDto));
 		
-		returnDto = new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
-				+ " enter room(" + room.getId() + "), num of players: " + room.getCntNow());
-		extAttrs = Maps.newHashMap();
-		extAttrs.put("newPlayer", user);
-		returnDto.setExtAttrs(extAttrs);
-		MessageSenderHelper.forwardMessageInRoom(
-				WordPressUtils.toJson(returnDto));
+		//~enter room
+//		Map<String, Object> extAttrs = Maps.newHashMap();
+//		extAttrs.put("players", room.getUsers());
+//		extAttrs.put("room", room);
+//		ReturnDto returnDto = new ReturnDto(200, action, "you enter room(" + room.getId()
+//				+ "), num of players: " + room.getCntNow());
+//		returnDto.setExtAttrs(extAttrs);
+//		session.write(WordPressUtils.toJson(returnDto));
+		
+		
+		//~notify other players
+//		ReturnDto returnDto = new ReturnDto(200, OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername()
+//				+ " enter room(" + room.getId() + "), num of players: " + room.getCntNow());
+//		Map<String, Object> extAttrs = Maps.newHashMap();
+//		extAttrs.put("newPlayer", user);
+//		returnDto.setExtAttrs(extAttrs);
+//		MessageSenderHelper.forwardMessageInRoom(
+//				WordPressUtils.toJson(returnDto));
 		if (room.isReadyToStart()) {
-			MessageSenderHelper.forwardMessage(room.getId(), WordPressUtils.toJson(new ReturnDto(200,
-					OnlineUserDto.ACTION_SYSTEM_BROADCAST, "players can play game now, game started!")));
-
+			ReturnDto ro = new ReturnDto(200, this.getAction(), "players can play game now, game started!");
+			ro.setExtAttrs(ImmutableMap.of("user", room.getUsers(), "room", room));
+			MessageSenderHelper.forwardMessage(room.getId(), WordPressUtils.toJson(ro));
 		}		
 		
 		
@@ -109,7 +114,7 @@ public class FastJoinAction implements BaseAction{
 
 	@Override
 	public String getAction() {
-		return FAST_JOIN;
+		return ActionNameEnum.FAST_JOIN.getAction();
 	}
 	
 	

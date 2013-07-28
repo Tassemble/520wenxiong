@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
@@ -15,6 +17,8 @@ import com.wenxiong.utils.WordPressUtils;
 
 
 public class GameMemory {
+	
+	static final int MAX_PLAYERS = 5000;
 
 	public static Map<Long, OnlineUserDto> sessionUsers;
 	
@@ -22,12 +26,20 @@ public class GameMemory {
 	
 	public static Map<String, RoomDto> room;
 	
+	public static ExecutorService executor = null;
+	
+	
+	
 	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
 	static ThreadLocal<IoSession> LOCAL_SESSION = new ThreadLocal<IoSession>();
 	
 	static ThreadLocal<OnlineUserDto> LOCAL_USER = new ThreadLocal<OnlineUserDto>();
 	
 	static {
+		//用于用于超时通知
+		executor = Executors.newFixedThreadPool(MAX_PLAYERS);
+		
+		
 		//key is session id , value is user
 		sessionUsers = new ConcurrentHashMap<Long, OnlineUserDto>();
 		//key is username , value is user
@@ -40,6 +52,15 @@ public class GameMemory {
 		LOCAL_SESSION.get().write(strMessage);
 	}
 	
+	
+	public static OnlineUserDto getUserByUsername(String username) {
+		return onlineUsers.get(username);
+	}
+	
+	
+	public static OnlineUserDto getUser() {
+		return LOCAL_USER.get();
+	}
 	
 	public static OnlineUserDto getOnlineUserBySessionId(Long id) {
 		return sessionUsers.get(id);

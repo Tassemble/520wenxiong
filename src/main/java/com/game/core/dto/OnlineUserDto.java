@@ -3,15 +3,6 @@ package com.game.core.dto;
 import org.apache.mina.core.session.IoSession;
 
 public class OnlineUserDto {
-	public static final String ACTION_LOGIN = "login"; 
-	public static final String ACTION_LOGOUT = "logout"; 
-	public static final String ACTION_GAME_START = "game-start"; 
-	public static final String ACTION_FAST_JOIN = "fast-join"; 
-	public static final String ACTION_FORWARD = "forward"; 
-	public static final String ACTION_GET_FRIENDLIST = "getFriendList"; 
-	public static final String ACTION_INVITE = "invite"; 
-	public static final String ACTION_SYSTEM_BROADCAST = "system-broadcast"; 
-	
 	
 	public static final String STATUS_ONLINE = "online"; 
 	public static final String STATUS_OFFLINE = "offline"; 
@@ -25,9 +16,19 @@ public class OnlineUserDto {
 	
 	String status;
 	
+	String nickname;
+	
 	transient IoSession session;
 	
 	
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
 
 	public IoSession getSession() {
 		return session;

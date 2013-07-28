@@ -1,6 +1,5 @@
 package com.game.core;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -20,11 +19,9 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.game.core.dispatcher.BaseAction;
-import com.game.core.dto.JsonDto;
-import com.game.core.dto.JsonDto.BaseJsonData;
-import com.game.core.dto.JsonDto.LoginData;
+import com.game.core.dto.ActionNameEnum;
+import com.game.core.dto.BaseActionDataDto;
 import com.game.core.dto.OnlineUserDto;
-import com.game.core.dto.OnlineUserVo;
 import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
 import com.game.core.utils.CellLocker;
@@ -32,8 +29,12 @@ import com.google.common.collect.Lists;
 import com.wenxiong.utils.WordPressUtils;
 
 /**
+ * 业务处理点入口，除了登录的action在这个类{@link AuthIoFilter}认证之外，其他
+ * 所有的action在这里处理，所有的action的类型可以查看{@link ActionNameEnum}
+ * 
  * @author CHQ
- * @since 20130713
+ * @since  1.0.0
+ * @date   2013-7-28
  */
 public class GameProtocolHandler implements IoHandler {
 
@@ -68,22 +69,7 @@ public class GameProtocolHandler implements IoHandler {
 		}
 		RoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
 		if (room != null) {
-			List<String> key = Arrays.asList(String.valueOf(room.getId()));
-			try {
-				locker.lock("", key);
-				room.getUsers().remove(user);
-				room.decreaseCnt();
-
-				if (room.isEmpty()) {
-					room.setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
-				} else {
-					MessageSenderHelper.forwardMessageInRoom(WordPressUtils.toJson(new ReturnDto(200,
-							OnlineUserDto.ACTION_SYSTEM_BROADCAST, user.getUsername() + " quit game (" + room.getId()
-									+ "), num of players: " + room.getCntNow())));
-				}
-			} finally {
-				locker.unLock("", key);
-			}
+			room.doUserQuit(user.getUsername());
 		}
 		GameMemory.onlineUsers.remove(user.getUsername());
 		GameMemory.removeSessionUserByKey(session.getId());
@@ -121,30 +107,20 @@ public class GameProtocolHandler implements IoHandler {
 			LOG.warn("parse json exeception");
 		}
 
-		BaseJsonData data = null;
+		BaseActionDataDto data = null;
 		if (StringUtils.isBlank(action)) {
 			// 特殊处理
-			MessageSenderHelper.forwardMessageInRoom(message);
+			MessageSenderHelper.forwardMessageToOtherClientsInRoom(message);
 			return;
 		} else {
 
-			data = (BaseJsonData) WordPressUtils.getFromJson(message.toString(), JsonDto.getClassByAction(action));
+			data = (BaseActionDataDto) WordPressUtils.getFromJson(message.toString(), BaseActionDataDto.getClassByAction(action));
 		}
 
 		// 特殊输出，如果是单纯字节的话========================end
 
 		// 正常逻辑
 		validateAction(action);
-
-		if (OnlineUserDto.ACTION_LOGIN.equals(action)) {
-			session.write(WordPressUtils.toJson(new ReturnDto(200, action, "you have already logon")));
-			return;
-		}
-
-		// if (OnlineUserDto.ACTION_FORWARD.equals(action)) {
-		// MessageSenderHelper.forwardMessage(session, message, user);
-		// return;
-		// }
 
 		Map<String, BaseAction> processorMap = listableBeanFactory.getBeansOfType(BaseAction.class);
 		if (processorMap != null) {
@@ -159,16 +135,10 @@ public class GameProtocolHandler implements IoHandler {
 			}
 		}
 
-		// if (OnlineUserDto.ACTION_FAST_JOIN.equals(action)) {
-		//
-		// doFastJoinAction(session, data);
-		// return;
-		// }
-
-		if (OnlineUserDto.ACTION_GET_FRIENDLIST.equals(action)) {
-			List<OnlineUserVo> users = Lists.newArrayList();
+		if (ActionNameEnum.ACTION_GET_FRIENDLIST.getAction().equals(action)) {
+			List<OnlineUserDto> users = Lists.newArrayList();
 			for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
-				users.add(new OnlineUserVo(entry.getValue()));
+				users.add(entry.getValue());
 			}
 			ReturnDto ret = new ReturnDto(200, action, action);
 			ret.setResult(users);
@@ -179,23 +149,9 @@ public class GameProtocolHandler implements IoHandler {
 		throw new NotImplementedException();
 	}
 
-	/**
-	 * @param session
-	 * @param action
-	 * @param user
-	 * @param data
-	 */
-	private void doFastJoinAction(IoSession session, BaseJsonData data) {
-
-	}
-
 	private void validateAction(String action) {
-		if (OnlineUserDto.ACTION_FAST_JOIN.equals(action) || OnlineUserDto.ACTION_FORWARD.equals(action)
-				|| OnlineUserDto.ACTION_GAME_START.equals(action) || OnlineUserDto.ACTION_GET_FRIENDLIST.equals(action)
-				|| OnlineUserDto.ACTION_INVITE.equals(action)
-				// || OnlineUserDto.ACTION_LOGIN.equals(action) has validated
-				// dont do it again
-				|| OnlineUserDto.ACTION_LOGOUT.equals(action)) {
+		
+		if (ActionNameEnum.validateAction(action)) {
 			return;
 		}
 		throw new RuntimeException("action is not invalidate");
