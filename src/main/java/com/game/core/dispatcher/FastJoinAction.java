@@ -105,7 +105,7 @@ public class FastJoinAction implements BaseAction{
 //				WordPressUtils.toJson(returnDto));
 		if (room.isReadyToStart()) {
 			ReturnDto ro = new ReturnDto(200, this.getAction(), "players can play game now, game started!");
-			ro.setExtAttrs(ImmutableMap.of("user", room.getUsers(), "room", room));
+			ro.setExtAttrs(ImmutableMap.of("players", room.getUsers(), "room", room));
 			MessageSenderHelper.forwardMessage(room.getId(), WordPressUtils.toJson(ro));
 		}		
 		
