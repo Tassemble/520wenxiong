@@ -17,7 +17,7 @@ public class WordPressUtils {
 	
 	
 	private static Gson						g	= new GsonBuilder().serializeNulls().create();
-	private static Gson gson = new Gson();
+	private static Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 	
 	public static final String origin = "http://520wenxiong.com";
 	public static final String host = "520wenxiong.com";
