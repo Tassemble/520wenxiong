@@ -9,7 +9,8 @@ public enum ActionNameEnum {
 	ACTION_LOGOUT("logout",BaseActionDataDto.LogoutData.class),
 	ACTION_GAME_START("game-start",BaseActionDataDto.class),
 	ACTION_GET_FRIENDLIST("getFriendList",BaseActionDataDto.class),
-	ACTION_INVITE("invite",BaseActionDataDto.GameInviteData.class);
+	ACTION_INVITE("invite",BaseActionDataDto.GameInviteData.class),
+	ACTION_SIGN_UP("signup",BaseActionDataDto.GameSignUpData.class);
 	
 	
 	String action;
