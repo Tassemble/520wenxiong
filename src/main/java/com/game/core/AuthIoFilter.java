@@ -138,6 +138,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 		dto.setStatus(OnlineUserDto.STATUS_ONLINE);
 		dto.setUsername(loginData.getUsername());
 		dto.setNickname(loginData.getUsername());
+		
 
 		if (isMock) {
 			return dto;
@@ -148,6 +149,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 			List<User> users = userService.getByDomainObjectSelective(query);
 			if (!CollectionUtils.isEmpty(users)) {
 				dto.setNickname(users.get(0).getNickName());
+				dto.setId(users.get(0).getId());
 				return dto;
 			}
 		}

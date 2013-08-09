@@ -1,5 +1,6 @@
 package com.game.core;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Map.Entry;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.service.IoHandler;
@@ -17,7 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache.ValueWrapper;
+import org.springframework.cache.ehcache.EhCacheCache;
 
+import com.game.core.action.processor.ActionAnotationProcessor;
 import com.game.core.dispatcher.BaseAction;
 import com.game.core.dto.ActionNameEnum;
 import com.game.core.dto.BaseActionDataDto;
@@ -33,12 +38,15 @@ import com.wenxiong.utils.WordPressUtils;
  * 所有的action在这里处理，所有的action的类型可以查看{@link ActionNameEnum}
  * 
  * @author CHQ
- * @since  1.0.0
- * @date   2013-7-28
+ * @since 1.0.0
+ * @date 2013-7-28
  */
 public class GameProtocolHandler implements IoHandler {
 
 	private static final Logger	LOG	= LoggerFactory.getLogger(GameProtocolHandler.class);
+
+	@Autowired
+	EhCacheCache				ehCacheCache;
 
 	@Autowired
 	CellLocker<List<String>>	locker;
@@ -114,7 +122,8 @@ public class GameProtocolHandler implements IoHandler {
 			return;
 		} else {
 
-			data = (BaseActionDataDto) WordPressUtils.getFromJson(message.toString(), BaseActionDataDto.getClassByAction(action));
+			data = (BaseActionDataDto) WordPressUtils.getFromJson(message.toString(),
+					BaseActionDataDto.getClassByAction(action));
 		}
 
 		// 特殊输出，如果是单纯字节的话========================end
@@ -122,8 +131,11 @@ public class GameProtocolHandler implements IoHandler {
 		// 正常逻辑
 		validateAction(action);
 
+		// ~ 提供了两种灵活的处理方式：1. 既能处理长连接的方式，2. 也能处理Request-Response的方式(类似http请求)
+
+		// ~ 这里是第一种方式 能够应付长连接的情况
 		Map<String, BaseAction> processorMap = listableBeanFactory.getBeansOfType(BaseAction.class);
-		if (processorMap != null) {
+		if (!MapUtils.isEmpty(processorMap)) {
 			Collection<BaseAction> processors = processorMap.values();
 			if (!CollectionUtils.isEmpty(processors)) {
 				for (BaseAction processor : processors) {
@@ -135,6 +147,7 @@ public class GameProtocolHandler implements IoHandler {
 			}
 		}
 
+		// ~ 老代码 需要移植到新的逻辑上去
 		if (ActionNameEnum.ACTION_GET_FRIENDLIST.getAction().equals(action)) {
 			List<OnlineUserDto> users = Lists.newArrayList();
 			for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
@@ -146,11 +159,32 @@ public class GameProtocolHandler implements IoHandler {
 			return;
 		}
 
+		// ~ 处理request-response的方式 非常简单 使用actionAnotation实现
+		ValueWrapper actionMapper = ehCacheCache.get(action);
+		if (actionMapper != null) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> valueMapper = (Map<String, Object>) actionMapper.get();
+			
+			
+			Method method = (Method) valueMapper.get("method");
+			ActionAnotationProcessor processor = (ActionAnotationProcessor) valueMapper.get("object");
+			Object result = method.invoke(processor, data);
+			if (result != null) {
+				ReturnDto ret = new ReturnDto(200, action, action);
+				ret.setResult(result);
+				session.write(WordPressUtils.toJson(ret));
+			} else {
+				ReturnDto ret = new ReturnDto(-1, action, action);
+				session.write(WordPressUtils.toJson(ret));
+			}
+			return;
+		}
+
 		throw new NotImplementedException();
 	}
 
 	private void validateAction(String action) {
-		
+
 		if (ActionNameEnum.validateAction(action)) {
 			return;
 		}

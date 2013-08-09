@@ -1,9 +1,11 @@
 package com.game.core.dto;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.game.bomb.domain.User;
 import com.game.core.exception.NoSuchActionException;
 import com.google.gson.Gson;
 import com.wenxiong.utils.WordPressUtils;
@@ -41,6 +43,27 @@ public class BaseActionDataDto {
 			this.password = password;
 		}
 	}
+	
+	
+	public static class UploadPlayerData extends BaseActionDataDto {
+		
+		Map<String, User> extAttrs;
+
+		public Map<String, User> getExtAttrs() {
+			return extAttrs;
+		}
+
+		public void setExtAttrs(Map<String, User> extAttrs) {
+			this.extAttrs = extAttrs;
+		}
+		
+		
+		
+		
+	}
+	
+	
+	
 	
 	public static class GameSignUpData  extends BaseActionDataDto {
 		private String	username;
