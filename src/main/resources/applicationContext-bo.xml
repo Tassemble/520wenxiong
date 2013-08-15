@@ -18,6 +18,7 @@
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
 	</bean>
 
+
 	<bean id="WebConfig" class="com.wenxiong.web.WebConfig">
 		<property name="host">
 			<value>http://wenxiong.com</value>

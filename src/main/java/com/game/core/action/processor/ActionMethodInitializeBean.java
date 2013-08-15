@@ -11,18 +11,17 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.ehcache.EhCacheCache;
+import org.springframework.stereotype.Component;
 
+import com.game.core.GameMemory;
 import com.game.core.annotation.ActionAnnotation;
 import com.google.common.collect.Maps;
-
+@Component
 public class ActionMethodInitializeBean implements InitializingBean, DisposableBean {
 
 	@Autowired
 	ListableBeanFactory			listableBeanFactory;
 
-	
-	@Autowired
-	EhCacheCache ehCacheCache;
 	
 	@Override
 	public void destroy() throws Exception {
@@ -41,10 +40,12 @@ public class ActionMethodInitializeBean implements InitializingBean, DisposableB
 				if (ArrayUtils.isNotEmpty(meothods)) {
 					for (Method method : meothods) {
 						ActionAnnotation annotation = method.getAnnotation(ActionAnnotation.class);
+						if (annotation == null) 
+							continue;
 						Map<String, Object> map = Maps.newHashMap();
 						map.put("method", method);
 						map.put("object", actionAnotationProcessor);
-						ehCacheCache.put(annotation.action(), map);
+						GameMemory.actionMapping.put(annotation.action(), map);
 					}
 				}
 						

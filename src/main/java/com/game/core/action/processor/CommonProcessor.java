@@ -30,25 +30,24 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	FriendRelationService	friendRelationService;
 
 	@ActionAnnotation(action = "downloadPlayerInfo")
-	public Map<String, Object> downloadPlayerInfo(BaseActionDataDto baseData) {
-		Map<String, Object> map = Maps.newHashMap();
+	public void downloadPlayerInfo(BaseActionDataDto baseData, Map<String, Object> map) {
 		OnlineUserDto onlineUser = GameMemory.getUser();
 		if (onlineUser == null) {
 			throw new NoAuthenticationException("downloadPlayerInfo");
 		}
 		User user = userService.getById(onlineUser.getId());
+		map.put("code", 200);
 		map.put("self", user);
 		// ~ put init
 		map.put("friends", null);
 		// ~ get friends
-		List<FriendRelation> relations = friendRelationService.getByCondition("user_id = ? and status = ?",
+		List<FriendRelation> relations = friendRelationService.getByCondition("user_id = ? and relation_status = ?",
 				onlineUser.getId(), FriendRelation.STATUS_ACCEPTED);
 		if (!CollectionUtils.isEmpty(relations)) {
 			List<Long> friendIds = PropertyExtractUtils.getByPropertyValue(relations, "FriendId");
 			List<User> friends = userService.getByIdList(friendIds);
 			map.put("friends", friends);
 		}
-		return map;
 	}
 
 	@ActionAnnotation(action = "uploadPlayerInfo")

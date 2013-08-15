@@ -1,5 +1,6 @@
 package com.game.core;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,8 @@ public class GameMemory {
 	
 	public static Map<String, OnlineUserDto> onlineUsers;
 	
+	public static Map<String, Object> actionMapping = new HashMap<String, Object>();
+	
 	public static Map<String, RoomDto> room;
 	
 	public static ExecutorService executor = null;
@@ -38,8 +41,6 @@ public class GameMemory {
 	static {
 		//用于用于超时通知
 		executor = Executors.newFixedThreadPool(MAX_PLAYERS);
-		
-		
 		//key is session id , value is user
 		sessionUsers = new ConcurrentHashMap<Long, OnlineUserDto>();
 		//key is username , value is user

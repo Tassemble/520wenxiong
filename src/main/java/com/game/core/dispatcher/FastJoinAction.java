@@ -60,26 +60,6 @@ public class FastJoinAction implements BaseAction{
 			room.addUserCallback(new TimeoutCallback(user.getUsername(), joinData.getTimeoutInSeconds()));
 			GameMemory.room.put(id, room);
 		} else {
-			// LOCK HERE
-//			List<String> key = Arrays.asList(String.valueOf(room.getId()));
-//			try {
-//				locker.lock("", key);
-//				room.increaseCnt();
-//				room.getUsers().add(user);
-//				user.setRoomId(room.getId());
-//				user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
-//
-//				if (room.isReadyToStart()) {
-//					// start game
-//					room.setRoomStatus(RoomDto.ROOM_STATUS_CLOSED);
-//					for (OnlineUserDto userDto : room.getUsers()) {
-//						userDto.setStatus(OnlineUserDto.STATUS_PLAYING);
-//					}
-//				}
-//			} finally {
-//				locker.unLock("", key);
-//			}
-			
 			room.doUserJoin(user.getUsername());
 			room.addUserCallback(new TimeoutCallback(user.getUsername(), joinData.getTimeoutInSeconds()));
 		}

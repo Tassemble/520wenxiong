@@ -2,6 +2,7 @@ package com.game.core;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +32,7 @@ import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.wenxiong.utils.WordPressUtils;
 
 /**
@@ -44,9 +46,6 @@ import com.wenxiong.utils.WordPressUtils;
 public class GameProtocolHandler implements IoHandler {
 
 	private static final Logger	LOG	= LoggerFactory.getLogger(GameProtocolHandler.class);
-
-	@Autowired
-	EhCacheCache				ehCacheCache;
 
 	@Autowired
 	CellLocker<List<String>>	locker;
@@ -102,6 +101,7 @@ public class GameProtocolHandler implements IoHandler {
 
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
+		JsonSessionWrapper jsonSessoin = new JsonSessionWrapper(session);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("receive message from session:" + session.getId() + ", message:" + message.toString());
 		}
@@ -160,23 +160,15 @@ public class GameProtocolHandler implements IoHandler {
 		}
 
 		// ~ 处理request-response的方式 非常简单 使用actionAnotation实现
-		ValueWrapper actionMapper = ehCacheCache.get(action);
-		if (actionMapper != null) {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> valueMapper = (Map<String, Object>) actionMapper.get();
-			
-			
+		@SuppressWarnings("unchecked")
+		HashMap<String, Object> valueMapper = (HashMap<String, Object>)GameMemory.actionMapping.get(action);
+		Map<String, Object> model = Maps.newHashMap();
+		
+		if (valueMapper != null) {
 			Method method = (Method) valueMapper.get("method");
 			ActionAnotationProcessor processor = (ActionAnotationProcessor) valueMapper.get("object");
-			Object result = method.invoke(processor, data);
-			if (result != null) {
-				ReturnDto ret = new ReturnDto(200, action, action);
-				ret.setResult(result);
-				session.write(WordPressUtils.toJson(ret));
-			} else {
-				ReturnDto ret = new ReturnDto(-1, action, action);
-				session.write(WordPressUtils.toJson(ret));
-			}
+			method.invoke(processor, data, model);
+			jsonSessoin.write(model);
 			return;
 		}
 
