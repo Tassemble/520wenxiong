@@ -42,6 +42,12 @@ public class SignUpAction implements BaseAction{
 		}
 		query.setId(userService.getId());
 		query.setNickName(data.getNickname());
+		query.setHeartNum(0);
+		query.setLevel(1);
+		query.setLoserNum(0);
+		query.setPortrait(0);
+		query.setRunawayNum(0);
+		query.setVictoryNum(0);
 		userService.add(query);
 		session.write(WordPressUtils.toJson(new ReturnDto(200, this.getAction(), "signup successfully")));
 		return;
