@@ -29,6 +29,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	@Autowired
 	FriendRelationService	friendRelationService;
 
+	//~ 如果是mock 请不要调用改接口
 	@ActionAnnotation(action = "downloadPlayerInfo")
 	public void downloadPlayerInfo(BaseActionDataDto baseData, Map<String, Object> map) {
 		OnlineUserDto onlineUser = GameMemory.getUser();

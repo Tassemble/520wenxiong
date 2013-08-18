@@ -10,13 +10,14 @@ import com.netease.framework.dao.sql.annotation.DataProperty;
 public class User {
 	
 	
-	
-	Long id;
+	//不进行序列化
+	transient  Long id;
 	String username;
 	String nickName;
 	
 	/** md5进行加密*/
-	String md5Password;
+	//不进行序列化
+	transient String md5Password;
 	
 	
 	//~ new added
