@@ -219,7 +219,7 @@ public class BaseActionDataDto {
 		}
 		Class<?> actionClass = ActionNameEnum.getActionClass(action);
 		if (actionClass == null) {
-			throw new NoSuchActionException(action);
+			return null;
 		}
 		return actionClass;
 	}

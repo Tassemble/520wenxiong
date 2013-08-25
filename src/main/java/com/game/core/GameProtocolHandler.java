@@ -120,58 +120,61 @@ public class GameProtocolHandler implements IoHandler {
 			// 特殊处理
 			MessageSenderHelper.forwardMessageToOtherClientsInRoom(message);
 			return;
-		} else {
-
-			data = (BaseActionDataDto) WordPressUtils.getFromJson(message.toString(),
-					BaseActionDataDto.getClassByAction(action));
 		}
-
-		// 特殊输出，如果是单纯字节的话========================end
 
 		// 正常逻辑
 		validateAction(action);
 
+		
 		// ~ 提供了两种灵活的处理方式：1. 既能处理长连接的方式，2. 也能处理Request-Response的方式(类似http请求)
+		if (BaseActionDataDto.getClassByAction(action) != null) {
+			data = (BaseActionDataDto) WordPressUtils.getFromJson(message.toString(),
+					BaseActionDataDto.getClassByAction(action));
 
-		// ~ 这里是第一种方式 能够应付长连接的情况
-		Map<String, BaseAction> processorMap = listableBeanFactory.getBeansOfType(BaseAction.class);
-		if (!MapUtils.isEmpty(processorMap)) {
-			Collection<BaseAction> processors = processorMap.values();
-			if (!CollectionUtils.isEmpty(processors)) {
-				for (BaseAction processor : processors) {
-					if (processor.getAction().equals(action)) {
-						processor.doAction(session, data);
-						return;// one time process one thing
+			// 特殊输出，如果是单纯字节的话========================end
+			// ~ 这里是第一种方式 能够应付长连接的情况
+			Map<String, BaseAction> processorMap = listableBeanFactory.getBeansOfType(BaseAction.class);
+			if (!MapUtils.isEmpty(processorMap)) {
+				Collection<BaseAction> processors = processorMap.values();
+				if (!CollectionUtils.isEmpty(processors)) {
+					for (BaseAction processor : processors) {
+						if (processor.getAction().equals(action)) {
+							processor.doAction(session, data);
+							return;// one time process one thing
+						}
 					}
 				}
 			}
-		}
 
-		// ~ 老代码 需要移植到新的逻辑上去
-		if (ActionNameEnum.ACTION_GET_FRIENDLIST.getAction().equals(action)) {
-			List<OnlineUserDto> users = Lists.newArrayList();
-			for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
-				users.add(entry.getValue());
+			// ~ 老代码 需要移植到新的逻辑上去
+			if (ActionNameEnum.ACTION_GET_FRIENDLIST.getAction().equals(action)) {
+				List<OnlineUserDto> users = Lists.newArrayList();
+				for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
+					users.add(entry.getValue());
+				}
+				ReturnDto ret = new ReturnDto(200, action, action);
+				ret.setResult(users);
+				session.write(WordPressUtils.toJson(ret));
+				return;
 			}
-			ReturnDto ret = new ReturnDto(200, action, action);
-			ret.setResult(users);
-			session.write(WordPressUtils.toJson(ret));
-			return;
+		} else {
+			// ~ 处理request-response的方式 非常简单 使用actionAnotation实现
+			@SuppressWarnings("unchecked")
+			HashMap<String, Object> valueMapper = (HashMap<String, Object>) GameMemory.actionMapping.get(action);
+			Map<String, Object> model = Maps.newHashMap();
+			if (valueMapper != null) {
+				model.put("action", action);
+				Method method = (Method) valueMapper.get("method");
+				ActionAnotationProcessor processor = (ActionAnotationProcessor) valueMapper.get("object");
+				Object returnValue = method.invoke(processor, message, model);
+				if (returnValue != null) {
+					jsonSessoin.write(model);
+				} else {
+					//nothing to do
+				}
+				return;
+			}
 		}
-
-		// ~ 处理request-response的方式 非常简单 使用actionAnotation实现
-		@SuppressWarnings("unchecked")
-		HashMap<String, Object> valueMapper = (HashMap<String, Object>)GameMemory.actionMapping.get(action);
-		Map<String, Object> model = Maps.newHashMap();
-		
-		if (valueMapper != null) {
-			Method method = (Method) valueMapper.get("method");
-			ActionAnotationProcessor processor = (ActionAnotationProcessor) valueMapper.get("object");
-			method.invoke(processor, data, model);
-			jsonSessoin.write(model);
-			return;
-		}
-
 		throw new NotImplementedException();
 	}
 

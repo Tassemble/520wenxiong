@@ -48,6 +48,10 @@ public class GameMemory {
 		room = new ConcurrentHashMap<String, RoomDto>();
 	}
 	
+	public static IoSession getCurrentSession() {
+		return LOCAL_SESSION.get();
+	}
+	
 	public static void write(Object message) {
 		String strMessage = WordPressUtils.toJson(message);
 		LOCAL_SESSION.get().write(strMessage);
