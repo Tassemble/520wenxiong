@@ -88,15 +88,18 @@ public class AuthIoFilter extends IoFilterAdapter {
 
 					if (GameMemory.onlineUsers.containsValue(dto)) {
 						OnlineUserDto oldUser = GameMemory.onlineUsers.get(dto.getUsername());
-						if (session.getId() != oldUser.getSession().getId()) {
-							session.write(WordPressUtils.toJson(new ReturnDto(
-									ReturnDto.ALREADY_LOGON_CODE_WITH_OTHER_REMOTE_CLIENT, action,
-									"you have already logon in remote clinet")));
-						} else {
-							session.write(WordPressUtils.toJson(new ReturnDto(ReturnDto.ALREADY_LOGON_CODE, action,
-									"you have already logon")));
-						}
-						return;
+						GameMemory.onlineUsers.remove(dto);
+						oldUser.getSession().write("remote client logon");
+						oldUser.getSession().close();
+					//	if (session.getId() != oldUser.getSession().getId()) {
+					//		session.write(WordPressUtils.toJson(new ReturnDto(
+					//				ReturnDto.ALREADY_LOGON_CODE_WITH_OTHER_REMOTE_CLIENT, action,
+					//				"you have already logon in remote clinet")));
+					//	} else {
+					//		session.write(WordPressUtils.toJson(new ReturnDto(ReturnDto.ALREADY_LOGON_CODE, action,
+					//				"you have already logon")));
+					//	}
+					//	return;
 					}
 					LOG.info("validate ok for username:" + dto.getUsername());
 					GameMemory.onlineUsers.put(dto.getUsername(), dto);
@@ -113,6 +116,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 			} else {
 
 				if (ActionNameEnum.ACTION_LOGIN.getAction().equals(action)) {
+					//如果用户
 					session.write(WordPressUtils.toJson(new ReturnDto(200, action, "you have already logon")));
 					return;
 				}
