@@ -84,9 +84,9 @@ public class GameProtocolHandler implements IoHandler {
 
 	@Override
 	public void sessionIdle(IoSession session, IdleStatus paramIdleStatus) throws Exception {
-		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void exceptionCaught(IoSession session, Throwable paramThrowable) throws Exception {
@@ -169,8 +169,13 @@ public class GameProtocolHandler implements IoHandler {
 				Object returnValue = method.invoke(processor, message, model);
 				if (returnValue != null) {
 					jsonSessoin.write(model);
+
+
+
 				} else {
 					//nothing to do
+					
+						
 				}
 				return;
 			}
