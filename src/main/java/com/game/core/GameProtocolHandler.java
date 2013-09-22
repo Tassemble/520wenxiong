@@ -95,6 +95,11 @@ public class GameProtocolHandler implements IoHandler {
 			return;
 		}
 
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("session id:" + session.getId(),  paramThrowable);
+		}
+
 		session.write(WordPressUtils.toJson(new ReturnDto(-100, "message format is error")));
 		return;
 	}
@@ -189,7 +194,7 @@ public class GameProtocolHandler implements IoHandler {
 		if (ActionNameEnum.validateAction(action)) {
 			return;
 		}
-		throw new RuntimeException("action is not invalidate");
+		throw new RuntimeException("action is not invalidate:" + action);
 
 	}
 
