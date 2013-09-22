@@ -112,7 +112,7 @@ public class GameProtocolHandler implements IoHandler {
 			json = JSONObject.fromObject(message);
 			action = json.getString("action");
 		} catch (Exception e) {
-			LOG.warn("parse json exeception");
+			LOG.warn("sessionID:" + session.getId()+" parse json exeception, message:" + json, e);
 		}
 
 		BaseActionDataDto data = null;

@@ -58,7 +58,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 
 				action = json.getString("action");
 			} catch (Exception e) {
-				LOG.warn("parse json exeception");
+				LOG.warn("sessionID:" + session.getId()+" parse json exeception, message:" + json, e);
 			}
 
 			OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
