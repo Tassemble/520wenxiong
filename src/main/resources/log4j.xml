@@ -7,6 +7,10 @@
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%p [%t] %c{1}.%M(%L) | %m%n" />
 		</layout>
+		<param name="threshold" value="info" />
+		<param name="file" value="console.log" />
+		<param name="append" value="true" />
+		<param name="datePattern" value="'.'yyyy-MM-dd" />
 	</appender>
 
 	<appender name="DailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">

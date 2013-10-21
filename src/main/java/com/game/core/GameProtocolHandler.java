@@ -88,15 +88,20 @@ public class GameProtocolHandler implements IoHandler {
 
 	@Override
 	public void sessionIdle(IoSession session, IdleStatus paramIdleStatus) throws Exception {
-		// TODO Auto-generated method stub
 
 	}
+
 
 	@Override
 	public void exceptionCaught(IoSession session, Throwable paramThrowable) throws Exception {
 		if (paramThrowable instanceof NotImplementedException) {
 			session.write(WordPressUtils.toJson(new ReturnDto(-5, "this function has not implemented")));
 			return;
+		}
+
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("session id:" + session.getId(),  paramThrowable);
 		}
 
 		session.write(WordPressUtils.toJson(new ReturnDto(-100, "message format is error")));
@@ -116,7 +121,7 @@ public class GameProtocolHandler implements IoHandler {
 			json = JSONObject.fromObject(message);
 			action = json.getString("action");
 		} catch (Exception e) {
-			LOG.warn("parse json exeception");
+			LOG.warn("sessionID:" + session.getId()+" parse json exeception, message:" + json, e);
 		}
 
 		BaseActionDataDto data = null;
@@ -173,8 +178,14 @@ public class GameProtocolHandler implements IoHandler {
 				Object returnValue = method.invoke(processor, message, model);
 				if (returnValue != null) {
 					jsonSessoin.write(model);
+
+					//this is a comment
+
+
 				} else {
 					//nothing to do
+					
+						
 				}
 				return;
 			}
@@ -187,7 +198,7 @@ public class GameProtocolHandler implements IoHandler {
 		if (ActionNameEnum.validateAction(action)) {
 			return;
 		}
-		throw new RuntimeException("action is not invalidate");
+		throw new RuntimeException("action is not invalidate:" + action);
 
 	}
 
