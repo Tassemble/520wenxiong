@@ -75,6 +75,21 @@ public class MessageSenderHelper {
 	}
 	
 	
+	public static void forwardMessageToOtherClientsInRoom(List<OnlineUserDto> users, Object message) {
+		OnlineUserDto user = GameMemory.LOCAL_USER.get();
+		
+		for (OnlineUserDto u : users) {
+			if (!u.getUsername().equals(user.getUsername())) {
+				if (u.getSession().isConnected()) {
+					u.getSession().write(message);
+				}
+			}
+		}
+	}
+	
+	
+	
+	
 	public static void forwardMessageToOtherClientsInRoom(IoSession session, OnlineUserDto user, Object message) {
 		LOG.info("forward message to other clients");
 		// forward to same room clients

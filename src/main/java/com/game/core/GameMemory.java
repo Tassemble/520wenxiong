@@ -2,15 +2,12 @@ package com.game.core;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.util.ConcurrentHashSet;
 
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.RoomDto;
@@ -18,6 +15,9 @@ import com.wenxiong.utils.WordPressUtils;
 
 
 public class GameMemory {
+	
+	
+	public static final String CONTEXT_NAME = "ctx";
 	
 	static final int MAX_PLAYERS = 5000;
 
@@ -30,6 +30,10 @@ public class GameMemory {
 	public static Map<String, RoomDto> room;
 	
 	public static ExecutorService executor = null;
+	
+	public static Map<String, Object> bizContext;
+	
+	
 	
 	
 	
@@ -46,6 +50,9 @@ public class GameMemory {
 		//key is username , value is user
 		onlineUsers = new ConcurrentHashMap<String, OnlineUserDto>();
 		room = new ConcurrentHashMap<String, RoomDto>();
+		
+		// for biz context
+		bizContext  = new ConcurrentHashMap<String, Object>();
 	}
 	
 	public static IoSession getCurrentSession() {

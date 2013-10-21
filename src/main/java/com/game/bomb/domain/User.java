@@ -21,6 +21,7 @@ public class User {
 	
 	
 	//~ new added
+	Long experience;
 	Integer level;
 	Integer portrait;
 	Integer heartNum;
@@ -32,6 +33,14 @@ public class User {
 	Integer itemInUse2;
 	Integer itemInUse3;
 	
+	
+	@DataProperty(column="experience")
+	public Long getExperience() {
+		return experience;
+	}
+	public void setExperience(Long experience) {
+		this.experience = experience;
+	}
 	
 	
 	@DataProperty(column="level")

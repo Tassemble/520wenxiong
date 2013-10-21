@@ -17,6 +17,7 @@ import com.game.bomb.Dao.UserMetaDao;
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMain;
+import com.game.core.GameMemory;
 import com.wenxiong.blog.dao.BaseTestCase;
 import com.wenxiong.utils.WordPressUtils;
 
@@ -31,6 +32,7 @@ public class GameMainTest extends BaseTestCase {
 	@Test
 	public void testRun() throws IOException {
 
+		GameMemory.bizContext.put("ctx", ctx);
 		IoAcceptor acceptor = (IoAcceptor) ctx.getBean("ioAcceptor");
 		try {
 			while (acceptor.isActive()) {

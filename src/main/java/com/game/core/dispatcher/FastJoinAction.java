@@ -17,6 +17,7 @@ import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
 import com.game.core.dto.RoomDto.TimeoutCallback;
+import com.game.core.logic.RoomLogic;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.ImmutableMap;
 import com.wenxiong.utils.WordPressUtils;
@@ -27,6 +28,10 @@ public class FastJoinAction implements BaseAction{
 
 	@Autowired
 	CellLocker<List<String>>	locker;
+	
+	
+	@Autowired
+	RoomLogic roomLogic;
 	
 	@Override
 	public void doAction(IoSession session, BaseActionDataDto data) {
@@ -60,7 +65,7 @@ public class FastJoinAction implements BaseAction{
 			room.addUserCallback(new TimeoutCallback(user.getUsername(), joinData.getTimeoutInSeconds()));
 			GameMemory.room.put(id, room);
 		} else {
-			room.doUserJoin(user.getUsername());
+			roomLogic.doUserJoin(room, user.getUsername());
 			room.addUserCallback(new TimeoutCallback(user.getUsername(), joinData.getTimeoutInSeconds()));
 		}
 		

@@ -30,6 +30,7 @@ import com.game.core.dto.BaseActionDataDto;
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
+import com.game.core.logic.RoomLogic;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -52,6 +53,9 @@ public class GameProtocolHandler implements IoHandler {
 
 	@Autowired
 	ListableBeanFactory			listableBeanFactory;
+	
+	@Autowired
+	RoomLogic roomLogic;
 
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -76,7 +80,7 @@ public class GameProtocolHandler implements IoHandler {
 		}
 		RoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
 		if (room != null) {
-			room.doUserQuit(user.getUsername());
+			roomLogic.doUserQuit(room, user.getUsername());
 		}
 		GameMemory.onlineUsers.remove(user.getUsername());
 		GameMemory.removeSessionUserByKey(session.getId());

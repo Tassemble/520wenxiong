@@ -1,7 +1,7 @@
 package com.game.core.dto;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -11,10 +11,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 import com.game.core.GameMemory;
 import com.game.core.MessageSenderHelper;
-import com.game.core.dispatcher.BaseAction;
+import com.game.core.logic.RoomLogic;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.wenxiong.utils.WordPressUtils;
@@ -44,6 +45,26 @@ public class RoomDto {
 		executorService = Executors.newFixedThreadPool(playersNum);
 		this.playersNum = playersNum;
 	}
+
+	
+	
+	public void setCntNow(AtomicInteger cntNow) {
+		this.cntNow = cntNow;
+	}
+
+
+
+	public Object getRoomLock() {
+		return roomLock;
+	}
+
+
+
+	public void setRoomLock(Object roomLock) {
+		this.roomLock = roomLock;
+	}
+
+
 
 	public void addUserCallback(Runnable task) {
 		executorService.submit(task);
@@ -124,60 +145,68 @@ public class RoomDto {
 		return cntNow.get() == 0;
 	}
 
-	public void doUserQuit(String username) {
-		OnlineUserDto user = GameMemory.getUserByUsername(username);
-		if (!this.id.equals(user.getRoomId())) {// not in this room
-			return;
-		}
-		IoSession session = GameMemory.getSessionByUsername(username);
-		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
-		ro.setExtAttrs(ImmutableMap.of("user", user));
+//	public void doUserQuit(String username) {
+//		OnlineUserDto user = GameMemory.getUserByUsername(username);
+//		if (!this.id.equals(user.getRoomId())) {// not in this room
+//			return;
+//		}
+//		IoSession session = GameMemory.getSessionByUsername(username);
+//		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
+//		ro.setExtAttrs(ImmutableMap.of("user", user));
+//
+//		MessageSenderHelper.forwardMessageToOtherClientsInRoom(session, user, WordPressUtils.toJson(ro));
+//		
+//		boolean isLastPlayer = false;
+//		synchronized (roomLock) {
+//			//如果是最后一个玩家
+//			if (cntNow.get() == 1) {
+//				isLastPlayer = true;
+//			}
+//			user.setRoomId("");
+//			user.setStatus(OnlineUserDto.STATUS_ONLINE);
+//			getUsers().remove(user);
+//			decreaseCnt();
+//			if (isEmpty()) {
+//				setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
+//			}
+//		}
+//		
+//		if (isLastPlayer) {
+//			Map<String, Object> maps = Maps.newHashMap();
+//			maps.put("action", "win");
+//			maps.put("user", user);
+//			maps.put("code", 200);
+//			session.write(WordPressUtils.toJson(maps));
+//			//UPDATE DB can't autowired
+//		}
+//	}
 
-		// TODO this 产生很多消息信息？
-		MessageSenderHelper.forwardMessageToOtherClientsInRoom(session, user, WordPressUtils.toJson(ro));
-
-		synchronized (roomLock) {
-			user.setRoomId("");
-			user.setStatus(OnlineUserDto.STATUS_ONLINE);
-			getUsers().remove(user);
-			decreaseCnt();
-			if (isEmpty()) {
-				setRoomStatus(RoomDto.ROOM_STATUS_OPEN);
-			}
-		}
-
-	}
-
-	public void doUserJoin(String username) {
-		synchronized (roomLock) {
-			OnlineUserDto user = GameMemory.getUserByUsername(username);
-			increaseCnt();
-			getUsers().add(user);
-			user.setRoomId(getId());
-			user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
-			if (isReadyToStart()) {
-				// start game
-				setRoomStatus(RoomDto.ROOM_STATUS_CLOSED);
-				for (OnlineUserDto userDto : getUsers()) {
-					userDto.setStatus(OnlineUserDto.STATUS_PLAYING);
-				}
-			}
-		}
-	}
 
 	public static class TimeoutCallback implements Runnable {
 
 		int		timeoutInSeconds	= 0;
 		String	userId;
+		RoomLogic roomLogic;
+		
+		
+
+
+
 
 		public TimeoutCallback(String userId, int timeoutInSeconds) {
 			super();
 			this.userId = userId;
 			this.timeoutInSeconds = timeoutInSeconds;
+			ApplicationContext cxt = (ApplicationContext)GameMemory.bizContext.get(GameMemory.CONTEXT_NAME);
+			roomLogic = cxt.getBean(RoomLogic.class);
 		}
 
+		
 		@Override
 		public void run() {
+			
+			
+			
 			try {
 				TimeUnit.SECONDS.sleep(timeoutInSeconds);
 				OnlineUserDto user = GameMemory.getUserByUsername(this.userId);
@@ -189,7 +218,7 @@ public class RoomDto {
 					return;
 				}
 				if (ROOM_STATUS_OPEN.equals(room.getRoomStatus())) {
-					room.doUserQuit(this.userId);
+					roomLogic.doUserQuit(room, this.userId);
 					IoSession session = GameMemory.getSessionByUsername(this.userId);
 					session.write(WordPressUtils.toJson(new ReturnDto(-20, ActionNameEnum.FAST_JOIN.getAction(), "fast-join timeout")));
 				} else {
@@ -199,7 +228,9 @@ public class RoomDto {
 				LOG.error(e.getMessage(), e);
 			}
 		}
-
 	}
+	
+	
+	
 
 }
