@@ -1,17 +1,17 @@
 package com.game.bomb.domain;
 
 import com.netease.framework.dao.sql.annotation.DataProperty;
+import com.wenxiong.blog.commons.domain.BaseDo;
 
 /**
  * @author CHQ
  * @since  1.0.0
  * @date   2013-8-1
  */
-public class User {
+public class User extends BaseDo {
 	
 	
 	//不进行序列化
-	transient  Long id;
 	String username;
 	String nickName;
 	
@@ -32,6 +32,12 @@ public class User {
 	Integer itemInUse1;
 	Integer itemInUse2;
 	Integer itemInUse3;
+	
+	//表示使用中的物品
+	private String  inUse;
+	
+	private Boolean enable;
+	
 	
 	
 	@DataProperty(column="experience")
@@ -123,13 +129,6 @@ public class User {
 	public void setItemInUse3(Integer itemInUse3) {
 		this.itemInUse3 = itemInUse3;
 	}
-	@DataProperty(column="id")
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
 	
 	@DataProperty(column="username")
 	public String getUsername() {
@@ -154,6 +153,26 @@ public class User {
 	public void setMd5Password(String md5Password) {
 		this.md5Password = md5Password;
 	}
+	
+	@DataProperty(column="in_use")
+	public String getInUse() {
+		return inUse;
+	}
+	public void setInUse(String inUse) {
+		this.inUse = inUse;
+	}
+	
+	@DataProperty(column="enable")
+	public Boolean getEnable() {
+		return enable;
+	}
+	public void setEnable(Boolean enable) {
+		this.enable = enable;
+	}
+
+	
+	
+	
 
 	
 	

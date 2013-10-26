@@ -1,4 +1,4 @@
-package com.game.core.dispatcher;
+package com.game.core.bomb.dispatcher;
 
 import java.util.Map;
 

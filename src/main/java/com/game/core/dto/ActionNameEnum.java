@@ -11,7 +11,7 @@ public enum ActionNameEnum {
 	ACTION_GET_FRIENDLIST("getFriendList",BaseActionDataDto.class),
 	ACTION_INVITE("invite",BaseActionDataDto.GameInviteData.class),
 	ACTION_SIGN_UP("signup",BaseActionDataDto.GameSignUpData.class),
-	ACTION_DOWNLOAD_INFO("downloadPlayerInfo",BaseActionDataDto.class),
+	ACTION_DOWNLOAD_INFO("downloadPlayerInfo",null),
 	ACTION_UPLOADINVENTORYITEM_INFO("uploadInventoryItem",null),
 	ACTION_DOWNLOADINVENTORYITEM_INFO("downloadInventoryItem",null),
 	ACTION_UPLOADHEARTS("uploadHearts",null),

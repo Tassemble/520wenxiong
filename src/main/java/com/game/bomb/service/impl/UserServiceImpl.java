@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.game.bomb.Dao.UserDao;
+import com.game.bomb.Dao.UserMeta;
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.wenxiong.blog.commons.dao.BaseDao;
@@ -28,6 +29,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		super.setBaseDao(userDao);
 		this.userDao = userDao;
 	}
+	
 	
 	
 	

@@ -29,10 +29,15 @@ public class OnlineUserDto {
 	Integer itemInUse3;
 	
 	
+	
+	private String action;
+	
+	
 	transient IoSession session;
 	
 	public OnlineUserDto() {}
 	public OnlineUserDto(User user) {
+		this.id = user.getId();
 		this.username = user.getUsername();
 		this.heartNum = user.getHeartNum();
 		this.level = user.getLevel();
@@ -200,6 +205,12 @@ public class OnlineUserDto {
 		} else if (!username.equals(other.username))
 			return false;
 		return true;
+	}
+	public String getAction() {
+		return action;
+	}
+	public void setAction(String action) {
+		this.action = action;
 	}
 	
 	

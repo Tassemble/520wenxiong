@@ -1,4 +1,4 @@
-package com.game.core.logic;
+package com.game.core.bomb.logic;
 
 import java.util.Iterator;
 import java.util.Map;

@@ -15,7 +15,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.game.core.GameMemory;
 import com.game.core.MessageSenderHelper;
-import com.game.core.logic.RoomLogic;
+import com.game.core.bomb.logic.RoomLogic;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.wenxiong.utils.WordPressUtils;

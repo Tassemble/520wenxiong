@@ -24,13 +24,15 @@ import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.ehcache.EhCacheCache;
 
 import com.game.core.action.processor.ActionAnotationProcessor;
-import com.game.core.dispatcher.BaseAction;
+import com.game.core.bomb.auth.AuthIoFilter;
+import com.game.core.bomb.dispatcher.BaseAction;
+import com.game.core.bomb.logic.RoomLogic;
 import com.game.core.dto.ActionNameEnum;
 import com.game.core.dto.BaseActionDataDto;
 import com.game.core.dto.OnlineUserDto;
+import com.game.core.dto.ReturnConstant;
 import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
-import com.game.core.logic.RoomLogic;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -133,7 +135,10 @@ public class GameProtocolHandler implements IoHandler {
 
 		// 正常逻辑
 		validateAction(action);
-
+		
+		
+		//set action
+		GameMemory.getUser().setAction(action);
 		
 		// ~ 提供了两种灵活的处理方式：1. 既能处理长连接的方式，2. 也能处理Request-Response的方式(类似http请求)
 		if (BaseActionDataDto.getClassByAction(action) != null) {
@@ -177,6 +182,16 @@ public class GameProtocolHandler implements IoHandler {
 				ActionAnotationProcessor processor = (ActionAnotationProcessor) valueMapper.get("object");
 				Object returnValue = method.invoke(processor, message, model);
 				if (returnValue != null) {
+					if (returnValue instanceof String) {
+						String value = (String)returnValue;
+						if (ReturnConstant.OK.equals(value)) {
+							Map<String, Object> okMapping = new HashMap<String, Object>();
+							okMapping.put("action", action);
+							okMapping.put("code", ReturnConstant.CODE_200);
+							jsonSessoin.write(okMapping);
+							return;
+						}
+					}
 					jsonSessoin.write(model);
 
 					//this is a comment

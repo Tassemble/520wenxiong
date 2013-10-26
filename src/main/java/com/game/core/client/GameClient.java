@@ -1,4 +1,4 @@
-package com.game.client;
+package com.game.core.client;
 
 import java.net.InetSocketAddress;
 

@@ -1,17 +1,17 @@
-package com.game.core.dispatcher;
+package com.game.core.bomb.dispatcher;
 
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.game.core.GameMemory;
+import com.game.core.bomb.logic.RoomLogic;
 import com.game.core.dto.ActionNameEnum;
 import com.game.core.dto.BaseActionDataDto;
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.RoomDto;
 import com.game.core.exception.ActionFailedException;
 import com.game.core.exception.NoAuthenticationException;
-import com.game.core.logic.RoomLogic;
 
 
 

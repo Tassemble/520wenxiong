@@ -38,9 +38,9 @@ public class GameMemory {
 	
 	
 	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
-	static ThreadLocal<IoSession> LOCAL_SESSION = new ThreadLocal<IoSession>();
+	public static ThreadLocal<IoSession> LOCAL_SESSION = new ThreadLocal<IoSession>();
 	
-	static ThreadLocal<OnlineUserDto> LOCAL_USER = new ThreadLocal<OnlineUserDto>();
+	public static ThreadLocal<OnlineUserDto> LOCAL_USER = new ThreadLocal<OnlineUserDto>();
 	
 	static {
 		//用于用于超时通知
@@ -72,6 +72,10 @@ public class GameMemory {
 	
 	public static OnlineUserDto getUser() {
 		return LOCAL_USER.get();
+	}
+	
+	public static void setUser(OnlineUserDto user) {
+		LOCAL_USER.set(user);
 	}
 	
 	public static OnlineUserDto getOnlineUserBySessionId(Long id) {

@@ -1,4 +1,4 @@
-package com.game.core;
+package com.game.core.bomb.auth;
 
 import java.util.List;
 
@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
+import com.game.core.GameMemory;
 import com.game.core.dto.ActionNameEnum;
 import com.game.core.dto.BaseActionDataDto;
 import com.game.core.dto.BaseActionDataDto.LoginData;
@@ -104,7 +105,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 					LOG.info("validate ok for username:" + dto.getUsername());
 					GameMemory.onlineUsers.put(dto.getUsername(), dto);
 					GameMemory.sessionUsers.put(session.getId(), dto);
-					GameMemory.LOCAL_USER.set(user);
+					GameMemory.setUser(user);
 
 					session.write(WordPressUtils.toJson(new ReturnDto(200, action, "logon successfully")));
 					return;

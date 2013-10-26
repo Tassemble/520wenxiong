@@ -11,12 +11,10 @@ import org.apache.mina.core.service.IoAcceptor;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.Rollback;
 
 import com.game.bomb.Dao.UserMetaDao;
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
-import com.game.core.GameMain;
 import com.game.core.GameMemory;
 import com.wenxiong.blog.dao.BaseTestCase;
 import com.wenxiong.utils.WordPressUtils;
