@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import com.game.bomb.domain.User;
 import com.game.core.exception.NoSuchActionException;
 import com.google.gson.Gson;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 public class BaseActionDataDto {
 
@@ -200,7 +200,7 @@ public class BaseActionDataDto {
 		// ForwardData data =
 		// g.fromJson("{\"action\":\"forward\", \"friendList\":[\"a\", \"b\", \"c\"], \"data\":\"hello i am here\"}",
 		// JsonDto.ForwardData.class);
-		BaseActionDataDto json = (BaseActionDataDto) WordPressUtils.getFromJson(
+		BaseActionDataDto json = (BaseActionDataDto) GsonUtils.getFromJson(
 				"{\"action\":\"getFriendList\"}",
 				getClassByAction("getFriendList"));
 		System.out.println("action:" + json.getAction());

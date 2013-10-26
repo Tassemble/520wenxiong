@@ -18,7 +18,7 @@ import com.game.core.MessageSenderHelper;
 import com.game.core.bomb.logic.RoomLogic;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 
 /**
@@ -220,7 +220,7 @@ public class RoomDto {
 				if (ROOM_STATUS_OPEN.equals(room.getRoomStatus())) {
 					roomLogic.doUserQuit(room, this.userId);
 					IoSession session = GameMemory.getSessionByUsername(this.userId);
-					session.write(WordPressUtils.toJson(new ReturnDto(-20, ActionNameEnum.FAST_JOIN.getAction(), "fast-join timeout")));
+					session.write(new ReturnDto(-20, ActionNameEnum.FAST_JOIN.getAction(), "fast-join timeout"));
 				} else {
 				}
 				// LOG.info("game is started");

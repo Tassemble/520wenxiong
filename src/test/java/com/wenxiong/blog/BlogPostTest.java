@@ -23,7 +23,7 @@ import com.wenxiong.blog.dto.TmallCommentsDto;
 import com.wenxiong.blog.service.WPPostService;
 import com.wenxiong.crawl.taobao.TmallCrawler;
 import com.wenxiong.utils.TmallCrawlerUtils;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 public class BlogPostTest extends BaseTestCase {
 
@@ -206,7 +206,7 @@ public class BlogPostTest extends BaseTestCase {
 
 	@Test
 	public void getPrice() {
-		WordPressUtils.printJson(tmallCrawler.getTmallProductDto("http://detail.tmall.com/item.htm?id=12738735995"));
+		GsonUtils.printJson(tmallCrawler.getTmallProductDto("http://detail.tmall.com/item.htm?id=12738735995"));
 	}
 
 }

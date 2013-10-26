@@ -13,7 +13,7 @@ import com.wenxiong.blog.commons.utils.text.JsonUtils;
 
 
 
-public class WordPressUtils {
+public class GsonUtils {
 	
 	
 	private static Gson						g	= new GsonBuilder().serializeNulls().create();

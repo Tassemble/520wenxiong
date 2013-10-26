@@ -1,5 +1,6 @@
 package com.game.core.bomb.dispatcher;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -16,7 +17,7 @@ import com.game.core.dto.BaseActionDataDto;
 import com.game.core.dto.BaseActionDataDto.GameSignUpData;
 import com.game.core.dto.ReturnDto;
 import com.game.core.exception.ActionFailedException;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 @Component
 public class SignUpAction implements BaseAction{
@@ -33,23 +34,30 @@ public class SignUpAction implements BaseAction{
 		validate(data);
 		
 		User query = new User();
-		query.setMd5Password(DigestUtils.md5Hex(data.getPassword()));
 		query.setUsername(data.getUsername());
 		List<User> users = userService.getByDomainObjectSelective(query);
 		if (!CollectionUtils.isEmpty(users)) {
 			session.write(new ReturnDto(-1, this.getAction(), "user existed"));
 			return;
 		}
-		query.setId(userService.getId());
-		query.setNickName(data.getNickname());
-		query.setHeartNum(0);
-		query.setLevel(1);
-		query.setLoserNum(0);
-		query.setPortrait(0);
-		query.setRunawayNum(0);
-		query.setVictoryNum(0);
+		
+		User newItem = query;
+		Date now = new Date();
+		
+		
+		newItem.setMd5Password(DigestUtils.md5Hex(data.getPassword()));
+		newItem.setId(userService.getId());
+		newItem.setNickName(data.getNickname());
+		newItem.setHeartNum(0);
+		newItem.setLevel(1);
+		newItem.setLoserNum(0);
+		newItem.setPortrait(0);
+		newItem.setRunawayNum(0);
+		newItem.setVictoryNum(0);
+		newItem.setGmtCreate(now);
+		newItem.setGmtModified(now);
 		userService.add(query);
-		session.write(WordPressUtils.toJson(new ReturnDto(200, this.getAction(), "signup successfully")));
+		session.write(new ReturnDto(200, this.getAction(), "signup successfully"));
 		return;
 	}
 

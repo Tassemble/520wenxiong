@@ -58,7 +58,7 @@ public class GameMain {
 		acceptor.getFilterChain().addLast("codec",
 				new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"))));
 
-		acceptor.setHandler(new GameProtocolHandler());
+		acceptor.setHandler(new GameProtocolHandlerProxy());
 		acceptor.getSessionConfig().setReadBufferSize(2048);
 		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 10);
 		acceptor.bind(new InetSocketAddress(8888));

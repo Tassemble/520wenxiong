@@ -36,7 +36,7 @@ import com.wenxiong.utils.HttpClientUtils;
 import com.wenxiong.utils.HttpDataProviderCandidate;
 import com.wenxiong.utils.ProductScoreUtils;
 import com.wenxiong.utils.TmallCrawlerUtils;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 @Service("wpPostService")
 public class WPPostServiceImpl extends BaseServiceImpl<WPPostDao, WPPost> implements WPPostService {
@@ -285,9 +285,9 @@ public class WPPostServiceImpl extends BaseServiceImpl<WPPostDao, WPPost> implem
 					
 					String html = HttpClientUtils.getHtmlByGetMethod(
 							getWPPage,
-							HttpDataProviderCandidate.getHomePage(WordPressUtils.origin
+							HttpDataProviderCandidate.getHomePage(GsonUtils.origin
 									+ "/wp-admin/post.php?post=" + postId + "&action=edit", HttpDataProviderCandidate.cookie));
-					String nonce = WordPressUtils.getUploadFileNonce(html);
+					String nonce = GsonUtils.getUploadFileNonce(html);
 					String result = HttpClientUtils.getHtmlByPostMethod(
 							postClient,
 							HttpDataProviderCandidate.getPostPictureData(firstPicture,
@@ -342,9 +342,9 @@ public class WPPostServiceImpl extends BaseServiceImpl<WPPostDao, WPPost> implem
 		resetCookie(httpClient);
 		String html = HttpClientUtils.getHtmlByGetMethod(
 				new DefaultHttpClient(),
-				HttpDataProviderCandidate.getHomePage(WordPressUtils.origin
+				HttpDataProviderCandidate.getHomePage(GsonUtils.origin
 						+ "/wp-admin/post.php?post=1000005&action=edit", HttpDataProviderCandidate.cookie));
-		String nonce = WordPressUtils.getUploadFileNonce(html);
+		String nonce = GsonUtils.getUploadFileNonce(html);
 		System.out.println(nonce);
 //		String result = HttpClientUtils
 //				.getHtmlByPostMethod(

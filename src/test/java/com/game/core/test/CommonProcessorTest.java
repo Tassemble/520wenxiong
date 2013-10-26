@@ -13,7 +13,7 @@ import com.game.core.GameMemory;
 import com.game.core.action.bomb.CommonProcessor;
 import com.game.core.action.processor.PlayerInfoProcessorHelper;
 import com.wenxiong.blog.dao.BaseTestCase;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 public class CommonProcessorTest extends BaseTestCase{
 
@@ -37,17 +37,17 @@ public class CommonProcessorTest extends BaseTestCase{
 	public void uploadPlayerInfoTest() throws IOException {
 		Properties prop = readProperties();
 		setOnlineUser(3L);
-		GameMemory.getUser().setAction("uploadPlayerInfo");
+		GameMemory.LOCAL_SESSION_CONTEXT.get().setAction("uploadPlayerInfo");
 		commonProcessor.uploadPlayerInfo(prop.get("uploadPlayerInfo"), new HashMap<String, Object>());
 	}
 	
 	@Test
 	public void downloadPlayerInfoTest() throws Exception {
 		setOnlineUser(3L);
-		GameMemory.getUser().setAction("downloadPlayerInfo");
+		GameMemory.LOCAL_SESSION_CONTEXT.get().setAction("downloadPlayerInfo");
 		Map map = new HashMap<String, Object>();
 		playerInfoProcessorHelper.innerDownloadPlayerInfo(map);
 		
-		System.out.println(WordPressUtils.toJson(map));
+		System.out.println(GsonUtils.toJson(map));
 	}
 }

@@ -1,4 +1,4 @@
-package com.game.core;
+package com.game.core.bomb;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -13,16 +13,16 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache.ValueWrapper;
-import org.springframework.cache.ehcache.EhCacheCache;
+import org.springframework.stereotype.Component;
 
+import com.game.core.GameMemory;
+import com.game.core.MessageSenderHelper;
 import com.game.core.action.processor.ActionAnotationProcessor;
 import com.game.core.bomb.auth.AuthIoFilter;
 import com.game.core.bomb.dispatcher.BaseAction;
@@ -36,7 +36,7 @@ import com.game.core.dto.RoomDto;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 /**
  * 业务处理点入口，除了登录的action在这个类{@link AuthIoFilter}认证之外，其他
@@ -46,9 +46,10 @@ import com.wenxiong.utils.WordPressUtils;
  * @since 1.0.0
  * @date 2013-7-28
  */
-public class GameProtocolHandler implements IoHandler {
+@Component
+public class BombMessageBizHandler implements BombMessageHandler{
 
-	private static final Logger	LOG	= LoggerFactory.getLogger(GameProtocolHandler.class);
+	private static final Logger	LOG	= LoggerFactory.getLogger(BombMessageBizHandler.class);
 
 	@Autowired
 	CellLocker<List<String>>	locker;
@@ -61,7 +62,7 @@ public class GameProtocolHandler implements IoHandler {
 
 	@Override
 	public void sessionCreated(IoSession session) throws Exception {
-
+		
 	}
 
 	@Override
@@ -97,7 +98,7 @@ public class GameProtocolHandler implements IoHandler {
 	@Override
 	public void exceptionCaught(IoSession session, Throwable paramThrowable) throws Exception {
 		if (paramThrowable instanceof NotImplementedException) {
-			session.write(WordPressUtils.toJson(new ReturnDto(-5, "this function has not implemented")));
+			session.write(new ReturnDto(-5, "this function has not implemented"));
 			return;
 		}
 
@@ -106,13 +107,12 @@ public class GameProtocolHandler implements IoHandler {
 			LOG.debug("session id:" + session.getId(),  paramThrowable);
 		}
 
-		session.write(WordPressUtils.toJson(new ReturnDto(-100, "message format is error")));
+		session.write(new ReturnDto(-100, paramThrowable.getMessage()));
 		return;
 	}
 
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
-		JsonSessionWrapper jsonSessoin = new JsonSessionWrapper(session);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("receive message from session:" + session.getId() + ", message:" + message.toString());
 		}
@@ -136,13 +136,12 @@ public class GameProtocolHandler implements IoHandler {
 		// 正常逻辑
 		validateAction(action);
 		
-		
 		//set action
-		GameMemory.getUser().setAction(action);
+		GameMemory.LOCAL_SESSION_CONTEXT.get().setAction(action);
 		
 		// ~ 提供了两种灵活的处理方式：1. 既能处理长连接的方式，2. 也能处理Request-Response的方式(类似http请求)
 		if (BaseActionDataDto.getClassByAction(action) != null) {
-			data = (BaseActionDataDto) WordPressUtils.getFromJson(message.toString(),
+			data = (BaseActionDataDto) GsonUtils.getFromJson(message.toString(),
 					BaseActionDataDto.getClassByAction(action));
 
 			// 特殊输出，如果是单纯字节的话========================end
@@ -168,7 +167,7 @@ public class GameProtocolHandler implements IoHandler {
 				}
 				ReturnDto ret = new ReturnDto(200, action, action);
 				ret.setResult(users);
-				session.write(WordPressUtils.toJson(ret));
+				session.write(GsonUtils.toJson(ret));
 				return;
 			}
 		} else {
@@ -188,15 +187,12 @@ public class GameProtocolHandler implements IoHandler {
 							Map<String, Object> okMapping = new HashMap<String, Object>();
 							okMapping.put("action", action);
 							okMapping.put("code", ReturnConstant.CODE_200);
-							jsonSessoin.write(okMapping);
+							session.write(okMapping);
 							return;
 						}
 					}
-					jsonSessoin.write(model);
-
+					session.write(model);
 					//this is a comment
-
-
 				} else {
 					//nothing to do
 					

@@ -30,9 +30,6 @@ public class OnlineUserDto {
 	
 	
 	
-	private String action;
-	
-	
 	transient IoSession session;
 	
 	public OnlineUserDto() {}
@@ -206,12 +203,7 @@ public class OnlineUserDto {
 			return false;
 		return true;
 	}
-	public String getAction() {
-		return action;
-	}
-	public void setAction(String action) {
-		this.action = action;
-	}
+
 	
 	
 	

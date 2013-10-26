@@ -38,7 +38,7 @@ import com.game.core.exception.MessageNullException;
 import com.game.core.exception.NoAuthenticationException;
 import com.google.common.collect.Lists;
 import com.wenxiong.blog.commons.utils.collection.PropertyExtractUtils;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 @Component
 public class CommonProcessor implements ActionAnotationProcessor {
@@ -65,7 +65,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	public void downloadPlayerInfo(Object message, Map<String, Object> map) throws Exception {
 		playerInfoProcessorHelper.innerDownloadPlayerInfo(map);
 		IoSession session = GameMemory.getCurrentSession();
-		session.write(WordPressUtils.toJson(map));
+		session.write(map);
 	}
 
 	@ActionAnnotation(action = "uploadPlayerInfo")
@@ -87,12 +87,12 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		User update = new User();
 
 		String nickName = json.getString("nickname");
-		if (!StringUtils.isBlank(nickName)) {
-			if (isNickNameExist(nickName)) {
-				throw new ActionFailedException(ExceptionConstant.NICKNAME_EXIST_CODE, "nickname exist",
-						onlineUser.getAction());
-			}
-		}
+//		if (!StringUtils.isBlank(nickName)) {
+//			if (isNickNameExist(nickName)) {
+//				throw new ActionFailedException(ExceptionConstant.NICKNAME_EXIST_CODE, "nickname exist",
+//						onlineUser.getAction());
+//			}
+//		}
 		update.setNickName(nickName);
 		update.setGmtModified(new Date());
 		update.setInUse(json.getString("in_use"));
@@ -184,7 +184,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 				return map;
 			}
 			json.discard(action);
-			String updatedValue = WordPressUtils.toJson(json);
+			String updatedValue = GsonUtils.toJson(json);
 
 			OnlineUserDto onlineUser = GameMemory.getUser();
 			UserMeta userMeta = userMetaDao.getFirstOneByCondition("user_id = ? and user_key = ?",

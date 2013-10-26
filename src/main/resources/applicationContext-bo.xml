@@ -32,7 +32,7 @@
 
 
 
-	<bean id="gameProtocolHandler" class="com.game.core.GameProtocolHandler"></bean>
+	<bean id="gameProtocolHandler" class="com.game.core.GameProtocolHandlerProxy"></bean>
 	<bean id="protocolCodecFilter" class="org.apache.mina.filter.codec.ProtocolCodecFilter">
 		<constructor-arg>
 			<bean class="com.game.core.GameTextCodecFilter" />
@@ -40,7 +40,7 @@
 	</bean>
 
 	<bean id="loggingFilter" class="org.apache.mina.filter.logging.LoggingFilter" />
-	<bean id="authIoFilter" class="com.game.core.AuthIoFilter" />
+	<bean id="authIoFilter" class="com.game.core.bomb.auth.AuthIoFilter" />
 	<!-- The filter chain. -->
 	<bean id="filterChainBuilder"
 		class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">

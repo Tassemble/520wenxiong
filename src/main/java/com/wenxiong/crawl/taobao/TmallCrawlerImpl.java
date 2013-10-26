@@ -52,7 +52,7 @@ import com.wenxiong.utils.HttpClientUtils;
 import com.wenxiong.utils.HttpDataProviderCandidate;
 import com.wenxiong.utils.ProductScoreUtils;
 import com.wenxiong.utils.TmallCrawlerUtils;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 @Component("tmallCrawler")
 public class TmallCrawlerImpl implements TmallCrawler {
@@ -196,8 +196,8 @@ public class TmallCrawlerImpl implements TmallCrawler {
 			}
 			comment.setCommentContent(tcomment.getString("rateContent"));
 			comment.setCommentAuthor(tcomment.getString("displayUserNick"));
-			comment.setCommentDate(new Timestamp(WordPressUtils.parseTime(tcomment.getString("rateDate"))));
-			comment.setCommentDateGmt(new Timestamp(WordPressUtils.parseTime(tcomment.getString("rateDate"))));
+			comment.setCommentDate(new Timestamp(GsonUtils.parseTime(tcomment.getString("rateDate"))));
+			comment.setCommentDateGmt(new Timestamp(GsonUtils.parseTime(tcomment.getString("rateDate"))));
 			comment.setCommentType(Comment.TYPE_TMALL);
 			comments.add(comment);
 		}
@@ -317,7 +317,7 @@ public class TmallCrawlerImpl implements TmallCrawler {
 			JSONObject jsonObject = JSONObject.fromObject(json);
 			String tagClouds = jsonObject.getJSONObject("tags").getString("tagClouds");
 
-			List<ProductEvaluationDto> dtos = WordPressUtils.fromJson(tagClouds,
+			List<ProductEvaluationDto> dtos = GsonUtils.fromJson(tagClouds,
 					new TypeToken<List<ProductEvaluationDto>>() {
 					}.getType());
 			map.put(ProductEvaluationDto.TAG_ALL_PRODUCT_EVALUATION, dtos);
@@ -329,7 +329,7 @@ public class TmallCrawlerImpl implements TmallCrawler {
 			for (int i = 0; i < jsonArray.size(); i++) {
 				JSONObject object = jsonArray.getJSONObject(i);
 				if ("聚拢效果".equals(object.getString("dimenName"))) {
-					List<GatherEffect> effects = WordPressUtils.fromJson(object.getString("tagScaleList"),
+					List<GatherEffect> effects = GsonUtils.fromJson(object.getString("tagScaleList"),
 							new TypeToken<List<GatherEffect>>() {
 							}.getType());
 					map.put(GatherEffect.TAG_GATHER, effects);
@@ -444,6 +444,6 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		isMock = true;
 		TmallCrawlerImpl crawlerImpl = new TmallCrawlerImpl();
 		List<String> ids = crawlerImpl.searchWithPhases("文胸 薄款", 1);
-		WordPressUtils.printJson(ids);
+		GsonUtils.printJson(ids);
 	}
 }

@@ -1,4 +1,4 @@
-package com.game.core.client;
+package com.game.core.bomb.client;
 
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IdleStatus;

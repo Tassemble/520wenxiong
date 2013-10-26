@@ -17,7 +17,7 @@ import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.wenxiong.blog.dao.BaseTestCase;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 public class GameMainTest extends BaseTestCase {
 
@@ -62,7 +62,7 @@ public class GameMainTest extends BaseTestCase {
 	@Test
 	public void testDecodeMsg() {
 		System.out
-				.println(WordPressUtils
+				.println(GsonUtils
 						.toJson("{\"action\":\"forward\",\"code\":200,\"message\":\"AQAAAGxqZW1oamVsZmZmZWxkZGZmZWVobW1nbWVtZGZobWxpbGRmZGtkZWVnaGZoZGtsZWxsZWVnamVtZmpkZG1sZW1qbW1pZm1nZmVtZmlkZWVlbGdqZWhmbWZlbGhmZm1qZm1laGZsZ2loaGtnZ2lsZGRkZmxtZWdkaGhmZW1kaGZnZW1oZmRrZWRqZGZtbG1tZ2xsZW1nZWZpbGVlZGxoZWhnbGxlaWhkZWs=\"}"));
 	}
 

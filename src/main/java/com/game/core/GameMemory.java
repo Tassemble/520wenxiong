@@ -9,9 +9,10 @@ import java.util.concurrent.Executors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
 
+import com.game.core.dto.GameSessionContext;
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.RoomDto;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 
 public class GameMemory {
@@ -35,12 +36,8 @@ public class GameMemory {
 	
 	
 	
-	
-	
 	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
-	public static ThreadLocal<IoSession> LOCAL_SESSION = new ThreadLocal<IoSession>();
-	
-	public static ThreadLocal<OnlineUserDto> LOCAL_USER = new ThreadLocal<OnlineUserDto>();
+	public static ThreadLocal<GameSessionContext> LOCAL_SESSION_CONTEXT = new ThreadLocal<GameSessionContext>();
 	
 	static {
 		//用于用于超时通知
@@ -56,12 +53,11 @@ public class GameMemory {
 	}
 	
 	public static IoSession getCurrentSession() {
-		return LOCAL_SESSION.get();
+		return LOCAL_SESSION_CONTEXT.get().getSession();
 	}
 	
 	public static void write(Object message) {
-		String strMessage = WordPressUtils.toJson(message);
-		LOCAL_SESSION.get().write(strMessage);
+		LOCAL_SESSION_CONTEXT.get().getSession().write(message);
 	}
 	
 	
@@ -71,11 +67,11 @@ public class GameMemory {
 	
 	
 	public static OnlineUserDto getUser() {
-		return LOCAL_USER.get();
+		return LOCAL_SESSION_CONTEXT.get().getOnlineUser();
 	}
 	
 	public static void setUser(OnlineUserDto user) {
-		LOCAL_USER.set(user);
+		LOCAL_SESSION_CONTEXT.get().setOnlineUser(user);
 	}
 	
 	public static OnlineUserDto getOnlineUserBySessionId(Long id) {

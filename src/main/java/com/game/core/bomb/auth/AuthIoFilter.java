@@ -16,12 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
+import com.game.core.JsonSessionWrapper;
 import com.game.core.dto.ActionNameEnum;
 import com.game.core.dto.BaseActionDataDto;
+import com.game.core.dto.GameSessionContext;
 import com.game.core.dto.BaseActionDataDto.LoginData;
 import com.game.core.dto.OnlineUserDto;
 import com.game.core.dto.ReturnDto;
-import com.wenxiong.utils.WordPressUtils;
+import com.wenxiong.utils.GsonUtils;
 
 /**
  * 用户的登录认证在filter中，同时，由于decode的操作不一定一直都是同一线程，但是顺序肯定是
@@ -50,7 +52,12 @@ public class AuthIoFilter extends IoFilterAdapter {
 	@Override
 	public void messageReceived(NextFilter nextFilter, IoSession session, Object message) throws Exception {
 		try {
-			GameMemory.LOCAL_SESSION.set(session);
+			
+			GameSessionContext context = new GameSessionContext();
+			JsonSessionWrapper jsonSessoin = new JsonSessionWrapper(session);
+			context.setSession(jsonSessoin);
+			GameMemory.LOCAL_SESSION_CONTEXT.set(context);
+			
 			// 特殊输出，如果是单纯字节的话========================start
 			JSONObject json = null;
 			String action = null;
@@ -75,11 +82,11 @@ public class AuthIoFilter extends IoFilterAdapter {
 				
 				// is login?
 				if (StringUtils.isBlank(action) || !action.equals(ActionNameEnum.ACTION_LOGIN.getAction())) {
-					session.write(WordPressUtils.toJson(new ReturnDto(403, action, "no authentication")));
+					session.write(GsonUtils.toJson(new ReturnDto(403, action, "no authentication")));
 					return;
 				}
 
-				LoginData loginData = (LoginData) WordPressUtils.getFromJson(message.toString(),
+				LoginData loginData = (LoginData) GsonUtils.getFromJson(message.toString(),
 						BaseActionDataDto.getClassByAction(action));
 
 				OnlineUserDto dto = validateLogin(loginData);
@@ -107,29 +114,28 @@ public class AuthIoFilter extends IoFilterAdapter {
 					GameMemory.sessionUsers.put(session.getId(), dto);
 					GameMemory.setUser(user);
 
-					session.write(WordPressUtils.toJson(new ReturnDto(200, action, "logon successfully")));
+					session.write(GsonUtils.toJson(new ReturnDto(200, action, "logon successfully")));
 					return;
 				}
 
-				session.write(WordPressUtils.toJson(new ReturnDto(-1, action, "logon failed")));
+				session.write(GsonUtils.toJson(new ReturnDto(-1, action, "logon failed")));
 				return;
 
 			} else {
 
 				if (ActionNameEnum.ACTION_LOGIN.getAction().equals(action)) {
 					//如果用户
-					session.write(WordPressUtils.toJson(new ReturnDto(200, action, "you have already logon")));
+					session.write(GsonUtils.toJson(new ReturnDto(200, action, "you have already logon")));
 					return;
 				}
 
-				GameMemory.LOCAL_USER.set(user);
+				GameMemory.LOCAL_SESSION_CONTEXT.get().setOnlineUser(user);
 			}
 
 			super.messageReceived(nextFilter, session, message);
 
 		} finally {
-			GameMemory.LOCAL_SESSION.remove();
-			GameMemory.LOCAL_USER.remove();
+			GameMemory.LOCAL_SESSION_CONTEXT.remove();
 		}
 
 	}

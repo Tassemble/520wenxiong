@@ -1,6 +1,5 @@
 package com.game.core.bomb.logic;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.mina.core.session.IoSession;
@@ -17,7 +16,6 @@ import com.game.core.dto.ReturnDto;
 import com.game.core.dto.RoomDto;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.wenxiong.utils.WordPressUtils;
 
 @Component
 public class RoomLogic {
@@ -51,7 +49,7 @@ public class RoomLogic {
 		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
 		ro.setExtAttrs(ImmutableMap.of("user", user));
 
-		MessageSenderHelper.forwardMessageToOtherClientsInRoom(session, user, WordPressUtils.toJson(ro));
+		MessageSenderHelper.forwardMessageToOtherClientsInRoom(session, user, ro);
 		
 		boolean isLastPlayer = false;
 		synchronized (room.getRoomLock()) {
@@ -76,12 +74,12 @@ public class RoomLogic {
 			maps.put("action", "win");
 			maps.put("user", user);
 			maps.put("code", 200);
-			session.write(WordPressUtils.toJson(maps));
+			session.write(maps);
 			
 			User update = new User();
 			update.setId(user.getId());
 			update.setLevel(user.getLevel());
-			update.setVictoryNum(user.getVictoryNum());
+			update.setVictoryNum(user.getVictoryNum() + 1);
 			userDao.updateSelectiveById(update);
 		}
 	}
