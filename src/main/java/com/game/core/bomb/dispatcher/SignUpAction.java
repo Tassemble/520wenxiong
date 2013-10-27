@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
-import com.game.core.dto.ActionNameEnum;
-import com.game.core.dto.BaseActionDataDto;
-import com.game.core.dto.BaseActionDataDto.GameSignUpData;
-import com.game.core.dto.ReturnDto;
+import com.game.core.bomb.dto.ActionNameEnum;
+import com.game.core.bomb.dto.BaseActionDataDto;
+import com.game.core.bomb.dto.ReturnDto;
+import com.game.core.bomb.dto.BaseActionDataDto.GameSignUpData;
 import com.game.core.exception.ActionFailedException;
 import com.wenxiong.utils.GsonUtils;
 

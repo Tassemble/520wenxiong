@@ -1,4 +1,4 @@
-package com.game.core.dto;
+package com.game.core.bomb.dto;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.game.core.dto;
+package com.game.core.bomb.dto;
 
 public enum ActionNameEnum {
 	FAST_JOIN("fast-join", BaseActionDataDto.FastJoinData.class), 

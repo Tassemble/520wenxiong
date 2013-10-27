@@ -1,10 +1,10 @@
 package com.game.core.exception;
 
-public class MessageNullException extends RuntimeException{
+public class MessageNullException extends BombException{
 
 	public MessageNullException(String string) {
 		// TODO Auto-generated constructor stub
-		super(string);
+		super(ExceptionConstant.MESSAGE_IS_NULL, string);
 	}
 
 	/**

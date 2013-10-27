@@ -9,9 +9,9 @@ import java.util.concurrent.Executors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
 
-import com.game.core.dto.GameSessionContext;
-import com.game.core.dto.OnlineUserDto;
-import com.game.core.dto.RoomDto;
+import com.game.core.bomb.dto.GameSessionContext;
+import com.game.core.bomb.dto.OnlineUserDto;
+import com.game.core.bomb.play.dto.PlayRoomDto;
 import com.wenxiong.utils.GsonUtils;
 
 
@@ -28,7 +28,7 @@ public class GameMemory {
 	
 	public static Map<String, Object> actionMapping = new HashMap<String, Object>();
 	
-	public static Map<String, RoomDto> room;
+	public static Map<String, PlayRoomDto> room;
 	
 	public static ExecutorService executor = null;
 	
@@ -46,7 +46,7 @@ public class GameMemory {
 		sessionUsers = new ConcurrentHashMap<Long, OnlineUserDto>();
 		//key is username , value is user
 		onlineUsers = new ConcurrentHashMap<String, OnlineUserDto>();
-		room = new ConcurrentHashMap<String, RoomDto>();
+		room = new ConcurrentHashMap<String, PlayRoomDto>();
 		
 		// for biz context
 		bizContext  = new ConcurrentHashMap<String, Object>();
@@ -78,7 +78,7 @@ public class GameMemory {
 		return sessionUsers.get(id);
 	}
 	
-	public static RoomDto getRoomByRoomId(String id) {
+	public static PlayRoomDto getRoomByRoomId(String id) {
 		if (StringUtils.isBlank(id)) {
 			return null;
 		}
@@ -109,7 +109,7 @@ public class GameMemory {
 	}
 
 
-	public static Map<String, RoomDto> getRoom() {
+	public static Map<String, PlayRoomDto> getRoom() {
 		return room;
 	}
 	

@@ -11,4 +11,21 @@ public class ExceptionConstant {
 	
 	
 	public static final int NICKNAME_EXIST_CODE = -102;
+	
+	
+	//游戏已经开始异常
+	public static final int GAME_START_EXCEPTION = -103;
+	
+	
+	
+	//消息为空异常
+	public static final int MESSAGE_IS_NULL = -104;
+	
+	
+	//房间创建失败
+	public static final int ROOM_CREATE_FAILED = -105;
+	
+	//加入房间失败
+	public static final int JOIN_ROOM_FAILED = -106;
+		
 }

@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.game.bomb.domain.User;
 import com.game.core.GameMemory;
-import com.game.core.dto.OnlineUserDto;
+import com.game.core.bomb.dto.OnlineUserDto;
 
 /**
  * 需要具备如下属性： 玩家昵称（String) 玩家ID（String) 用户状态（离线，在线，游戏中）（String） 用户头像（unsigned
@@ -46,7 +47,11 @@ public class MobileUserDto {
 		this.nickName = user.getNickName();
 		this.portrait = user.getPortrait();
 		this.level = user.getLevel();
-		int total = user.getVictoryNum() + user.getLoserNum() + user.getRunawayNum();
+		int victoryNum = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
+		int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
+		int runawayNum = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
+		
+		int total =  victoryNum + loseNum + runawayNum;
 		if (total == 0) {
 			this.win = 0.0f;
 			this.runaway = 0.0f;
@@ -55,6 +60,33 @@ public class MobileUserDto {
 			this.runaway = (float)user.getRunawayNum()/(float)(total);
 		}
 	}
+	
+
+	@SuppressWarnings("unchecked")
+	public MobileUserDto(OnlineUserDto user) throws Exception {
+		this.id = user.getId();
+		this.username = user.getUsername();
+		this.nickName = user.getNickname();
+		this.portrait = user.getPortrait();
+		this.level = user.getLevel();
+		int victoryNum = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
+		int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
+		int runawayNum = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
+		int total = victoryNum + loseNum + runawayNum;
+		if (total == 0) {
+			this.win = 0.0f;
+			this.runaway = 0.0f;
+		} else {
+			this.win = (float)user.getVictoryNum() / (float)(total);
+			this.runaway = (float)user.getRunawayNum()/(float)(total);
+		}
+		this.status = user.getStatus();
+		if (!StringUtils.isBlank(user.getInUse())) {
+			this.inUse = new ObjectMapper().readValue(user.getInUse(), HashMap.class);
+		}
+	}
+	
+	
 	
 	
 	@SuppressWarnings("unchecked")
@@ -68,9 +100,14 @@ public class MobileUserDto {
 		mobData.setStatus(onlineUser.getStatus());
 		mobData.setInUse(new ObjectMapper().readValue(user.getInUse(), HashMap.class));
 		
-		
 		return mobData;
 	}
+	
+	
+	
+	
+	
+	
 
 	public Long getId() {
 		return id;

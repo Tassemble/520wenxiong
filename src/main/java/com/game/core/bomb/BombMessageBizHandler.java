@@ -22,17 +22,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.game.core.GameMemory;
+import com.game.core.JsonSessionWrapper;
 import com.game.core.MessageSenderHelper;
 import com.game.core.action.processor.ActionAnotationProcessor;
 import com.game.core.bomb.auth.AuthIoFilter;
 import com.game.core.bomb.dispatcher.BaseAction;
+import com.game.core.bomb.dto.ActionNameEnum;
+import com.game.core.bomb.dto.BaseActionDataDto;
+import com.game.core.bomb.dto.OnlineUserDto;
+import com.game.core.bomb.dto.ReturnConstant;
+import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.bomb.logic.RoomLogic;
-import com.game.core.dto.ActionNameEnum;
-import com.game.core.dto.BaseActionDataDto;
-import com.game.core.dto.OnlineUserDto;
-import com.game.core.dto.ReturnConstant;
-import com.game.core.dto.ReturnDto;
-import com.game.core.dto.RoomDto;
+import com.game.core.bomb.play.dto.PlayRoomDto;
+import com.game.core.exception.BombException;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -81,7 +83,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 		if (user == null) {
 			return;
 		}
-		RoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
+		PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
 		if (room != null) {
 			roomLogic.doUserQuit(room, user.getUsername());
 		}
@@ -94,20 +96,27 @@ public class BombMessageBizHandler implements BombMessageHandler{
 
 	}
 
-
 	@Override
-	public void exceptionCaught(IoSession session, Throwable paramThrowable) throws Exception {
-		if (paramThrowable instanceof NotImplementedException) {
+	public void exceptionCaught(IoSession session, Throwable throwable) throws Exception {
+		
+		if (BombException.class.isAssignableFrom(throwable.getClass())) {
+			BombException exception = (BombException)throwable;
+			session.write(new ReturnDto(exception.getCode(), exception.getAction(), exception.getMessage()));
+			return;
+		}
+		
+		
+		if (throwable instanceof NotImplementedException) {
 			session.write(new ReturnDto(-5, "this function has not implemented"));
 			return;
 		}
 
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("session id:" + session.getId(),  paramThrowable);
+			LOG.debug("session id:" + session.getId(),  throwable);
 		}
 
-		session.write(new ReturnDto(-100, paramThrowable.getMessage()));
+		session.write(new ReturnDto(-100, throwable.getMessage()));
 		return;
 	}
 
@@ -129,7 +138,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 		BaseActionDataDto data = null;
 		if (StringUtils.isBlank(action)) {
 			// 特殊处理
-			MessageSenderHelper.forwardMessageToOtherClientsInRoom(message);
+			RoomLogic.forwardMessageToOtherClientsInRoom(message);
 			return;
 		}
 
@@ -217,7 +226,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 	public void messageSent(IoSession session, Object message) throws Exception {
 		if (LOG.isDebugEnabled()) {
 			if (message != null)
-				LOG.debug("sent:" + message.toString());
+				LOG.debug("sent:" + message);
 		}
 
 	}

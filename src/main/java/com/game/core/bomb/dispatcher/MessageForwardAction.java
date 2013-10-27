@@ -8,16 +8,17 @@ import org.springframework.stereotype.Component;
 
 import com.game.core.GameMemory;
 import com.game.core.MessageSenderHelper;
-import com.game.core.dto.ActionNameEnum;
-import com.game.core.dto.BaseActionDataDto;
-import com.game.core.dto.BaseActionDataDto.ForwardData;
-import com.game.core.dto.ReturnDto;
+import com.game.core.bomb.dto.ActionNameEnum;
+import com.game.core.bomb.dto.BaseActionDataDto;
+import com.game.core.bomb.dto.BaseActionDataDto.ForwardData;
+import com.game.core.bomb.logic.RoomLogic;
 import com.google.common.collect.Maps;
 
 
 @Component
 public class MessageForwardAction implements BaseAction {
 
+	
 	@Override
 	public void doAction(IoSession session, BaseActionDataDto baseData) {
 		ForwardData data = (ForwardData) baseData;
@@ -31,7 +32,7 @@ public class MessageForwardAction implements BaseAction {
 				MessageSenderHelper.forwardMessage(friendSession, map);
 			}
 		} else {
-			MessageSenderHelper.forwardMessageToOtherClientsInRoom(data.getData());
+			RoomLogic.forwardMessageToOtherClientsInRoom(data.getData());
 		}
 	}
 

@@ -1,4 +1,4 @@
-package com.game.core.dto;
+package com.game.core.bomb.dto;
 
 import org.apache.mina.core.session.IoSession;
 
@@ -30,6 +30,8 @@ public class OnlineUserDto {
 	
 	
 	
+	private String inUse;
+	
 	transient IoSession session;
 	
 	public OnlineUserDto() {}
@@ -47,6 +49,7 @@ public class OnlineUserDto {
 		this.portrait = user.getPortrait();
 		this.runawayNum = user.getRunawayNum();
 		this.victoryNum = user.getVictoryNum();
+		this.inUse = user.getInUse();
 	}
 	
 
@@ -202,6 +205,12 @@ public class OnlineUserDto {
 		} else if (!username.equals(other.username))
 			return false;
 		return true;
+	}
+	public String getInUse() {
+		return inUse;
+	}
+	public void setInUse(String inUse) {
+		this.inUse = inUse;
 	}
 
 	

@@ -8,7 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
-import com.game.core.dto.OnlineUserDto;
+import com.game.core.bomb.dto.OnlineUserDto;
 import com.wenxiong.dao.JunitTransactionSpringContextTest;
 
 @ContextConfiguration(locations = { "classpath:/applicationContext-aop-base.xml",

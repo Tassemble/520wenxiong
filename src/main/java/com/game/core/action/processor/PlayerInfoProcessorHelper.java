@@ -16,7 +16,7 @@ import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.FriendRelationService;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
-import com.game.core.dto.OnlineUserDto;
+import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.exception.NoAuthenticationException;
 import com.google.common.collect.Lists;
 import com.wenxiong.blog.commons.utils.collection.PropertyExtractUtils;

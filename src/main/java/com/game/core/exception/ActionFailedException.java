@@ -5,7 +5,7 @@ package com.game.core.exception;
  * @since  1.0.0
  * @date   2013-7-28
  */
-public class ActionFailedException extends RuntimeException{
+public class ActionFailedException extends BombException{
 
 	
 
@@ -20,7 +20,7 @@ public class ActionFailedException extends RuntimeException{
 	String action;
 	
 	public ActionFailedException(int code, String message, String action) {
-		super(message);
+		super(code, message);
 		this.code = code;
 		this.message = message;
 		this.action = action;
@@ -28,7 +28,7 @@ public class ActionFailedException extends RuntimeException{
 	
 	
 	public ActionFailedException(String message, String action) {
-		super(message);
+		super(ExceptionConstant.ACTION_FAILED_CODE, message);
 		this.code = ExceptionConstant.ACTION_FAILED_CODE;
 		this.message = message;
 		this.action = action;
@@ -36,6 +36,7 @@ public class ActionFailedException extends RuntimeException{
 	
 	
 	public ActionFailedException(String action) {
+		super(ExceptionConstant.ACTION_FAILED_CODE, "action is:" + action);
 		this.code = ExceptionConstant.ACTION_FAILED_CODE;
 		this.action = action;
 		this.message = "please refresh friends list";

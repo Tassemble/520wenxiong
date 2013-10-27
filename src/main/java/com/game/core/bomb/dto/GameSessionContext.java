@@ -1,4 +1,4 @@
-package com.game.core.dto;
+package com.game.core.bomb.dto;
 
 import org.apache.mina.core.session.IoSession;
 

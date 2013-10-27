@@ -17,12 +17,13 @@ import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.JsonSessionWrapper;
-import com.game.core.dto.ActionNameEnum;
-import com.game.core.dto.BaseActionDataDto;
-import com.game.core.dto.GameSessionContext;
-import com.game.core.dto.BaseActionDataDto.LoginData;
-import com.game.core.dto.OnlineUserDto;
-import com.game.core.dto.ReturnDto;
+import com.game.core.bomb.dto.ActionNameEnum;
+import com.game.core.bomb.dto.BaseActionDataDto;
+import com.game.core.bomb.dto.BaseActionDataDto.LoginData;
+import com.game.core.bomb.dto.GameSessionContext;
+import com.game.core.bomb.dto.OnlineUserDto;
+import com.game.core.bomb.dto.ReturnDto;
+import com.game.core.exception.BombException;
 import com.wenxiong.utils.GsonUtils;
 
 /**
@@ -51,25 +52,25 @@ public class AuthIoFilter extends IoFilterAdapter {
 
 	@Override
 	public void messageReceived(NextFilter nextFilter, IoSession session, Object message) throws Exception {
+		String action = null;
 		try {
-			
-			GameSessionContext context = new GameSessionContext();
-			JsonSessionWrapper jsonSessoin = new JsonSessionWrapper(session);
-			context.setSession(jsonSessoin);
-			GameMemory.LOCAL_SESSION_CONTEXT.set(context);
-			
 			// 特殊输出，如果是单纯字节的话========================start
 			JSONObject json = null;
-			String action = null;
 			try {
 				json = JSONObject.fromObject(message);
-
 				action = json.getString("action");
 			} catch (Exception e) {
 				LOG.warn("sessionID:" + session.getId()+" parse json exeception, message:" + json, e);
 			}
+			JsonSessionWrapper jsonSession = new JsonSessionWrapper(session);;
+			
+			GameSessionContext context = new GameSessionContext();
+			context.setSession(jsonSession);
+			
+			GameMemory.LOCAL_SESSION_CONTEXT.set(context);
+			GameMemory.LOCAL_SESSION_CONTEXT.get().setAction(action);
 
-			OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
+			OnlineUserDto user = GameMemory.sessionUsers.get(jsonSession.getId());
 			if (user == null) {
 
 				
@@ -82,7 +83,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 				
 				// is login?
 				if (StringUtils.isBlank(action) || !action.equals(ActionNameEnum.ACTION_LOGIN.getAction())) {
-					session.write(GsonUtils.toJson(new ReturnDto(403, action, "no authentication")));
+					jsonSession.write(new ReturnDto(403, action, "no authentication"));
 					return;
 				}
 
@@ -92,7 +93,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 				OnlineUserDto dto = validateLogin(loginData);
 
 				if (dto != null) {// TODO 实现验证用户名和密码
-					dto.setSession(session);
+					dto.setSession(jsonSession);
 
 					if (GameMemory.onlineUsers.containsValue(dto)) {
 						OnlineUserDto oldUser = GameMemory.onlineUsers.get(dto.getUsername());
@@ -111,30 +112,39 @@ public class AuthIoFilter extends IoFilterAdapter {
 					}
 					LOG.info("validate ok for username:" + dto.getUsername());
 					GameMemory.onlineUsers.put(dto.getUsername(), dto);
-					GameMemory.sessionUsers.put(session.getId(), dto);
+					GameMemory.sessionUsers.put(jsonSession.getId(), dto);
 					GameMemory.setUser(user);
 
-					session.write(GsonUtils.toJson(new ReturnDto(200, action, "logon successfully")));
+					jsonSession.write(new ReturnDto(200, action, "logon successfully"));
 					return;
 				}
 
-				session.write(GsonUtils.toJson(new ReturnDto(-1, action, "logon failed")));
+				jsonSession.write(new ReturnDto(-1, action, "logon failed"));
 				return;
 
 			} else {
 
 				if (ActionNameEnum.ACTION_LOGIN.getAction().equals(action)) {
 					//如果用户
-					session.write(GsonUtils.toJson(new ReturnDto(200, action, "you have already logon")));
+					jsonSession.write(new ReturnDto(200, action, "you have already logon"));
 					return;
 				}
 
-				GameMemory.LOCAL_SESSION_CONTEXT.get().setOnlineUser(user);
+				GameMemory.setUser(user);
 			}
 
 			super.messageReceived(nextFilter, session, message);
 
-		} finally {
+		} catch(Exception  e) {
+			if (BombException.class.isAssignableFrom(e.getClass())) {
+				BombException exception = (BombException)e;
+				exception.setAction(action);
+				throw exception;
+			} else {
+				throw e;
+			}
+		}
+		finally {
 			GameMemory.LOCAL_SESSION_CONTEXT.remove();
 		}
 
