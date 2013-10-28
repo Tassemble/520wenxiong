@@ -38,15 +38,17 @@ public class RoomLogic {
 	
 
 	public static void destroyRoom(PlayRoomDto room) {
-		if (!CollectionUtils.isEmpty(room.getUsers())) {
-			for (OnlineUserDto user : room.getUsers()) {
-				user.setStatus(OnlineUserDto.STATUS_ONLINE);
-			};
+		synchronized (room.getRoomLock()) {
+			if (!CollectionUtils.isEmpty(room.getUsers())) {
+				for (OnlineUserDto user : room.getUsers()) {
+					user.setStatus(OnlineUserDto.STATUS_ONLINE);
+				};
+			}
+			
+			room.setUsers(null);
+			GameMemory.getRoom().remove(room.getId());
+			room = null;
 		}
-		
-		room.setUsers(null);
-		GameMemory.getRoom().remove(room.getId());
-		room = null;
 	}
 
 	
@@ -119,6 +121,8 @@ public class RoomLogic {
 			if (room.getReadyNumNow() == 1) {
 				isLastPlayer = true;
 				user.setVictoryNum(user.getVictoryNum() + 1);
+			} else {
+				user.setLoserNum(user.getLoserNum() + 1);
 			}
 			user.setRoomId("");
 			user.setStatus(OnlineUserDto.STATUS_ONLINE);
@@ -141,6 +145,18 @@ public class RoomLogic {
 			update.setLevel(user.getLevel());
 			
 			update.setVictoryNum(user.getVictoryNum());
+			userDao.updateSelectiveById(update);
+		} else {
+			Map<String, Object> maps = Maps.newHashMap();
+			maps.put("action", "lose");
+			maps.put("user", new MobileUserDto(user));
+			maps.put("code", 200);
+			session.write(maps);
+			
+			User update = new User();
+			update.setId(user.getId());
+			update.setLoserNum(user.getLoserNum());
+			update.setRunawayNum(user.getRunawayNum());
 			userDao.updateSelectiveById(update);
 		}
 		
