@@ -22,7 +22,7 @@ public class QuitGameAction implements BaseAction{
 	RoomLogic roomLogic;
 	
 	@Override
-	public void doAction(IoSession session, BaseActionDataDto baseData) {
+	public void doAction(IoSession session, BaseActionDataDto baseData) throws Exception {
 		validateUserStatus(baseData);
 		
 		OnlineUserDto user = GameMemory.getUser();

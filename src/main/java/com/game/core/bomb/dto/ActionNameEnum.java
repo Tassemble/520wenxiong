@@ -8,14 +8,15 @@ public enum ActionNameEnum {
 	ACTION_LOGIN("login",BaseActionDataDto.LoginData.class),
 	ACTION_LOGOUT("logout",BaseActionDataDto.LogoutData.class),
 	ACTION_GAME_START("game-start",BaseActionDataDto.class),
-	ACTION_GET_FRIENDLIST("getFriendList",BaseActionDataDto.class),
+	ACTION_GET_FRIENDLIST("getFriendList",null),
 	ACTION_INVITE("invite",BaseActionDataDto.GameInviteData.class),
 	ACTION_SIGN_UP("signup",BaseActionDataDto.GameSignUpData.class),
 	ACTION_DOWNLOAD_INFO("downloadPlayerInfo",null),
 	ACTION_UPLOADINVENTORYITEM_INFO("uploadInventoryItem",null),
 	ACTION_DOWNLOADINVENTORYITEM_INFO("downloadInventoryItem",null),
 	ACTION_UPLOADHEARTS("uploadHearts",null),
-	ACTION_DOWNLOADHEARTS("downloadHearts",null);
+	ACTION_DOWNLOADHEARTS("downloadHearts",null),
+	ACTION_GETONLINEUSERLIST("getOnlineUserList",null);
 
 	
 	String action;

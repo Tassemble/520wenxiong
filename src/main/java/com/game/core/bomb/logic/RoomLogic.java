@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.game.bomb.Dao.UserDao;
 import com.game.bomb.domain.User;
+import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.core.GameMemory;
 import com.game.core.bomb.dto.ActionNameEnum;
 import com.game.core.bomb.dto.GameSessionContext;
@@ -93,12 +94,22 @@ public class RoomLogic {
 		}
 	}
 	
-	public void doUserQuit(PlayRoomDto room, String username) {
+	
+	public void shutdownRoom(PlayRoomDto room) {
+		destroyRoom(room);
+	}
+	
+	public void doUserQuit(PlayRoomDto room, String username) throws Exception {
+		if (room.getRoomStatus().equals(PlayRoomDto.ROOM_STATUS_OPEN)) {//not playing
+			shutdownRoom(room);
+			return;
+		}
+		
 		OnlineUserDto user = GameMemory.getUserByUsername(username);
 		
 		IoSession session = GameMemory.getSessionByUsername(username);
 		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
-		ro.setExtAttrs(ImmutableMap.of("user", user));
+		ro.setExtAttrs(ImmutableMap.of("user", new MobileUserDto(user)));
 
 		forwardMessageToOtherClientsInRoom(session, user, ro);
 		
@@ -107,12 +118,10 @@ public class RoomLogic {
 			//如果是最后一个玩家
 			if (room.getReadyNumNow() == 1) {
 				isLastPlayer = true;
+				user.setVictoryNum(user.getVictoryNum() + 1);
 			}
 			user.setRoomId("");
 			user.setStatus(OnlineUserDto.STATUS_ONLINE);
-			user.setVictoryNum(user.getVictoryNum() + 1);
-			
-			user.setLevel(getLevel(user.getVictoryNum()));
 			room.getUsers().remove(user);
 			room.decreaseReadyNum();
 			if (room.isEmpty()) {
@@ -123,15 +132,23 @@ public class RoomLogic {
 		if (isLastPlayer) {
 			Map<String, Object> maps = Maps.newHashMap();
 			maps.put("action", "win");
-			maps.put("user", user);
+			maps.put("user", new MobileUserDto(user));
 			maps.put("code", 200);
 			session.write(maps);
 			
 			User update = new User();
 			update.setId(user.getId());
 			update.setLevel(user.getLevel());
-			update.setVictoryNum(user.getVictoryNum() + 1);
+			
+			update.setVictoryNum(user.getVictoryNum());
 			userDao.updateSelectiveById(update);
+		}
+		
+		
+		if (!CollectionUtils.isEmpty(room.getUsers())) {
+			if (room.getUsers().size() == 1) {//last players
+				doUserQuit(room, room.getUsers().get(0).getUsername());
+			}
 		}
 	}
 	

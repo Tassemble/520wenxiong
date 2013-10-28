@@ -47,13 +47,13 @@ public class FastJoinTimeoutCallback implements Runnable {
 				return;
 			}
 			if (PlayRoomDto.ROOM_STATUS_OPEN.equals(room.getRoomStatus())) {
-				roomLogic.doUserQuit(room, this.userId);
+				roomLogic.shutdownRoom(room);
 				IoSession session = GameMemory.getSessionByUsername(this.userId);
 				session.write(new ReturnDto(-20, ActionNameEnum.FAST_JOIN.getAction(), "fast-join timeout"));
 			} else {
 			}
 			// LOG.info("game is started");
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}

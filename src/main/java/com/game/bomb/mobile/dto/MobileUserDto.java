@@ -33,6 +33,8 @@ public class MobileUserDto {
 	Integer				level;
 	Float				win;
 	Float				runaway;
+	Float 				lose;
+	
 
 	
 	
@@ -55,9 +57,11 @@ public class MobileUserDto {
 		if (total == 0) {
 			this.win = 0.0f;
 			this.runaway = 0.0f;
+			this.lose = 0.0f;
 		} else {
-			this.win = (float)user.getVictoryNum() / (float)(total);
-			this.runaway = (float)user.getRunawayNum()/(float)(total);
+			this.win = (float)victoryNum / (float)(total);
+			this.runaway = (float)runawayNum/(float)(total);
+			this.lose = (float)loseNum /(float)(total);
 		}
 	}
 	
@@ -75,10 +79,12 @@ public class MobileUserDto {
 		int total = victoryNum + loseNum + runawayNum;
 		if (total == 0) {
 			this.win = 0.0f;
+			this.lose = 0.0f;
 			this.runaway = 0.0f;
 		} else {
-			this.win = (float)user.getVictoryNum() / (float)(total);
-			this.runaway = (float)user.getRunawayNum()/(float)(total);
+			this.win = (float)victoryNum / (float)(total);
+			this.runaway = (float)runawayNum/(float)(total);
+			this.lose = (float)loseNum /(float)(total);
 		}
 		this.status = user.getStatus();
 		if (!StringUtils.isBlank(user.getInUse())) {
@@ -98,8 +104,9 @@ public class MobileUserDto {
 		}
 		MobileUserDto mobData = new MobileUserDto(user);
 		mobData.setStatus(onlineUser.getStatus());
-		mobData.setInUse(new ObjectMapper().readValue(user.getInUse(), HashMap.class));
-		
+		if (!StringUtils.isBlank(user.getInUse())) {
+			mobData.setInUse(new ObjectMapper().readValue(user.getInUse(), HashMap.class));
+		}
 		return mobData;
 	}
 	

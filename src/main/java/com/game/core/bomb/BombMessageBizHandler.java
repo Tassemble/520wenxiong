@@ -168,17 +168,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 				}
 			}
 
-			// ~ 老代码 需要移植到新的逻辑上去
-			if (ActionNameEnum.ACTION_GET_FRIENDLIST.getAction().equals(action)) {
-				List<OnlineUserDto> users = Lists.newArrayList();
-				for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
-					users.add(entry.getValue());
-				}
-				ReturnDto ret = new ReturnDto(200, action, action);
-				ret.setResult(users);
-				session.write(GsonUtils.toJson(ret));
-				return;
-			}
+			
 		} else {
 			// ~ 处理request-response的方式 非常简单 使用actionAnotation实现
 			@SuppressWarnings("unchecked")

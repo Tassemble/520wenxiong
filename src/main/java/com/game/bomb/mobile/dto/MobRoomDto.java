@@ -11,7 +11,7 @@ public class MobRoomDto {
 
 	public MobRoomDto(PlayRoomDto room) {
 		this.id = room.getId();
-		this.playersNum = room.getPlayersNum();
+		this.playersNum = room.getUsers().size();
 		this.roomStatus = room.getRoomStatus();
 	}
 

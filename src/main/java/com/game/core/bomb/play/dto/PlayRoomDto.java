@@ -38,18 +38,6 @@ public class PlayRoomDto {
 
 	String								id;
 	private Integer						roomNumLimit;
-	private Integer						playersNum;
-	
-	public Integer getPlayersNum() {
-		return playersNum;
-	}
-
-
-
-
-	public void setPlayersNum(Integer playersNum) {
-		this.playersNum = playersNum;
-	}
 
 
 
@@ -58,21 +46,16 @@ public class PlayRoomDto {
 	private PlayersOfRoomStart playerInfoAfterGameStart;
 	
 
-	public PlayRoomDto(int roomNumLimit, OnlineUserDto user , FastJoinData joinData) {
+	public PlayRoomDto(int roomNumLimit, OnlineUserDto user) {
 		executorService = Executors.newFixedThreadPool(roomNumLimit);
 		this.roomNumLimit = roomNumLimit;
-		
 		increaseReadyNum();
 		
 		roomStatus = PlayRoomDto.ROOM_STATUS_OPEN;
 		this.id = PlayRoomDto.generateRoomId();
 		
-		executorService.submit(new FastJoinTimeoutCallback(user.getUsername(), joinData.getTimeoutInSeconds()));
-		
-		user.setRoomId(id);
+		user.setRoomId(this.id);
 		user.setStatus(OnlineUserDto.STATUS_IN_ROOM);
-		
-		
 		
 		this.users = new CopyOnWriteArrayList<OnlineUserDto>();
 		users.add(user);
@@ -204,15 +187,6 @@ public class PlayRoomDto {
 
 
 
-	public Integer getRoomReadyNum() {
-		return playersNum;
-	}
-
-
-
-	public void setRoomReadyNum(Integer roomReadyNum) {
-		this.playersNum = roomReadyNum;
-	}
 	
 	
 

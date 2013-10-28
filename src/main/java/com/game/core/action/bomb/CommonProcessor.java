@@ -1,10 +1,12 @@
 package com.game.core.action.bomb;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.json.JSONObject;
 
@@ -30,13 +32,16 @@ import com.game.core.GameMemory;
 import com.game.core.action.processor.ActionAnotationProcessor;
 import com.game.core.action.processor.PlayerInfoProcessorHelper;
 import com.game.core.annotation.ActionAnnotation;
+import com.game.core.bomb.dto.ActionNameEnum;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnConstant;
+import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.exception.ActionFailedException;
 import com.game.core.exception.ExceptionConstant;
 import com.game.core.exception.MessageNullException;
 import com.game.core.exception.NoAuthenticationException;
 import com.google.common.collect.Lists;
+import com.wenxiong.blog.commons.utils.collection.FieldComparator;
 import com.wenxiong.blog.commons.utils.collection.PropertyExtractUtils;
 import com.wenxiong.utils.GsonUtils;
 
@@ -67,6 +72,33 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		IoSession session = GameMemory.getCurrentSession();
 		session.write(map);
 	}
+	
+	@ActionAnnotation(action = "getOnlineUserList")
+	public Map<String, Object> getOnlineUserList(Object message, Map<String, Object> map) throws Exception {
+		// ~ 老代码 需要移植到新的逻辑上去
+			List<OnlineUserDto> users = Lists.newArrayList();
+			int limit = 100;
+			for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
+				limit--;
+				if (limit == 0) {
+					break;
+				}
+				users.add(entry.getValue());
+			}
+			
+			Collections.sort(users, new FieldComparator<OnlineUserDto>("level", false));
+			List<MobileUserDto> mUsers = Lists.newArrayList();
+			for (OnlineUserDto u : users) {
+				MobileUserDto mUser = new MobileUserDto(u);
+				mUsers.add(mUser);
+			}
+			map.put("code", 200);
+			map.put("result", mUsers);
+			return map;
+	}
+	
+	
+				
 
 	@ActionAnnotation(action = "uploadPlayerInfo")
 	public String uploadPlayerInfo(Object message, Map<String, Object> map) {

@@ -169,8 +169,8 @@ public class AuthIoFilter extends IoFilterAdapter {
 			query.setUsername(loginData.getUsername());
 			List<User> users = userService.getByDomainObjectSelective(query);
 			if (!CollectionUtils.isEmpty(users)) {
-				dto.setNickname(users.get(0).getNickName());
-				dto.setId(users.get(0).getId());
+				dto = new OnlineUserDto(users.get(0));
+				dto.setStatus(OnlineUserDto.STATUS_ONLINE);
 				return dto;
 			}
 		}

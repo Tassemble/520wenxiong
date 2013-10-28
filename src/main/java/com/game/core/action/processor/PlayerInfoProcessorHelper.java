@@ -19,6 +19,7 @@ import com.game.core.GameMemory;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.exception.NoAuthenticationException;
 import com.google.common.collect.Lists;
+import com.wenxiong.blog.commons.utils.collection.OrderLimit;
 import com.wenxiong.blog.commons.utils.collection.PropertyExtractUtils;
 
 @Component
@@ -48,8 +49,10 @@ public class PlayerInfoProcessorHelper {
 		// ~ put init
 		map.put("friends", null);
 		// ~ get friends
-		List<FriendRelation> relations = friendRelationService.getByCondition(
-				"user_id = ? and relation_status = ?", onlineUser.getId(), FriendRelation.STATUS_ACCEPTED);
+		OrderLimit ol = new OrderLimit();
+		ol.setLimit(200);
+		ol.setOffset(0);
+		List<FriendRelation> relations =friendRelationService.getOrderLimitByCondition(ol, "user_id = ? and relation_status = ?", onlineUser.getId(), FriendRelation.STATUS_ACCEPTED);
 		if (!CollectionUtils.isEmpty(relations)) {
 			List<Long> friendIds = PropertyExtractUtils.getByPropertyValue(relations, "FriendId");
 			List<User> friends = userService.getByIdList(friendIds);
