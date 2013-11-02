@@ -1,0 +1,11 @@
+# DataSource 1,using ddb for deploy
+mysql.url=jdbc:mysql://198.100.99.235:3306/bomb
+mysql.user=bomb_online
+mysql.pass=bomb_online1234
+
+
+
+
+
+
+
