@@ -24,6 +24,30 @@
 		<property name="pass">
 		<value>${mysql.pass}</value>
 		</property>
+		<property name="initialSize">
+			<value>${mysql.initialSize}</value>
+		</property>
+		<!-- 设置最大空闲连接 -->
+		<property name="maxIdle">
+			<value>
+			${mysql.maxIdle}
+			</value>
+		</property>
+		<!-- 设置最小空闲连接 -->
+		<property name="minIdle">
+			<value>
+			${mysql.minIdle}
+			</value>
+		</property>
+		<!-- 设置最大连接数量 -->
+		<property name="maxActive">
+			<value>
+			${mysql.maxActive}
+			</value>
+		</property>
+		
+		
+		
 	</bean>
 
 
