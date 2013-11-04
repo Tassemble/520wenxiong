@@ -3,7 +3,6 @@ package com.game.core.action.bomb;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import com.game.bomb.Dao.UserMeta;
 import com.game.bomb.Dao.UserMetaDao;
-import com.game.bomb.domain.FriendRelation;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.FriendRelationService;
@@ -32,17 +30,15 @@ import com.game.core.GameMemory;
 import com.game.core.action.processor.ActionAnotationProcessor;
 import com.game.core.action.processor.PlayerInfoProcessorHelper;
 import com.game.core.annotation.ActionAnnotation;
-import com.game.core.bomb.dto.ActionNameEnum;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnConstant;
-import com.game.core.bomb.dto.ReturnDto;
+import com.game.core.bomb.logic.RoomLogic;
+import com.game.core.bomb.play.dto.PlayRoomDto;
 import com.game.core.exception.ActionFailedException;
-import com.game.core.exception.ExceptionConstant;
 import com.game.core.exception.MessageNullException;
 import com.game.core.exception.NoAuthenticationException;
 import com.google.common.collect.Lists;
 import com.wenxiong.blog.commons.utils.collection.FieldComparator;
-import com.wenxiong.blog.commons.utils.collection.PropertyExtractUtils;
 import com.wenxiong.utils.GsonUtils;
 
 @Component
@@ -61,9 +57,53 @@ public class CommonProcessor implements ActionAnotationProcessor {
 
 	@Autowired
 	PlayerInfoProcessorHelper	playerInfoProcessorHelper;
+	
+	@Autowired
+	RoomLogic roomLogic;
 
 	private static final Logger	LOG			= LoggerFactory.getLogger(CommonProcessor.class);
 
+	
+	//lose
+	//runaway
+	@ActionAnnotation(action = "runaway")
+	public void runaway(Object message, Map<String, Object> map) throws Exception {
+		validateUserStatus("runaway");
+		
+		OnlineUserDto user = GameMemory.getUser();
+		PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
+		roomLogic.doUserQuit(room, user.getUsername());
+		
+		return;
+	}
+	
+	@ActionAnnotation(action = "lose")
+	public void lose(Object message, Map<String, Object> map) throws Exception {
+		validateUserStatus("lose");
+		OnlineUserDto user = GameMemory.getUser();
+		PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
+		roomLogic.doUserQuit(room, user.getUsername());
+	}
+	
+	private void validateUserStatus(String action) {
+		OnlineUserDto user = GameMemory.getUser();
+		
+		if (user == null) {
+			throw new NoAuthenticationException(action);
+		}
+		PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
+		
+		if (room == null) {
+			throw new ActionFailedException(action);
+		}
+		
+		 if (!(OnlineUserDto.STATUS_PLAYING.equals(user.getStatus()) || OnlineUserDto.STATUS_IN_ROOM.equals(user.getStatus()))) {
+			 throw new ActionFailedException(action);
+		 }
+	}
+	
+	
+	
 	// ~ 如果是mock 请不要调用改接口
 	@SuppressWarnings("unchecked")
 	@ActionAnnotation(action = "downloadPlayerInfo")
@@ -218,21 +258,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 				return map;
 			}
 			json.discard(action);
-			String updatedValue = GsonUtils.toJson(json);
-
-			OnlineUserDto onlineUser = GameMemory.getUser();
-			UserMeta userMeta = userMetaDao.getFirstOneByCondition("user_id = ? and user_key = ?",
-					onlineUser.getId(), UserMeta.USER_INVENTORY_ITEM);
-			UserMeta newItem = new UserMeta();
-			newItem.setKey(UserMeta.USER_INVENTORY_ITEM);
-			newItem.setValue(updatedValue);
-			newItem.setUserId(onlineUser.getId());
-			if (userMeta == null) {
-				userMetaDao.add(newItem);
-			} else {
-				userMetaDao.updateSelectiveByCondition(newItem, "user_id = ? and user_key = ?",
-						onlineUser.getId(), UserMeta.USER_INVENTORY_ITEM);
-			}
+			updateMemberMetaItem(json, UserMeta.USER_INVENTORY_ITEM);
 			map.put("code", 200);
 			map.put("message", "uploadInventoryItem successfully");
 			return map;
@@ -240,6 +266,70 @@ public class CommonProcessor implements ActionAnotationProcessor {
 			map.put("code", -20);
 			map.put("message", "uploadInventoryItem failed:" + message);
 			return map;
+		}
+	}
+	
+	
+	@ActionAnnotation(action = "uploadMedals")
+	public Map<String, Object> uploadMedals(Object message, Map<String, Object> map) {
+		JSONObject json = null;
+		try {
+			json = JSONObject.fromObject(message);
+			String items = json.getString("medal");
+			if (StringUtils.isBlank(items)) {
+				map.put("code", -1);
+				map.put("message", "update failed, because no items existed:" + message);
+				return map;
+			}
+			json.discard(action);
+			updateMemberMetaItem(json, UserMeta.USER_MEDAL);
+			map.put("code", 200);
+			map.put("message", "uploadMedals successfully");
+			return map;
+		} catch (Exception e) {
+			map.put("code", -20);
+			map.put("message", "uploadMedals failed:" + message);
+			return map;
+		}
+	}
+
+	
+	@ActionAnnotation(action = "downloadMedals")
+	public Map<String, Object> downloadMedals(Object message, Map<String, Object> map) {
+		OnlineUserDto onlineUser = GameMemory.getUser();
+		UserMeta userMeta = userMetaDao.getFirstOneByCondition("user_id = ? and user_key = ?",
+				onlineUser.getId(), UserMeta.USER_MEDAL);
+		if (userMeta == null || StringUtils.isBlank(userMeta.getValue())) {
+			map.put("code", 200);
+			map.put("message", "you have nothing!");
+			return map;
+		} else {
+			JSONObject json = JSONObject.fromObject(userMeta.getValue());
+			json.discard(action);
+			json.discard(CODE_NAME);
+			json.accumulate(action, "downloadMedals");
+			json.accumulate(CODE_NAME, 200);
+			GameMemory.getCurrentSession().write(json);
+			return null;
+		}
+	}
+	
+	
+	private void updateMemberMetaItem(JSONObject json, String key) {
+		String updatedValue = GsonUtils.toJson(json);
+
+		OnlineUserDto onlineUser = GameMemory.getUser();
+		UserMeta userMeta = userMetaDao.getFirstOneByCondition("user_id = ? and user_key = ?",
+				onlineUser.getId(), key);
+		UserMeta newItem = new UserMeta();
+		newItem.setKey(key);
+		newItem.setValue(updatedValue);
+		newItem.setUserId(onlineUser.getId());
+		if (userMeta == null) {
+			userMetaDao.add(newItem);
+		} else {
+			userMetaDao.updateSelectiveByCondition(newItem, "user_id = ? and user_key = ?",
+					onlineUser.getId(), key);
 		}
 	}
 
@@ -253,7 +343,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 			map.put("message", "you have nothing!");
 			return map;
 		} else {
-
+//			HashMap<Object, Object> map = new mapper.readValue(json, HashMap.class);
 			JSONObject json = JSONObject.fromObject(userMeta.getValue());
 			json.discard(action);
 			json.discard(CODE_NAME);
@@ -272,13 +362,19 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		// json.discard("hey");
 		// json.accumulate("hey", "哈哈");
 		// WordPressUtils.printJson(json);
-		String json = "{\"a\":\"b\", \"d\":{\"a\":\"b\"}}";
+//		String json = "{\"a\":\"b\", \"d\":{\"a\":\"b\"}}";
 
-		ObjectMapper mapper = new ObjectMapper();
+		long time = System.currentTimeMillis();
 
-		HashMap<Object, Object> map = mapper.readValue(json, HashMap.class);
-		Map o = (Map) map.get("d");
-		System.out.println(o.get("a"));
+		for (int i = 0; i < 1000000; i++) {
+			
+			ObjectMapper mapper = new ObjectMapper();
+		}
+		System.out.println(System.currentTimeMillis() - time );
+//
+//		HashMap<Object, Object> map = mapper.readValue(json, HashMap.class);
+//		Map o = (Map) map.get("d");
+//		System.out.println(o.get("a"));
 
 	}
 

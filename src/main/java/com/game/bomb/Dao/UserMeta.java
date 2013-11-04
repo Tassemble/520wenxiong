@@ -6,6 +6,7 @@ public class UserMeta {
 	
 	public static final String USER_INVENTORY_ITEM = "UserInventoryItem";
 	public static final String HEART_NUM = "HEART_NUM";
+	public static final String USER_MEDAL = "USER_MEDAL";
 	
 	Long id;
 	Long userId;
