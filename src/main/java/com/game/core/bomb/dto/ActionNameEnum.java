@@ -16,8 +16,13 @@ public enum ActionNameEnum {
 	ACTION_DOWNLOADINVENTORYITEM_INFO("downloadInventoryItem",null),
 	ACTION_UPLOADHEARTS("uploadHearts",null),
 	ACTION_DOWNLOADHEARTS("downloadHearts",null),
-	ACTION_GETONLINEUSERLIST("getOnlineUserList",null);
-
+	ACTION_GETONLINEUSERLIST("getOnlineUserList",null),
+	ACTION_DOWNLOADMEDALS("downloadMedals",null),
+	ACTION_UPLOADMEDALS("uploadMedals",null),
+	ACTION_LOSE("lose",null),
+	ACTION_RUNAWAY("runaway",null);
+	
+	
 	
 	String action;
 
