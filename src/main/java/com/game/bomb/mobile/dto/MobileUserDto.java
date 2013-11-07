@@ -31,9 +31,9 @@ public class MobileUserDto {
 	String				nickName;
 	Integer				portrait;
 	Integer				level;
-	Float				win;
-	Float				runaway;
-	Float 				lose;
+	Integer				win;
+	Integer				runaway;
+	Integer 			lose;
 	
 
 	
@@ -43,26 +43,29 @@ public class MobileUserDto {
 	Map<Object, Object>	inUse;
 	
 	
-	public MobileUserDto(User user) {
+	private MobileUserDto(User user) {
 		this.id = user.getId();
 		this.username = user.getUsername();
 		this.nickName = user.getNickName();
 		this.portrait = user.getPortrait();
 		this.level = user.getLevel();
-		int victoryNum = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
-		int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
-		int runawayNum = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
-		
-		int total =  victoryNum + loseNum + runawayNum;
-		if (total == 0) {
-			this.win = 0.0f;
-			this.runaway = 0.0f;
-			this.lose = 0.0f;
-		} else {
-			this.win = (float)victoryNum / (float)(total);
-			this.runaway = (float)runawayNum/(float)(total);
-			this.lose = (float)loseNum /(float)(total);
-		}
+		this.win = user.getVictoryNum() == null ? 0 :  user.getVictoryNum();
+		this.runaway = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
+		this.lose = user.getLoserNum() == null ? 0 : user.getLoserNum();
+//		int victoryNum = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
+//		int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
+//		int runawayNum = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
+//		
+//		int total =  victoryNum + loseNum + runawayNum;
+//		if (total == 0) {
+//			this.win = 0.0f;
+//			this.runaway = 0.0f;
+//			this.lose = 0.0f;
+//		} else {
+//			this.win = (float)victoryNum / (float)(total);
+//			this.runaway = (float)runawayNum/(float)(total);
+//			this.lose = (float)loseNum /(float)(total);
+//		}
 	}
 	
 
@@ -73,24 +76,28 @@ public class MobileUserDto {
 		this.nickName = user.getNickname();
 		this.portrait = user.getPortrait();
 		this.level = user.getLevel();
-		int victoryNum = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
-		int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
-		int runawayNum = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
-		int total = victoryNum + loseNum + runawayNum;
-		if (total == 0) {
-			this.win = 0.0f;
-			this.lose = 0.0f;
-			this.runaway = 0.0f;
-		} else {
-			this.win = (float)victoryNum / (float)(total);
-			this.runaway = (float)runawayNum/(float)(total);
-			this.lose = (float)loseNum /(float)(total);
-		}
+		this.win = user.getVictoryNum() == null ? 0 :  user.getVictoryNum();
+		this.runaway = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
+		this.lose = user.getLoserNum() == null ? 0 : user.getLoserNum();
+//		int victoryNum = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
+//		int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
+//		int runawayNum = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
+//		int total = victoryNum + loseNum + runawayNum;
+//		if (total == 0) {
+//			this.win = 0.0f;
+//			this.lose = 0.0f;
+//			this.runaway = 0.0f;
+//		} else {
+//			this.win = (float)victoryNum / (float)(total);
+//			this.runaway = (float)runawayNum/(float)(total);
+//			this.lose = (float)loseNum /(float)(total);
+//		}
 		this.status = user.getStatus();
 		if (!StringUtils.isBlank(user.getInUse())) {
 			this.inUse = new ObjectMapper().readValue(user.getInUse(), HashMap.class);
 		}
 	}
+	
 	
 	
 	
@@ -115,6 +122,36 @@ public class MobileUserDto {
 	
 	
 	
+
+	public Integer getWin() {
+		return win;
+	}
+
+
+	public void setWin(Integer win) {
+		this.win = win;
+	}
+
+
+	public Integer getRunaway() {
+		return runaway;
+	}
+
+
+	public void setRunaway(Integer runaway) {
+		this.runaway = runaway;
+	}
+
+
+	public Integer getLose() {
+		return lose;
+	}
+
+
+	public void setLose(Integer lose) {
+		this.lose = lose;
+	}
+
 
 	public Long getId() {
 		return id;
@@ -164,21 +201,6 @@ public class MobileUserDto {
 		this.level = level;
 	}
 
-	public Float getWin() {
-		return win;
-	}
-
-	public void setWin(Float win) {
-		this.win = win;
-	}
-
-	public Float getRunaway() {
-		return runaway;
-	}
-
-	public void setRunaway(Float runaway) {
-		this.runaway = runaway;
-	}
 
 	public Map<Object, Object> getInUse() {
 		return inUse;

@@ -167,7 +167,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 //		}
 		update.setNickName(nickName);
 		update.setGmtModified(new Date());
-		update.setInUse(json.getString("in_use"));
+		update.setInUse(json.getString("inUse"));
 		update.setPortrait(getValue(json.get("portrait")));
 		update.setId(onlineUser.getId());
 		userService.updateSelectiveById(update);
