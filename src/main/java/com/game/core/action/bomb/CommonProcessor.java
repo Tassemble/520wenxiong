@@ -1,16 +1,24 @@
 package com.game.core.action.bomb;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.mina.core.session.IoSession;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -20,11 +28,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.game.bomb.Dao.TransactionDao;
 import com.game.bomb.Dao.UserMeta;
 import com.game.bomb.Dao.UserMetaDao;
+import com.game.bomb.config.BombConfig;
+import com.game.bomb.domain.Transaction;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.FriendRelationService;
+import com.game.bomb.service.TransactionService;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.action.processor.ActionAnotationProcessor;
@@ -39,7 +51,10 @@ import com.game.core.exception.MessageNullException;
 import com.game.core.exception.NoAuthenticationException;
 import com.google.common.collect.Lists;
 import com.wenxiong.blog.commons.utils.collection.FieldComparator;
+import com.wenxiong.blog.commons.utils.text.JsonUtils;
 import com.wenxiong.utils.GsonUtils;
+import com.wenxiong.utils.HttpClientUtils;
+import com.wenxiong.utils.HttpDataProvider;
 
 @Component
 public class CommonProcessor implements ActionAnotationProcessor {
@@ -63,6 +78,34 @@ public class CommonProcessor implements ActionAnotationProcessor {
 
 	private static final Logger	LOG			= LoggerFactory.getLogger(CommonProcessor.class);
 
+	
+	@Autowired
+	BombConfig bombConfig;
+	
+	
+	@Autowired
+	HttpClientUtils httpClientUtils;
+	
+	@Autowired
+	TransactionService transactionService;
+	
+	//验证receipt
+	@ActionAnnotation(action = "receiptData")
+	public Map<String, Object> verifyReceiptData(Object message, Map<String, Object> map) {
+		
+		JSONObject jsonRoot = JSONObject.fromObject(message);
+		final String data = jsonRoot.getString("data");
+		if (StringUtils.isBlank(data)) {
+			throw new ActionFailedException("data is empty!!", jsonRoot.getString(action));
+		}
+		
+		if (LOG.isDebugEnabled()) { 
+			LOG.info("verify data:" + data);
+		}
+		
+		
+		return transactionService.createAfterVerified(data, map);	
+	}
 	
 	//lose
 	//runaway

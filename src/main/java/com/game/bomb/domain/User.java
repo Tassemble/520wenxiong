@@ -38,6 +38,10 @@ public class User extends BaseDo {
 	
 	private Boolean enable;
 	
+	Long gold;
+	
+	
+	
 	
 	
 	@DataProperty(column="experience")

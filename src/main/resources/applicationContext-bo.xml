@@ -19,6 +19,11 @@
 	</bean>
 
 
+	<bean id="bombConfig" class="com.game.bomb.config.BombConfig">
+		<property name="verifyReceiptUrl"><value>${verifyRecetptUrl}</value></property>
+		<property name="debug"><value>${debug}</value></property>
+	</bean>
+
 	<bean id="WebConfig" class="com.wenxiong.web.WebConfig">
 		<property name="host">
 			<value>http://wenxiong.com</value>
