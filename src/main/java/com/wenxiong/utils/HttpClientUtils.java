@@ -49,9 +49,20 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 
 	private int								taobaoMaxConnection	= 200;												// 每条通道最大并发连接数
 
+	
+	private PoolingClientConnectionManager	verifyReceiptDataHttpManager	= null;
+	private int								verifyReceiptMaxConnection	= 100;		
 	static {
+		
+		
 	}
 
+	
+	public HttpClient getVerifyReceiptDataHttpManager() {
+		return new DefaultHttpClient(verifyReceiptDataHttpManager, getParams());
+	}
+	
+	
 	public HttpClient getTaobaoHttpManager() {
 		return new DefaultHttpClient(taobaoHttpManager, getParams());
 	}
@@ -96,6 +107,40 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 		}
 	}
 
+	
+	public static String getDefaultHtmlByPostMethod(HttpClient client, HttpDataProvider provider) throws Exception {
+		// List<NameValuePair> nameValuePairs = provider.getNameValuePairs();
+		// UrlEncodedFormEntity params = new
+		// UrlEncodedFormEntity(nameValuePairs, "UTF-8");
+
+		
+		HttpPost post = new HttpPost(provider.getUrl());
+		if (provider.getHttpEntity() != null)
+			post.setEntity(provider.getHttpEntity());
+
+		if (!CollectionUtils.isEmpty(provider.getHeaders())) {
+			// solve :Content-Length header already present exception
+			for (Header header : provider.getHeaders()) {
+				post.addHeader(header);
+			}
+		}
+
+		if (log.isDebugEnabled()) {
+		}
+		HttpResponse response = client.execute(post);
+
+		if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+			log.error("response code is not OK, it's " + response.getStatusLine().getStatusCode());
+			throw new RuntimeException("response code is not OK, it's " + response.getStatusLine().getStatusCode());
+		}
+		
+		HttpEntity entity = response.getEntity();
+		
+		String result = EntityUtils.toString(entity, "UTF-8");
+		post.abort();
+		return result;
+		
+	}
 	public static String getHtmlByPostMethod(HttpClient client, HttpDataProvider provider) throws Exception {
 		// List<NameValuePair> nameValuePairs = provider.getNameValuePairs();
 		// UrlEncodedFormEntity params = new
@@ -168,6 +213,10 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 		if (taobaoHttpManager != null) {
 			taobaoHttpManager.shutdown();
 		}
+		
+		if (verifyReceiptDataHttpManager != null) {
+			verifyReceiptDataHttpManager.shutdown();
+		}
 		log.info("Http connection pool destroyed!");
 	}
 
@@ -179,6 +228,10 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 		taobaoHttpManager = new PoolingClientConnectionManager(schemeRegistry);
 		taobaoHttpManager.setMaxTotal(taobaoMaxConnection);
 		taobaoHttpManager.setDefaultMaxPerRoute(taobaoMaxConnection); // 每条通道最大并发连接数
+		
+		verifyReceiptDataHttpManager = new PoolingClientConnectionManager(schemeRegistry);;
+		verifyReceiptDataHttpManager.setMaxTotal(verifyReceiptMaxConnection);
+		verifyReceiptDataHttpManager.setDefaultMaxPerRoute(verifyReceiptMaxConnection);
 		log.info("Feedback http connection pool has start up..., max total is:" + taobaoMaxConnection);
 	}
 }

@@ -1,13 +1,12 @@
 package com.wenxiong.blog.dao;
 
-import java.util.ArrayList;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
+import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.wenxiong.dao.JunitTransactionSpringContextTest;
 
@@ -23,6 +22,7 @@ public class BaseTestCase extends JunitTransactionSpringContextTest {
 	UserService service;
 	
 	public void setOnlineUser(Long id) {
+		GameMemory.LOCAL_SESSION_CONTEXT.set(new GameSessionContext());
 		User user = service.getById(id);
 		OnlineUserDto onlineUser = new OnlineUserDto(user);
 		GameMemory.setUser(onlineUser);

@@ -8,7 +8,6 @@
 			<param name="ConversionPattern" value="%p [%t] %c{1}.%M(%L) | %m%n" />
 		</layout>
 		<param name="threshold" value="info" />
-		<param name="file" value="console.log" />
 		<param name="append" value="true" />
 		<param name="datePattern" value="'.'yyyy-MM-dd" />
 	</appender>
@@ -58,6 +57,7 @@
 
 	<root>
 		<level value="info" />
+		<appender-ref ref="game_appender" />
 		<appender-ref ref="CONSOLE" />
 	</root>
 
