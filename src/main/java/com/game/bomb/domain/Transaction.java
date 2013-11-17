@@ -1,27 +1,33 @@
 package com.game.bomb.domain;
 
+import com.game.bomb.constant.ProductType;
 import com.netease.framework.dao.sql.annotation.DataProperty;
 import com.wenxiong.blog.commons.domain.BaseDo;
 
-public class Transaction extends BaseDo{
+public class Transaction extends BaseDo {
 
 	/**
 	 * 
 	 */
-	private static final long	serialVersionUID	= -8262623129130110008L;
+	private static final long	serialVersionUID		= -8262623129130110008L;
 
-	
-	Long uid;
-	
-	String productId;
-	
-	Integer quantity;
-	
-	String transactionId;
-	
-	Long purchaseDateMs;
-	
-	String uniqueIdentifier;
+	public static final String	PRODUCT_TYPE_10_INGOTS	= ProductType.PRODUCT_TYPE_10_INGOTS.getName();
+	public static final String	PRODUCT_TYPE_25_INGOTS	= ProductType.PRODUCT_TYPE_25_INGOTS.getName();
+	public static final String	PRODUCT_TYPE_60_INGOTS	= ProductType.PRODUCT_TYPE_60_INGOTS.getName();
+	public static final String	PRODUCT_TYPE_350_INGOTS	= ProductType.PRODUCT_TYPE_350_INGOTS.getName();
+	public static final String	PRODUCT_TYPE_150_INGOTS	= ProductType.PRODUCT_TYPE_150_INGOTS.getName();
+
+	Long						uid;
+
+	String						productId;
+
+	Integer						quantity;
+
+	String						transactionId;
+
+	Long						purchaseDateMs;
+
+	String						uniqueIdentifier;
 
 	public Long getUid() {
 		return uid;
@@ -31,8 +37,7 @@ public class Transaction extends BaseDo{
 		this.uid = uid;
 	}
 
-	
-	@DataProperty(column="product_id")
+	@DataProperty(column = "product_id")
 	public String getProductId() {
 		return productId;
 	}
@@ -41,7 +46,6 @@ public class Transaction extends BaseDo{
 		this.productId = productId;
 	}
 
-	
 	public Integer getQuantity() {
 		return quantity;
 	}
@@ -50,8 +54,7 @@ public class Transaction extends BaseDo{
 		this.quantity = quantity;
 	}
 
-	
-	@DataProperty(column="transaction_id")
+	@DataProperty(column = "transaction_id")
 	public String getTransactionId() {
 		return transactionId;
 	}
@@ -60,7 +63,7 @@ public class Transaction extends BaseDo{
 		this.transactionId = transactionId;
 	}
 
-	@DataProperty(column="purchase_date_ms")
+	@DataProperty(column = "purchase_date_ms")
 	public Long getPurchaseDateMs() {
 		return purchaseDateMs;
 	}
@@ -69,8 +72,7 @@ public class Transaction extends BaseDo{
 		this.purchaseDateMs = purchaseDateMs;
 	}
 
-	
-	@DataProperty(column="unique_identifier")
+	@DataProperty(column = "unique_identifier")
 	public String getUniqueIdentifier() {
 		return uniqueIdentifier;
 	}
@@ -78,7 +80,5 @@ public class Transaction extends BaseDo{
 	public void setUniqueIdentifier(String uniqueIdentifier) {
 		this.uniqueIdentifier = uniqueIdentifier;
 	}
-	
-	
-	
+
 }

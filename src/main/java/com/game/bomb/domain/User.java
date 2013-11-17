@@ -38,12 +38,26 @@ public class User extends BaseDo {
 	
 	private Boolean enable;
 	
+	Long inGot;
 	Long gold;
 	
 	
 	
 	
+	@DataProperty(column="in_got")
+	public Long getInGot() {
+		return inGot;
+	}
+	public void setInGot(Long inGot) {
+		this.inGot = inGot;
+	}
 	
+	public Long getGold() {
+		return gold;
+	}
+	public void setGold(Long gold) {
+		this.gold = gold;
+	}
 	@DataProperty(column="experience")
 	public Long getExperience() {
 		return experience;

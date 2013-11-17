@@ -33,41 +33,43 @@ public class MobileUserDto {
 	Integer				level;
 	Integer				win;
 	Integer				runaway;
-	Integer 			lose;
-	
+	Integer				lose;
 
-	
-	
-	//should set it alone
+	Long				inGot;
+	Long				gold;
+
+	// should set it alone
 	String				status;
 	Map<Object, Object>	inUse;
-	
-	
+
 	private MobileUserDto(User user) {
 		this.id = user.getId();
 		this.username = user.getUsername();
 		this.nickName = user.getNickName();
 		this.portrait = user.getPortrait();
 		this.level = user.getLevel();
-		this.win = user.getVictoryNum() == null ? 0 :  user.getVictoryNum();
+		this.win = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
 		this.runaway = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
 		this.lose = user.getLoserNum() == null ? 0 : user.getLoserNum();
-//		int victoryNum = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
-//		int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
-//		int runawayNum = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
-//		
-//		int total =  victoryNum + loseNum + runawayNum;
-//		if (total == 0) {
-//			this.win = 0.0f;
-//			this.runaway = 0.0f;
-//			this.lose = 0.0f;
-//		} else {
-//			this.win = (float)victoryNum / (float)(total);
-//			this.runaway = (float)runawayNum/(float)(total);
-//			this.lose = (float)loseNum /(float)(total);
-//		}
+		this.gold = user.getGold();
+		this.inGot = user.getInGot();
+		// int victoryNum = user.getVictoryNum() == null ? 0 :
+		// user.getVictoryNum();
+		// int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
+		// int runawayNum = user.getRunawayNum() == null ? 0 :
+		// user.getRunawayNum();
+		//
+		// int total = victoryNum + loseNum + runawayNum;
+		// if (total == 0) {
+		// this.win = 0.0f;
+		// this.runaway = 0.0f;
+		// this.lose = 0.0f;
+		// } else {
+		// this.win = (float)victoryNum / (float)(total);
+		// this.runaway = (float)runawayNum/(float)(total);
+		// this.lose = (float)loseNum /(float)(total);
+		// }
 	}
-	
 
 	@SuppressWarnings("unchecked")
 	public MobileUserDto(OnlineUserDto user) throws Exception {
@@ -76,36 +78,37 @@ public class MobileUserDto {
 		this.nickName = user.getNickname();
 		this.portrait = user.getPortrait();
 		this.level = user.getLevel();
-		this.win = user.getVictoryNum() == null ? 0 :  user.getVictoryNum();
+		this.win = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
 		this.runaway = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
 		this.lose = user.getLoserNum() == null ? 0 : user.getLoserNum();
-//		int victoryNum = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
-//		int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
-//		int runawayNum = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
-//		int total = victoryNum + loseNum + runawayNum;
-//		if (total == 0) {
-//			this.win = 0.0f;
-//			this.lose = 0.0f;
-//			this.runaway = 0.0f;
-//		} else {
-//			this.win = (float)victoryNum / (float)(total);
-//			this.runaway = (float)runawayNum/(float)(total);
-//			this.lose = (float)loseNum /(float)(total);
-//		}
+		this.gold = user.getGold();
+		this.inGot = user.getInGot();
+		// int victoryNum = user.getVictoryNum() == null ? 0 :
+		// user.getVictoryNum();
+		// int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
+		// int runawayNum = user.getRunawayNum() == null ? 0 :
+		// user.getRunawayNum();
+		// int total = victoryNum + loseNum + runawayNum;
+		// if (total == 0) {
+		// this.win = 0.0f;
+		// this.lose = 0.0f;
+		// this.runaway = 0.0f;
+		// } else {
+		// this.win = (float)victoryNum / (float)(total);
+		// this.runaway = (float)runawayNum/(float)(total);
+		// this.lose = (float)loseNum /(float)(total);
+		// }
 		this.status = user.getStatus();
 		if (!StringUtils.isBlank(user.getInUse())) {
 			this.inUse = new ObjectMapper().readValue(user.getInUse(), HashMap.class);
 		}
 	}
-	
-	
-	
-	
-	
+
 	@SuppressWarnings("unchecked")
-	public static MobileUserDto buildMobileUser(User user) throws JsonParseException, JsonMappingException, IOException {
+	public static MobileUserDto buildMobileUser(User user) throws JsonParseException, JsonMappingException,
+			IOException {
 		OnlineUserDto onlineUser = GameMemory.getUserByUsername(user.getUsername());
-		
+
 		if (onlineUser == null) {
 			return null;
 		}
@@ -116,42 +119,30 @@ public class MobileUserDto {
 		}
 		return mobData;
 	}
-	
-	
-	
-	
-	
-	
 
 	public Integer getWin() {
 		return win;
 	}
 
-
 	public void setWin(Integer win) {
 		this.win = win;
 	}
-
 
 	public Integer getRunaway() {
 		return runaway;
 	}
 
-
 	public void setRunaway(Integer runaway) {
 		this.runaway = runaway;
 	}
-
 
 	public Integer getLose() {
 		return lose;
 	}
 
-
 	public void setLose(Integer lose) {
 		this.lose = lose;
 	}
-
 
 	public Long getId() {
 		return id;
@@ -200,7 +191,6 @@ public class MobileUserDto {
 	public void setLevel(Integer level) {
 		this.level = level;
 	}
-
 
 	public Map<Object, Object> getInUse() {
 		return inUse;
