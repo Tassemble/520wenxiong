@@ -23,12 +23,10 @@ public class OnlineUserDto {
 	Integer victoryNum;
 	Integer loserNum;
 	Integer runawayNum;
-	Integer medalInUse;
-	Integer itemInUse1;
-	Integer itemInUse2;
-	Integer itemInUse3;
 	
 	
+	Long				inGot;
+	Long				gold;
 	
 	private String inUse;
 	
@@ -40,19 +38,29 @@ public class OnlineUserDto {
 		this.username = user.getUsername();
 		this.heartNum = user.getHeartNum();
 		this.level = user.getLevel();
-		this.itemInUse1 = user.getItemInUse1();
-		this.itemInUse2 = user.getItemInUse2();
-		this.itemInUse3 = user.getItemInUse3();
 		this.loserNum = user.getLoserNum();
-		this.medalInUse = user.getMedalInUse();
 		this.nickname = user.getNickName();
 		this.portrait = user.getPortrait();
 		this.runawayNum = user.getRunawayNum();
 		this.victoryNum = user.getVictoryNum();
 		this.inUse = user.getInUse();
+		this.gold = user.getGold();
+		this.inGot = user.getInGot();
 	}
 	
 
+	public Long getInGot() {
+		return inGot;
+	}
+	public void setInGot(Long inGot) {
+		this.inGot = inGot;
+	}
+	public Long getGold() {
+		return gold;
+	}
+	public void setGold(Long gold) {
+		this.gold = gold;
+	}
 	public Long getId() {
 		return id;
 	}
@@ -109,37 +117,6 @@ public class OnlineUserDto {
 		this.runawayNum = runawayNum;
 	}
 
-	public Integer getMedalInUse() {
-		return medalInUse;
-	}
-
-	public void setMedalInUse(Integer medalInUse) {
-		this.medalInUse = medalInUse;
-	}
-
-	public Integer getItemInUse1() {
-		return itemInUse1;
-	}
-
-	public void setItemInUse1(Integer itemInUse1) {
-		this.itemInUse1 = itemInUse1;
-	}
-
-	public Integer getItemInUse2() {
-		return itemInUse2;
-	}
-
-	public void setItemInUse2(Integer itemInUse2) {
-		this.itemInUse2 = itemInUse2;
-	}
-
-	public Integer getItemInUse3() {
-		return itemInUse3;
-	}
-
-	public void setItemInUse3(Integer itemInUse3) {
-		this.itemInUse3 = itemInUse3;
-	}
 
 	public String getNickname() {
 		return nickname;

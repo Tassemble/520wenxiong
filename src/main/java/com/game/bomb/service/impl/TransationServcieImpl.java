@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -20,11 +18,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.game.bomb.Dao.TransactionDao;
+import com.game.bomb.Dao.WealthBudgetDao;
 import com.game.bomb.config.BombConfig;
+import com.game.bomb.constant.ProductType;
 import com.game.bomb.domain.Transaction;
+import com.game.bomb.domain.User;
+import com.game.bomb.domain.WealthBudget;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.TransactionService;
+import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
+import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.exception.ActionFailedException;
 import com.wenxiong.blog.commons.dao.BaseDao;
 import com.wenxiong.blog.commons.service.impl.BaseServiceImpl;
@@ -44,9 +48,17 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 	
 	
 	@Autowired
+	WealthBudgetDao wealthBudgetDao;
+	
+	@Autowired
 	HttpClientUtils httpClientUtils;
 	
 
+	
+	@Autowired
+	UserService userService;
+	
+	
 	private  Logger LOG = LoggerFactory.getLogger(TransationServcieImpl.class);
 
 
@@ -117,6 +129,7 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 				map.put("code", 200);
 				Map<String, Object> receiptMapping = (HashMap<String, Object>)dataFromAppleMapping.get("receipt");
 				Date now = new Date();
+				//TODO transaction_id当做唯一键，因为如果对于同一个receiptData给多个人使用的话，还是会有效的
 				Transaction query = new Transaction();
 				query.setUid(GameMemory.getUser().getId());
 				query.setTransactionId((String)receiptMapping.get("transaction_id"));
@@ -132,16 +145,43 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 					transaction.setUid(GameMemory.getUser().getId());
 					transaction.setUniqueIdentifier((String)receiptMapping.get("unique_identifier"));
 					add(transaction);
+					
+
+					long quantity = ProductType.getQuantityByProductType(transaction.getProductId());
+					WealthBudget wealth = new WealthBudget();
+					wealth.setBudgetType(WealthBudget.BUDGET_TYPE_PAY);
+					wealth.setQuantity(quantity);
+					wealth.setOrderId(transaction.getId());
+					wealth.setUid(GameMemory.getUser().getId());
+					wealth.setGmtCreate(now);
+					wealth.setGmtModified(now);
+					wealthBudgetDao.add(wealth);
+					
+					
+					WealthBudget queryWealth = new WealthBudget();
+					queryWealth.setUid(GameMemory.getUser().getId());
+					List<WealthBudget> allWealth = wealthBudgetDao.getByDomainObjectSelective(queryWealth);
+					long sum = 0;
+					for (WealthBudget wealthBudget : allWealth) {
+						sum += wealthBudget.getQuantity();
+					}
+					
+					User updateUser = new User();
+					updateUser.setInGot(sum);
+					updateUser.setId(GameMemory.getUser().getId());
+					userService.updateSelectiveById(updateUser);
+					
 				} else {
-					Transaction update = new Transaction();
-					update.setId(results.get(0).getId());
-					update.setGmtModified(new Date());
-					update.setProductId((String)receiptMapping.get("product_id"));
-					update.setPurchaseDateMs(Long.valueOf((String)receiptMapping.get("purchase_date_ms")));
-					update.setQuantity(Integer.valueOf((String)receiptMapping.get("quantity")));
-					update.setTransactionId((String)receiptMapping.get("transaction_id"));
-					update.setUniqueIdentifier((String)receiptMapping.get("unique_identifier"));
-					this.updateSelectiveById(update);
+					//nothing to do
+//					Transaction update = new Transaction();
+//					update.setId(results.get(0).getId());
+//					update.setGmtModified(new Date());
+//					update.setProductId((String)receiptMapping.get("product_id"));
+//					update.setPurchaseDateMs(Long.valueOf((String)receiptMapping.get("purchase_date_ms")));
+//					update.setQuantity(Integer.valueOf((String)receiptMapping.get("quantity")));
+//					update.setTransactionId((String)receiptMapping.get("transaction_id"));
+//					update.setUniqueIdentifier((String)receiptMapping.get("unique_identifier"));
+//					this.updateSelectiveById(update);
 				}
 				if (bombConfig.isDebug()) {
 					map.put("message", "verify successful");

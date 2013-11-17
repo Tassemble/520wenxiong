@@ -103,6 +103,17 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		}
 		
 		transactionService.createAfterVerified(data, map);	
+		
+		
+		OnlineUserDto onlineUser = GameMemory.getUser();
+		
+		User user = userService.getById(onlineUser.getId());
+		
+		
+		//TODO reload from user
+		//
+		
+		
 		return;
 	}
 	
