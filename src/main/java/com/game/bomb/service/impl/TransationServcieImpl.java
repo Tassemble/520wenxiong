@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import com.game.bomb.Dao.TransactionDao;
 import com.game.bomb.config.BombConfig;
 import com.game.bomb.domain.Transaction;
+import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.TransactionService;
 import com.game.core.GameMemory;
 import com.game.core.exception.ActionFailedException;
@@ -74,8 +75,9 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 
 	@Override
 	public Map<String, Object> createAfterVerified(final String data, Map<String, Object> map) {
-		
+		MobileUserDto user = null;
 		try {
+			user = new MobileUserDto(GameMemory.getUser());
 			String responseData = HttpClientUtils.getDefaultHtmlByPostMethod(httpClientUtils.getVerifyReceiptDataHttpManager(), new HttpDataProvider() {
 				
 				@Override
@@ -109,8 +111,10 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 			HashMap<String, Object> dataFromAppleMapping = mapper.readValue(responseData, HashMap.class);
 			Integer status = (Integer)dataFromAppleMapping.get("status");
 			if (status == null || !status.equals(0)) {
+				map.put("code", -1);
 				map.put("message", "verify failed, see verify-result for more details");
 			} else {
+				map.put("code", 200);
 				Map<String, Object> receiptMapping = (HashMap<String, Object>)dataFromAppleMapping.get("receipt");
 				Date now = new Date();
 				Transaction query = new Transaction();
@@ -149,7 +153,7 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 			}
 			return map;
 		} catch (Exception e) {
-			LOG.error(e.getMessage() + " buyer " + JsonUtils.toJson(GameMemory.getUser()), e);
+			LOG.error(e.getMessage() + " buyer " + GsonUtils.toJson(user), e);
 			throw new ActionFailedException("receipt 交易失败");
 		}
 	}

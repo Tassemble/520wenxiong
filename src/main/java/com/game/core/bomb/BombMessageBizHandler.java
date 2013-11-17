@@ -192,9 +192,11 @@ public class BombMessageBizHandler implements BombMessageHandler{
 							session.write(okMapping);
 							return;
 						}
+					} else if (Map.class.isAssignableFrom(returnValue.getClass())) {
+						throw new RuntimeException("return Map.class is not support");
+					} else {
+						session.write(model);
 					}
-					session.write(model);
-					//this is a comment
 				} else {
 					//nothing to do
 					
