@@ -52,6 +52,8 @@ public class GameMemory {
 		bizContext  = new ConcurrentHashMap<String, Object>();
 	}
 	
+	
+	
 	public static IoSession getCurrentSession() {
 		return LOCAL_SESSION_CONTEXT.get().getSession();
 	}
