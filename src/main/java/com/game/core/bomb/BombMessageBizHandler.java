@@ -138,12 +138,11 @@ public class BombMessageBizHandler implements BombMessageHandler{
 		BaseActionDataDto data = null;
 		if (StringUtils.isBlank(action)) {
 			// 特殊处理
-			RoomLogic.forwardMessageToOtherClientsInRoom(message);
-			return;
+			throw new BombException(-1, "no action find!");
 		}
 
 		// 正常逻辑
-		validateAction(action);
+//		validateAction(action);
 		
 		//set action
 		GameMemory.LOCAL_SESSION_CONTEXT.get().setAction(action);
@@ -173,6 +172,10 @@ public class BombMessageBizHandler implements BombMessageHandler{
 			// ~ 处理request-response的方式 非常简单 使用actionAnotation实现
 			@SuppressWarnings("unchecked")
 			HashMap<String, Object> valueMapper = (HashMap<String, Object>) GameMemory.actionMapping.get(action);
+			if (valueMapper == null) {
+				throw new NotImplementedException();
+			}
+			
 			Map<String, Object> model = Maps.newHashMap();
 			if (valueMapper != null) {
 				model.put("action", action);
@@ -200,7 +203,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 				return;
 			}
 		}
-		throw new NotImplementedException();
+		
 	}
 
 	private void validateAction(String action) {
