@@ -91,8 +91,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	
 	//验证receipt
 	@ActionAnnotation(action = "receiptData")
-	public Map<String, Object> verifyReceiptData(Object message, Map<String, Object> map) {
-		
+	public void verifyReceiptData(Object message, Map<String, Object> map) {
 		JSONObject jsonRoot = JSONObject.fromObject(message);
 		final String data = jsonRoot.getString("data");
 		if (StringUtils.isBlank(data)) {
@@ -103,8 +102,8 @@ public class CommonProcessor implements ActionAnotationProcessor {
 			LOG.info("verify data:" + data);
 		}
 		
-		
-		return transactionService.createAfterVerified(data, map);	
+		transactionService.createAfterVerified(data, map);	
+		return;
 	}
 	
 	//lose
