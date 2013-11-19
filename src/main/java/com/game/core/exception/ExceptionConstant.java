@@ -27,5 +27,9 @@ public class ExceptionConstant {
 	
 	//加入房间失败
 	public static final int JOIN_ROOM_FAILED = -106;
+	
+	
+	public static final int TRANSACTION_DUP = -201;
+	
 		
 }
