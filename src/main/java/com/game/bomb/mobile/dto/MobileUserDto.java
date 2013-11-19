@@ -37,6 +37,7 @@ public class MobileUserDto {
 
 	Long				inGot;
 	Long				gold;
+	Integer 			heart;
 
 	// should set it alone
 	String				status;
@@ -44,6 +45,7 @@ public class MobileUserDto {
 
 	private MobileUserDto(User user) {
 		this.id = user.getId();
+		this.heart = user.getHeartNum();
 		this.username = user.getUsername();
 		this.nickName = user.getNickName();
 		this.portrait = user.getPortrait();
@@ -74,6 +76,7 @@ public class MobileUserDto {
 	@SuppressWarnings("unchecked")
 	public MobileUserDto(OnlineUserDto user) throws Exception {
 		this.id = user.getId();
+		this.heart = user.getHeartNum();
 		this.username = user.getUsername();
 		this.nickName = user.getNickname();
 		this.portrait = user.getPortrait();

@@ -48,7 +48,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		newItem.setUsername(data.getUsername());
 		newItem.setMd5Password(DigestUtils.md5Hex(data.getPassword()));
 		newItem.setNickName(data.getNickname());
-		newItem.setHeartNum(0);
+		newItem.setHeartNum(5);
 		newItem.setLevel(1);
 		newItem.setLoserNum(0);
 		newItem.setPortrait(0);
