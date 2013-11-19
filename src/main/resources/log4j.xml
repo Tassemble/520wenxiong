@@ -42,13 +42,32 @@
 
 	<appender name="game_appender" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="threshold" value="debug" />
-		<param name="file" value="game.log" />
+		<param name="file" value="logs/game/game.log" />
 		<param name="append" value="true" />
 		<param name="datePattern" value="'.'yyyy-MM-dd" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
 		</layout>
 	</appender>
+	
+	
+	
+	<appender name="transaction_appender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="threshold" value="debug" />
+		<param name="file" value="logs/transaction/transaction.log" />
+		<param name="append" value="true" />
+		<param name="datePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
+		</layout>
+	</appender>
+
+	<logger name="transaction" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="transaction_appender" />
+	</logger>
+	
+	
 
 	<logger name="com.game" additivity="false">
 		<level value="debug" />

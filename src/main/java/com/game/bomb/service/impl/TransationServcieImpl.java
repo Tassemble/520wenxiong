@@ -30,6 +30,8 @@ import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.exception.ActionFailedException;
+import com.game.core.exception.BombException;
+import com.game.core.exception.ExceptionConstant;
 import com.wenxiong.blog.commons.dao.BaseDao;
 import com.wenxiong.blog.commons.service.impl.BaseServiceImpl;
 import com.wenxiong.blog.commons.utils.text.JsonUtils;
@@ -59,7 +61,7 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 	UserService userService;
 	
 	
-	private  Logger LOG = LoggerFactory.getLogger(TransationServcieImpl.class);
+	private  Logger LOG = LoggerFactory.getLogger("transaction");
 
 
 
@@ -129,9 +131,8 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 				map.put("code", 200);
 				Map<String, Object> receiptMapping = (HashMap<String, Object>)dataFromAppleMapping.get("receipt");
 				Date now = new Date();
-				//TODO transaction_id当做唯一键，因为如果对于同一个receiptData给多个人使用的话，还是会有效的
+				
 				Transaction query = new Transaction();
-				query.setUid(GameMemory.getUser().getId());
 				query.setTransactionId((String)receiptMapping.get("transaction_id"));
 				List<Transaction> results = this.getByDomainObjectSelective(query);
 				if (CollectionUtils.isEmpty(results)) {
@@ -147,6 +148,7 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 					add(transaction);
 					
 
+					
 					long quantity = ProductType.getQuantityByProductType(transaction.getProductId());
 					WealthBudget wealth = new WealthBudget();
 					wealth.setBudgetType(WealthBudget.BUDGET_TYPE_PAY);
@@ -172,16 +174,10 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 					userService.updateSelectiveById(updateUser);
 					
 				} else {
-					//nothing to do
-//					Transaction update = new Transaction();
-//					update.setId(results.get(0).getId());
-//					update.setGmtModified(new Date());
-//					update.setProductId((String)receiptMapping.get("product_id"));
-//					update.setPurchaseDateMs(Long.valueOf((String)receiptMapping.get("purchase_date_ms")));
-//					update.setQuantity(Integer.valueOf((String)receiptMapping.get("quantity")));
-//					update.setTransactionId((String)receiptMapping.get("transaction_id"));
-//					update.setUniqueIdentifier((String)receiptMapping.get("unique_identifier"));
-//					this.updateSelectiveById(update);
+					if (!results.get(0).getUid().equals(GameMemory.getUser().getId())) {
+						LOG.error("user " + GameMemory.getUser().getId() + " may be a hack, for transaction:" + results.get(0).getTransactionId());
+						throw new BombException(ExceptionConstant.TRANSACTION_DUP, "transaction exsited:" + results.get(0).getTransactionId());
+					}
 				}
 				if (bombConfig.isDebug()) {
 					map.put("message", "verify successful");

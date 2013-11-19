@@ -5,6 +5,8 @@ import com.wenxiong.blog.commons.domain.BaseDo;
 
 public class WealthBudget extends BaseDo{
 
+	
+	public static final Long DEFAULT_WEALTH = 10L;
 	/**
 	 * 
 	 */
@@ -31,6 +33,7 @@ public class WealthBudget extends BaseDo{
 	
 	
 	public static final String BUDGET_TYPE_PAY = "pay";
+	public static final String BUDGET_TYPE_SIGNUP = "signup";
 	
 	
 	public Long getUid() {

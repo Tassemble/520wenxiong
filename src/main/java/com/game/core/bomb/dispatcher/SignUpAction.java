@@ -10,7 +10,9 @@ import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.game.bomb.Dao.WealthBudgetDao;
 import com.game.bomb.domain.User;
+import com.game.bomb.domain.WealthBudget;
 import com.game.bomb.service.UserService;
 import com.game.core.bomb.dto.ActionNameEnum;
 import com.game.core.bomb.dto.BaseActionDataDto;
@@ -27,6 +29,9 @@ public class SignUpAction implements BaseAction{
 	UserService userService;
 	
 	
+	@Autowired
+	WealthBudgetDao wealthBudgetDao;
+	
 	@Override
 	public void doAction(IoSession session, BaseActionDataDto baseData) {
 		BaseActionDataDto.GameSignUpData data = (BaseActionDataDto.GameSignUpData)baseData;
@@ -41,22 +46,9 @@ public class SignUpAction implements BaseAction{
 			return;
 		}
 		
-		User newItem = query;
-		Date now = new Date();
+		userService.addNewUser(data);
 		
 		
-		newItem.setMd5Password(DigestUtils.md5Hex(data.getPassword()));
-		newItem.setId(userService.getId());
-		newItem.setNickName(data.getNickname());
-		newItem.setHeartNum(0);
-		newItem.setLevel(1);
-		newItem.setLoserNum(0);
-		newItem.setPortrait(0);
-		newItem.setRunawayNum(0);
-		newItem.setVictoryNum(0);
-		newItem.setGmtCreate(now);
-		newItem.setGmtModified(now);
-		userService.add(query);
 		session.write(new ReturnDto(200, this.getAction(), "signup successfully"));
 		return;
 	}

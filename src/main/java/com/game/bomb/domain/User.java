@@ -28,10 +28,6 @@ public class User extends BaseDo {
 	Integer victoryNum;
 	Integer loserNum;
 	Integer runawayNum;
-	Integer medalInUse;
-	Integer itemInUse1;
-	Integer itemInUse2;
-	Integer itemInUse3;
 	
 	//表示使用中的物品
 	private String  inUse;
@@ -115,38 +111,7 @@ public class User extends BaseDo {
 	public void setRunawayNum(Integer runawayNum) {
 		this.runawayNum = runawayNum;
 	}
-	
-	@DataProperty(column="medal_in_user")
-	public Integer getMedalInUse() {
-		return medalInUse;
-	}
-	public void setMedalInUse(Integer medalInUse) {
-		this.medalInUse = medalInUse;
-	}
-	
-	@DataProperty(column="item_in_use1")
-	public Integer getItemInUse1() {
-		return itemInUse1;
-	}
-	public void setItemInUse1(Integer itemInUse1) {
-		this.itemInUse1 = itemInUse1;
-	}
-	
-	@DataProperty(column="item_in_use2")
-	public Integer getItemInUse2() {
-		return itemInUse2;
-	}
-	public void setItemInUse2(Integer itemInUse2) {
-		this.itemInUse2 = itemInUse2;
-	}
-	
-	@DataProperty(column="item_in_use3")
-	public Integer getItemInUse3() {
-		return itemInUse3;
-	}
-	public void setItemInUse3(Integer itemInUse3) {
-		this.itemInUse3 = itemInUse3;
-	}
+
 	
 	@DataProperty(column="username")
 	public String getUsername() {

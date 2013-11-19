@@ -9,10 +9,11 @@ import java.util.concurrent.Executors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
 
+import com.game.bomb.domain.User;
+import com.game.bomb.service.UserService;
 import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.play.dto.PlayRoomDto;
-import com.wenxiong.utils.GsonUtils;
 
 
 public class GameMemory {
@@ -35,6 +36,15 @@ public class GameMemory {
 	public static Map<String, Object> bizContext;
 	
 	
+	
+	public static void reloadUser() {
+		UserService userService = ApplicationContextHolder.get().getBean(UserService.class);
+		if (getUser() == null) {
+			throw new RuntimeException("reload user error due to threadlocal no user find");
+		}
+		User user = userService.getById(getUser().getId());
+		setUser(new OnlineUserDto(user));
+	}
 	
 	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
 	public static ThreadLocal<GameSessionContext> LOCAL_SESSION_CONTEXT = new ThreadLocal<GameSessionContext>();
