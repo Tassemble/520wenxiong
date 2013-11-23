@@ -182,7 +182,9 @@ public class BombMessageBizHandler implements BombMessageHandler{
 				Method method = (Method) valueMapper.get("method");
 				ActionAnotationProcessor processor = (ActionAnotationProcessor) valueMapper.get("object");
 				Object returnValue = method.invoke(processor, message, model);
-				if (returnValue != null) {
+				
+				//两个条件同时成立时，才进入执行
+				if (!void.class.isAssignableFrom(returnValue.getClass()) && (returnValue != null)) {//如果返回不是NULL，
 					if (returnValue instanceof String) {
 						String value = (String)returnValue;
 						if (ReturnConstant.OK.equals(value)) {
@@ -193,7 +195,9 @@ public class BombMessageBizHandler implements BombMessageHandler{
 							return;
 						}
 					} else if (Map.class.isAssignableFrom(returnValue.getClass())) {
-						throw new RuntimeException("return Map.class is not support");
+						session.write(returnValue);
+						return;
+//						throw new RuntimeException("return Map.class is not support");
 					} else {
 						session.write(model);
 					}
