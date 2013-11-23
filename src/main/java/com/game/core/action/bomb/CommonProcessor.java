@@ -194,6 +194,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 			throw new MessageNullException("user upload no message, uid:" + GameMemory.getUser().getId());
 		}
 
+		
 		JSONObject jsonRoot = JSONObject.fromObject(jsonString);
 		JSONObject json = jsonRoot.getJSONObject("playerInfo");
 
@@ -204,17 +205,24 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		OnlineUserDto onlineUser = GameMemory.getUser();
 		User update = new User();
 
-		String nickName = json.getString("nickname");
+		if (json.containsKey("nickname")) {
+			String nickName = json.getString("nickname");
+			update.setNickName(nickName);
+			
+		}
 //		if (!StringUtils.isBlank(nickName)) {
 //			if (isNickNameExist(nickName)) {
 //				throw new ActionFailedException(ExceptionConstant.NICKNAME_EXIST_CODE, "nickname exist",
 //						onlineUser.getAction());
 //			}
 //		}
-		update.setNickName(nickName);
 		update.setGmtModified(new Date());
-		update.setInUse(json.getString("inUse"));
-		update.setPortrait(getValue(json.get("portrait")));
+		if (json.containsKey("in_use")) {
+			update.setInUse(json.getString("in_use"));
+		}
+		if (json.containsKey("portrait")) {
+			update.setPortrait(getValue(json.get("portrait")));
+		}
 		update.setId(onlineUser.getId());
 		userService.updateSelectiveById(update);
 		return ReturnConstant.OK;

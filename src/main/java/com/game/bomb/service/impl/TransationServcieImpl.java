@@ -185,7 +185,7 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 			}
 			
 			if (bombConfig.isDebug()) {
-				map.put("verify-result-for-debug", dataFromAppleMapping);
+				//map.put("verify-result-for-debug", dataFromAppleMapping);
 			}
 			return map;
 		} catch (Exception e) {
