@@ -12,6 +12,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.game.bomb.domain.User;
 import com.game.core.GameMemory;
 import com.game.core.bomb.dto.OnlineUserDto;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * 需要具备如下属性： 玩家昵称（String) 玩家ID（String) 用户状态（离线，在线，游戏中）（String） 用户头像（unsigned
@@ -41,6 +42,8 @@ public class MobileUserDto {
 
 	// should set it alone
 	String				status;
+	
+	@SerializedName("in_use")
 	Map<Object, Object>	inUse;
 
 	private MobileUserDto(User user) {
