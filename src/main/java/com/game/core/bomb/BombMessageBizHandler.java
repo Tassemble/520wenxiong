@@ -184,7 +184,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 				Object returnValue = method.invoke(processor, message, model);
 				
 				//两个条件同时成立时，才进入执行
-				if (!void.class.isAssignableFrom(returnValue.getClass()) && (returnValue != null)) {//如果返回不是NULL，
+				if ((returnValue != null) && !void.class.isAssignableFrom(returnValue.getClass())) {//如果返回不是NULL，
 					if (returnValue instanceof String) {
 						String value = (String)returnValue;
 						if (ReturnConstant.OK.equals(value)) {
