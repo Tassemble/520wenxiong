@@ -3,12 +3,15 @@ package com.game.core.bomb.dispatcher;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.game.bomb.Dao.MatchPolicyDao;
+import com.game.bomb.domain.MatchPolicy;
 import com.game.bomb.mobile.dto.MobRoomDto;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.core.GameMemory;
@@ -35,6 +38,10 @@ public class FastJoinAction implements BaseAction {
 
 	@Autowired
 	RoomLogic					roomLogic;
+	
+	
+	@Autowired
+	MatchPolicyDao matchPolicyDao;
 
 	private static Logger		LOG	= LoggerFactory.getLogger(FastJoinAction.class);
 
@@ -43,12 +50,24 @@ public class FastJoinAction implements BaseAction {
 		// check user status
 		OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
 		checkUserStatus(user);
+		
+		//查找一个level
+		int policyLevel = MatchPolicy.DEFAULT_POLICY_LEVEL;
+		
+		//如果匹配到多个的话，按照pkLevel降序
+		List<MatchPolicy> policies = matchPolicyDao.getByCondition("? >= win_low and ? < win_high and ? >= lose_low and ? < lose_high order by pk_level desc ", 
+				user.getVictoryNum(), user.getVictoryNum(), user.getLoserNum(), user.getLoserNum());
+		if (CollectionUtils.isNotEmpty(policies)) {
+			policyLevel = policies.get(0).getPkLevel();
+		}
+		
+		
 		FastJoinData joinData = (FastJoinData) data;
 		int userNumLimit = joinData.getPlayersNum();
 
 		PlayRoomDto room = null;
 		for (Entry<String, PlayRoomDto> entry : GameMemory.room.entrySet()) {
-			if (isMatchRoom(userNumLimit, entry.getValue())) {
+			if (isMatchRoom(userNumLimit, entry.getValue(), policyLevel)) {
 				room = entry.getValue();
 				break;
 			}
@@ -57,7 +76,7 @@ public class FastJoinAction implements BaseAction {
 		try {
 			if (room == null) {// create new room
 				// 这里不需要同步，原因是在没有创建好房间的时候，其他用户是看到这个房间的
-				room = new PlayRoomDto(userNumLimit, user);
+				room = new PlayRoomDto(userNumLimit, user, policyLevel);
 				GameMemory.room.put(room.getId(), room);
 				room.addUserCallback(new FastJoinTimeoutCallback(user.getUsername(), joinData
 						.getTimeoutInSeconds()));
@@ -102,6 +121,18 @@ public class FastJoinAction implements BaseAction {
 		return room.getReadyNumNow() < room.getRoomNumLimit() && room.getRoomNumLimit() == userNumLimit
 				&& PlayRoomDto.ROOM_STATUS_OPEN == room.getRoomStatus();
 	}
+	
+	private boolean isMatchRoom(int userNumLimit, PlayRoomDto room, Integer pkLevel) {
+		//增加一个条件，必须是相同的level的用户，才能进行PK
+		Integer roomPkLevel = room.getPkLevel();
+		if (!pkLevel.equals(roomPkLevel)) {
+			return false;
+		}
+		return room.getReadyNumNow() < room.getRoomNumLimit() && room.getRoomNumLimit() == userNumLimit
+				&& PlayRoomDto.ROOM_STATUS_OPEN == room.getRoomStatus();
+	}
+	
+	
 
 	@Override
 	public String getAction() {
