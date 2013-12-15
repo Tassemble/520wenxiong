@@ -37,6 +37,13 @@ public class GameMemory {
 	
 	
 	
+	public static boolean hasLogin() {
+		if (getUser() != null) {
+			return true;
+		}
+		return false;
+	}
+	
 	public static void reloadUser() {
 		UserService userService = ApplicationContextHolder.get().getBean(UserService.class);
 		if (getUser() == null) {

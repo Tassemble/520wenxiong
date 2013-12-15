@@ -51,7 +51,9 @@ public class RoomLogic {
 		}
 	}
 
-	
+	public void doUserJoin(PlayRoomDto room, String username, boolean withReady) {
+		
+	}
 	
 	public void doUserJoin(PlayRoomDto room, String username) {
 		synchronized (room.getRoomLock()) {

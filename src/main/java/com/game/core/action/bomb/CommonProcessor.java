@@ -8,13 +8,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import net.sf.json.JSONObject;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -23,6 +26,7 @@ import org.apache.mina.core.session.IoSession;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +51,7 @@ import com.game.core.bomb.dto.ReturnConstant;
 import com.game.core.bomb.logic.RoomLogic;
 import com.game.core.bomb.play.dto.PlayRoomDto;
 import com.game.core.exception.ActionFailedException;
+import com.game.core.exception.BombException;
 import com.game.core.exception.MessageNullException;
 import com.game.core.exception.NoAuthenticationException;
 import com.google.common.collect.Lists;
@@ -89,6 +94,65 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	@Autowired
 	TransactionService transactionService;
 	
+	@ActionAnnotation(action = "createRoom")
+	public void createRoom(Object message, Map<String, Object> map) {
+		//创建房间
+		JSONObject jsonRoot = JSONObject.fromObject(message);
+		//判断他是否有权限、是否在创建房间的条件内
+		//条件为：1. 用户是空闲状态，2. 普通用户即可
+		checkUserLegalToCreateOrJoinRoom();
+		
+		int priviledge = 1;
+		try {
+			priviledge = jsonRoot.getInt("priviledge");
+		} catch (Exception e) {
+		}
+		
+		if (!(priviledge == 1 || priviledge == 0)) {
+			throw new BombException(-1, "priviledge is ilegall");
+		}
+		
+		PlayRoomDto room = null;
+		if (priviledge == 0) {//如果是私有的房间
+			String authCode = String.valueOf(System.currentTimeMillis()) + "-" + String.valueOf(RandomUtils.nextLong(((new Random(System.currentTimeMillis())))));
+			room = new PlayRoomDto(GameMemory.getUser(), priviledge);
+			map.put("authCode", authCode);
+			//创建一个房间
+			//设定他自己为房主
+		} else {
+			room = new PlayRoomDto(GameMemory.getUser(), priviledge);
+			map.put("authCode",""); 
+		}
+		map.put("roomId", room.getId());
+		map.put("code", 200);
+	}
+	
+	
+	
+	@ActionAnnotation(action = "joinRoom")
+	public void joinRoom(Object message, Map<String, Object> map) {
+		
+		//需要验证是否加入房间 条件是用户是idle的状态
+		checkUserLegalToCreateOrJoinRoom();
+//		roomLogic.doUserJoin(room, username);
+		//
+	}
+	
+	
+	
+	
+	
+	private void checkUserLegalToCreateOrJoinRoom() {
+		if (GameMemory.hasLogin()) {
+			if (GameMemory.getUser().getStatus().equals(OnlineUserDto.STATUS_ONLINE)) {
+				return;
+			}
+			
+		}
+		throw new BombException(-1, "user is not idle, can't create room!");
+	}
+
+
 	//验证receipt
 	@ActionAnnotation(action = "receiptData")
 	public void verifyReceiptData(Object message, Map<String, Object> map) {
@@ -409,22 +473,21 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		}
 	}
 
-	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
+	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException, JSONException {
 
-		// JSONObject json = JSONObject.fromObject("{}");
-		// json.accumulate("hey", "ok");
-		// json.discard("hey");
-		// json.accumulate("hey", "哈哈");
-		// WordPressUtils.printJson(json);
-//		String json = "{\"a\":\"b\", \"d\":{\"a\":\"b\"}}";
+		
+		org.codehaus.jettison.json.JSONObject json =
+				new org.codehaus.jettison.json.JSONObject("{\"a\":\"b\", \"d\":{\"a\":\"b\"}}");
+		System.out.println(json.has("hah"));
+		//		String json = "{\"a\":\"b\", \"d\":{\"a\":\"b\"}}";
 
-		long time = System.currentTimeMillis();
-
-		for (int i = 0; i < 1000000; i++) {
-			
-			ObjectMapper mapper = new ObjectMapper();
-		}
-		System.out.println(System.currentTimeMillis() - time );
+//		long time = System.currentTimeMillis();
+//
+//		for (int i = 0; i < 1000000; i++) {
+//			
+//			ObjectMapper mapper = new ObjectMapper();
+//		}
+//		System.out.println(System.currentTimeMillis() - time );
 //
 //		HashMap<Object, Object> map = mapper.readValue(json, HashMap.class);
 //		Map o = (Map) map.get("d");
