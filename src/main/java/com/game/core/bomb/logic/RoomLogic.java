@@ -131,7 +131,9 @@ public class RoomLogic {
 			room.getUsers().remove(user);
 			room.decreaseReadyNum();
 			if (room.isEmpty()) {
-				room.setRoomStatus(PlayRoomDto.ROOM_STATUS_OPEN);
+				//把房间删除吧
+				GameMemory.room.remove(room.getId());
+//				room.setRoomStatus(PlayRoomDto.ROOM_STATUS_OPEN);
 			}
 		}
 		

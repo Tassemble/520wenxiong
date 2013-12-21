@@ -1,9 +1,12 @@
 package com.game.core.bomb.dispatcher;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,7 @@ import com.game.core.exception.GamePlayException;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.wenxiong.blog.commons.utils.text.JsonUtils;
 
 @Component
 public class FastJoinAction implements BaseAction {
@@ -52,23 +56,40 @@ public class FastJoinAction implements BaseAction {
 		checkUserStatus(user);
 		
 		//查找一个level
-		int policyLevel = MatchPolicy.DEFAULT_POLICY_LEVEL;
 		
-		//如果匹配到多个的话，按照pkLevel降序
-		List<MatchPolicy> policies = matchPolicyDao.getByCondition("? >= win_low and ? < win_high and ? >= lose_low and ? < lose_high order by pk_level desc ", 
-				user.getVictoryNum(), user.getVictoryNum(), user.getLoserNum(), user.getLoserNum());
-		if (CollectionUtils.isNotEmpty(policies)) {
-			policyLevel = policies.get(0).getPkLevel();
+		List<MatchPolicy> policies = matchPolicyDao.getByCondition("1=1 order by pk_level asc");
+		if (CollectionUtils.isEmpty(policies)) {
+			throw new BombException(ExceptionConstant.GAME_START_EXCEPTION, "no policies in db, please configure it");
 		}
-		
 		
 		FastJoinData joinData = (FastJoinData) data;
 		int userNumLimit = joinData.getPlayersNum();
 
 		PlayRoomDto room = null;
-		for (Entry<String, PlayRoomDto> entry : GameMemory.room.entrySet()) {
-			if (isMatchRoom(userNumLimit, entry.getValue(), policyLevel)) {
-				room = entry.getValue();
+		Map<String, Object> bestPolicyMap = findBestPolicy(policies, user);
+		
+		
+		Integer bestPosition = 0;
+		int policyLevel = MatchPolicy.DEFAULT_POLICY_LEVEL;
+		if (!MapUtils.isEmpty(bestPolicyMap)) {
+			bestPosition = (Integer)bestPolicyMap.get("position");
+			MatchPolicy bestPolicy = (MatchPolicy)bestPolicyMap.get("policy");
+			policyLevel = bestPolicy.getPkLevel();
+		}
+		
+		//如果找不到就找相邻的梯级
+		for (int i = 0; i < policies.size(); i++) {
+			room = matchRoom(policies, userNumLimit, room, bestPosition + i);
+			if (room != null) {
+				break;
+			}
+			//优化 因为再一次match room 还是和上一次match room 一样
+			if (bestPosition == 0 && i == 0) {
+				continue;
+			}
+			
+			room = matchRoom(policies, userNumLimit, room, bestPosition - i);
+			if (room != null) {
 				break;
 			}
 		}
@@ -115,6 +136,53 @@ public class FastJoinAction implements BaseAction {
 					+ e.getMessage());
 		}
 
+	}
+
+	private PlayRoomDto matchRoom(List<MatchPolicy> policies, int userNumLimit, PlayRoomDto room, int i) {
+		MatchPolicy policy = findNextPolicy(policies, i);
+		if (policy == null) {
+			return null;
+		}
+		for (Entry<String, PlayRoomDto> entry : GameMemory.room.entrySet()) {
+			if (isMatchRoom(userNumLimit, entry.getValue(), policy.getPkLevel())) {
+				room = entry.getValue();
+				break;
+			}
+		}
+		return room;
+	}
+
+	private MatchPolicy findNextPolicy(List<MatchPolicy> policies, int i) {
+		if (i < 0 || i >= policies.size()) {
+			return null;
+		}
+		
+		return policies.get(i);
+	}
+
+	private Map<String, Object> findBestPolicy(List<MatchPolicy> policies, OnlineUserDto user) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		if (CollectionUtils.isEmpty(policies) || user == null) {
+			throw new BombException(-1, "find best policy failed, policy is empty or user null, for user:" + JsonUtils.toJson(user));
+		}
+		
+		if (user.getVictoryNum() == null || user.getLoserNum() == null) {
+			throw new BombException(-1, "user victory null is null or lose number is null, for user:" + JsonUtils.toJson(user));
+		}
+		
+		
+		for (int idx = 0; idx < policies.size(); idx++) {
+			MatchPolicy matchPolicy = policies.get(idx);
+			if (user.getVictoryNum() >= matchPolicy.getWinLow() && user.getVictoryNum() < matchPolicy.getWinHigh()
+					&&  user.getLoserNum() >= matchPolicy.getLoseLow() &&  user.getLoserNum() < matchPolicy.getLoseHigh())
+			{
+				map.put("position", idx);
+				map.put("policy", matchPolicy);
+				return map;
+			}
+		}
+		
+		return map;
 	}
 
 	private boolean isMatchRoom(int userNumLimit, PlayRoomDto room) {
