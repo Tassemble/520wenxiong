@@ -72,6 +72,7 @@ public class BloodLogic {
 			update.setId(user.getId());
 			update.setBloodTime(new Date(curTime));
 			userService.updateSelectiveById(update);
+			user.setBloodTime(new Date(curTime));
 		}
 		
 		
