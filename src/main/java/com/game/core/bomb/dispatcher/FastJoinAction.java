@@ -61,7 +61,8 @@ public class FastJoinAction implements BaseAction {
 		checkUserStatus(user);
 		User userInDB = userService.getById(user.getId());
 		if (userInDB.getHeartNum() == null || userInDB.getHeartNum() <= 0) {
-			throw new BombException(ExceptionConstant.NO_HEART_EXCEPTION, "no heart, you can wait or buy it");
+			session.write(new ReturnDto(-1, "no heart, you can wait or buy it"));
+			return;
 		}
 		
 		//查找一个level
