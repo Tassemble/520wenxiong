@@ -144,6 +144,7 @@ public class RoomLogic {
 			maps.put("code", 200);
 			session.write(maps);
 			
+			changeLevelWhenWin(user);
 			User update = new User();
 			update.setId(user.getId());
 			update.setLevel(user.getLevel());
@@ -172,6 +173,27 @@ public class RoomLogic {
 		}
 	}
 	
+	
+	
+	public void changeLevelWhenWin(OnlineUserDto user) {
+		if (user.getVictoryNum() == null || user.getVictoryNum() < 5) {
+			user.setLevel(1);
+		} else if (user.getVictoryNum() < 15 && user.getVictoryNum() >= 5) {
+			user.setLevel(2);
+		} else if (user.getVictoryNum() < 35 && user.getVictoryNum() >= 15) {
+			user.setLevel(3);
+		} else if (user.getVictoryNum() < 80 && user.getVictoryNum() >= 35) {
+			user.setLevel(4);
+		} else if (user.getVictoryNum() < 150 && user.getVictoryNum() >= 80) {
+			user.setLevel(5);
+		} else if (user.getVictoryNum() < 450 && user.getVictoryNum() >= 150) {
+			user.setLevel(6);
+		} else if (user.getVictoryNum() < 1000 && user.getVictoryNum() <= 450) {
+			user.setLevel(7);
+		} else {
+			user.setLevel(8);
+		}
+	}
 	
 	public int getLevel(Integer winNum) {
 		int winNumCopy = winNum;

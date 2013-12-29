@@ -123,7 +123,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("receive message from session:" + session.getId() + ", message:" + message.toString());
+			LOG.debug("receive message from session:" + session.getId() + ", message:" + message.toString() + ",cnt:" + message.toString().length());
 		}
 		// 特殊输出，如果是单纯字节的话========================start
 		JSONObject json = null;
@@ -225,7 +225,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 	public void messageSent(IoSession session, Object message) throws Exception {
 		if (LOG.isDebugEnabled()) {
 			if (message != null)
-				LOG.debug("sent:" + message);
+				LOG.debug("sent:" + message + ", cnt:" + message.toString().length());
 		}
 
 	}
