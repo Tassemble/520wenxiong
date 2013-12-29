@@ -83,7 +83,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		
 		//try to get locker
 		this.getByCondition("id = ? for update", user.getId());
-		updateSelectiveByCondition(user, "id = ? for update", user.getId());
+		updateSelectiveById(user);
 	}
 	
 	

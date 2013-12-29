@@ -31,5 +31,8 @@ public class ExceptionConstant {
 	
 	public static final int TRANSACTION_DUP = -201;
 	
+	
+	public static final int NO_HEART_EXCEPTION = -202;
+	
 		
 }

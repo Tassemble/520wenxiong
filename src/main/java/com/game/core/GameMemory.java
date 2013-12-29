@@ -49,8 +49,12 @@ public class GameMemory {
 		if (getUser() == null) {
 			throw new RuntimeException("reload user error due to threadlocal no user find");
 		}
+		
 		User user = userService.getById(getUser().getId());
-		setUser(new OnlineUserDto(user));
+		OnlineUserDto onlineUser = new OnlineUserDto(user);
+		onlineUser.setStatus(getUser().getStatus());
+		onlineUser.setSession(getUser().getSession());
+		setUser(onlineUser);
 	}
 	
 	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session

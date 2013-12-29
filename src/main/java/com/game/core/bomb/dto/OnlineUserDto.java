@@ -16,26 +16,22 @@ public class OnlineUserDto {
 	String username;
 	String status;
 	String nickname;
-	
 	Integer level;
 	Integer portrait;
 	Integer heartNum;
 	Integer victoryNum;
 	Integer loserNum;
 	Integer runawayNum;
-	
-	
 	Long				inGot;
 	Long				gold;
-	
 	private String inUse;
-	
 	transient IoSession session;
 	
 	public OnlineUserDto() {}
 	public OnlineUserDto(User user) {
 		this.id = user.getId();
 		this.username = user.getUsername();
+		this.nickname = user.getNickName();
 		this.heartNum = user.getHeartNum();
 		this.level = user.getLevel();
 		this.loserNum = user.getLoserNum();

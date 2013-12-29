@@ -1,5 +1,6 @@
 package com.game.core.bomb.logic;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -128,6 +129,7 @@ public class RoomLogic {
 			} else {
 				user.setLoserNum(user.getLoserNum() + 1);
 			}
+			user.setHeartNum(user.getHeartNum() - 1);
 			user.setRoomId("");
 			user.setStatus(OnlineUserDto.STATUS_ONLINE);
 			room.getUsers().remove(user);
@@ -150,8 +152,10 @@ public class RoomLogic {
 			User update = new User();
 			update.setId(user.getId());
 			update.setLevel(user.getLevel());
-			
+			update.setHeartNum(user.getHeartNum());
 			update.setVictoryNum(user.getVictoryNum());
+			update.setBloodTime(new Date());
+			update.setGmtModified(new Date());
 			userDao.updateSelectiveById(update);
 		} else {
 			Map<String, Object> maps = Maps.newHashMap();
@@ -162,6 +166,9 @@ public class RoomLogic {
 			
 			User update = new User();
 			update.setId(user.getId());
+			update.setBloodTime(new Date());
+			update.setHeartNum(user.getHeartNum());
+			update.setGmtModified(new Date());
 			update.setLoserNum(user.getLoserNum());
 			update.setRunawayNum(user.getRunawayNum());
 			userDao.updateSelectiveById(update);
@@ -173,6 +180,8 @@ public class RoomLogic {
 				doUserQuit(room, room.getUsers().get(0).getUsername());
 			}
 		}
+		
+		GameMemory.reloadUser();
 	}
 	
 	

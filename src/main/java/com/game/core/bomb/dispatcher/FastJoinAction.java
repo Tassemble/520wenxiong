@@ -45,11 +45,8 @@ public class FastJoinAction implements BaseAction {
 	@Autowired
 	RoomLogic					roomLogic;
 	
-	
 	@Autowired
 	MatchPolicyDao matchPolicyDao;
-
-	
 	
 	@Autowired
 	UserService userService;
@@ -62,6 +59,10 @@ public class FastJoinAction implements BaseAction {
 		// check user status
 		OnlineUserDto user = GameMemory.SESSION_USERS.get(session.getId());
 		checkUserStatus(user);
+		User userInDB = userService.getById(user.getId());
+		if (userInDB.getHeartNum() == null || userInDB.getHeartNum() <= 0) {
+			throw new BombException(ExceptionConstant.NO_HEART_EXCEPTION, "no heart, you can wait or buy it");
+		}
 		
 		//查找一个level
 		

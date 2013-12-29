@@ -27,6 +27,10 @@ public class BloodLogic {
 	GameAttributeDao gameAttributeDao;
 	
 	
+	public static Long DefaultBloodRecoveryOfDuration = 10 * 60 * 1000L;//ten minites;
+	
+	
+	
 	@Autowired
 	UserService userService;
 	
@@ -62,8 +66,16 @@ public class BloodLogic {
 		
 		Long curTime = System.currentTimeMillis();
 		
+		//容错
+		if (user.getBloodTime() == null || user.getBloodTime().getTime() <= 0) {
+			User update = new User();
+			update.setId(user.getId());
+			update.setBloodTime(new Date(curTime));
+			userService.updateSelectiveById(update);
+		}
 		
-		long heardGain = (curTime - user.getBloodTime().getTime()) % getBloodRecoveryOfDuration();
+		
+		long heardGain = (curTime - user.getBloodTime().getTime()) / getBloodRecoveryOfDuration();
 		
 		if (heardGain > 1) {
 			int heartNow = user.getHeartNum() + (int)heardGain;
@@ -81,19 +93,22 @@ public class BloodLogic {
 	
 	
 	public Long getBloodRecoveryOfDuration() {
-		Long tenMinites = 10 * 60 * 1000L;//ten minites;
 		GameAttribute attr = new GameAttribute();
 		attr.setAttrName(GameAttribute.KEY_DURATION_OF_RENEW_BLOOD);
 		List<GameAttribute> results = gameAttributeDao.getByDomainObjectSelective(attr);
 		if (CollectionUtils.isEmpty(results)) {
-			return tenMinites;
+			return DefaultBloodRecoveryOfDuration;
 		}
 		
 		try {
-			return Long.valueOf(results.get(0).getAttrValue());
+			Long duration = Long.valueOf(results.get(0).getAttrValue());
+			if (!duration.equals(DefaultBloodRecoveryOfDuration)) {
+				DefaultBloodRecoveryOfDuration = duration;
+			}
+			return DefaultBloodRecoveryOfDuration;
 		} catch (NumberFormatException e) {
 			LOG.error(e.getMessage(), e);
-			return tenMinites;
+			return DefaultBloodRecoveryOfDuration;
 		}
 		
 	}

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.text.StyledEditorKit.BoldAction;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -11,6 +13,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.game.bomb.domain.User;
 import com.game.core.GameMemory;
+import com.game.core.action.bomb.logic.BloodLogic;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.google.gson.annotations.SerializedName;
 
@@ -40,16 +43,12 @@ public class MobileUserDto {
 	Long				gold;
 	Integer 			heart;
 	
-	
-	
 
 	// should set it alone
 	String				status;
 	
 	@SerializedName("in_use")
 	Map<Object, Object>	inUse;
-	
-	
 	
 	private Long leftTime; //ms 
 	
@@ -97,7 +96,12 @@ public class MobileUserDto {
 		}
 		MobileUserDto mobData = new MobileUserDto(user);
 		mobData.setStatus(onlineUser.getStatus());
-		mobData.setLeftTime(System.currentTimeMillis() - user.getBloodTime().getTime());
+		if (user.getFullHeart() == null || user.getHeartNum() == null || user.getHeartNum() >= user.getFullHeart()) {
+			mobData.setLeftTime(0L);
+		} else {
+			mobData.setLeftTime(BloodLogic.DefaultBloodRecoveryOfDuration - 
+					(System.currentTimeMillis() - user.getBloodTime().getTime()));
+		}
 		if (!StringUtils.isBlank(user.getInUse())) {
 			mobData.setInUse(new ObjectMapper().readValue(user.getInUse(), HashMap.class));
 		}
