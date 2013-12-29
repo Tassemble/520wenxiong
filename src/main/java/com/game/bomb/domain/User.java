@@ -1,5 +1,7 @@
 package com.game.bomb.domain;
 
+import java.util.Date;
+
 import com.netease.framework.dao.sql.annotation.DataProperty;
 import com.wenxiong.blog.commons.domain.BaseDo;
 
@@ -24,7 +26,7 @@ public class User extends BaseDo {
 	Long experience;
 	Integer level;
 	Integer portrait;
-	Integer heartNum;
+	
 	Integer victoryNum;
 	Integer loserNum;
 	Integer runawayNum;
@@ -38,8 +40,43 @@ public class User extends BaseDo {
 	Long gold;
 	
 	
+	/**
+	 * 血量的设计：
+	 * 1. 需要一个满血量
+	 * 2. 需要一个剩余血量
+	 * 3. 记录由满血到非满血的时间点(blood_time, 没有竞争条件，所以不够成并发)
+	 * 4. 非满血状态在一定时间范围内可以恢复部分或者全部血量至剩余血量中(这里剩余血量构成竞争条件，需要并发控制)，
+	 *    blood_time记录恢复的时间点
+	 * 5. 记录一个恢复时长 在game_attribute表中   
+	 *    
+	 *    
+	 */
+	/*  满血量  */
+	Integer fullHeart;
+	
+	/*  剩余血量  */
+	Integer heartNum;
+	
+	Date bloodTime;
+	
+	public final static int CONSTANT_FULL_HEART = 5;
 	
 	
+	
+	@DataProperty(column="full_heart")
+	public Integer getFullHeart() {
+		return fullHeart;
+	}
+	public void setFullHeart(Integer fullHeart) {
+		this.fullHeart = fullHeart;
+	}
+	@DataProperty(column="blood_time")
+	public Date getBloodTime() {
+		return bloodTime;
+	}
+	public void setBloodTime(Date bloodTime) {
+		this.bloodTime = bloodTime;
+	}
 	@DataProperty(column="in_got")
 	public Long getInGot() {
 		return inGot;

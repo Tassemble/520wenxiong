@@ -16,6 +16,7 @@ import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.FriendRelationService;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
+import com.game.core.action.bomb.logic.BloodLogic;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.exception.NoAuthenticationException;
 import com.google.common.collect.Lists;
@@ -29,6 +30,9 @@ public class PlayerInfoProcessorHelper {
 	FriendRelationService friendRelationService;
 	@Autowired
 	UserService userService;
+	
+	@Autowired
+	BloodLogic bloodLogic;
 
 	public void innerDownloadPlayerInfo(Map<String, Object> map) throws JsonParseException,
 			JsonMappingException, IOException {
@@ -42,6 +46,9 @@ public class PlayerInfoProcessorHelper {
 			throw new NoAuthenticationException("downloadPlayerInfo");
 		}
 
+		//TODO
+		bloodLogic.processBloodWithRealTime(user);
+		
 		MobileUserDto mobData = MobileUserDto.buildMobileUser(user);
 
 		map.put("code", 200);

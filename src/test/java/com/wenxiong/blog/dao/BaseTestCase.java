@@ -26,6 +26,6 @@ public class BaseTestCase extends JunitTransactionSpringContextTest {
 		User user = service.getById(id);
 		OnlineUserDto onlineUser = new OnlineUserDto(user);
 		GameMemory.setUser(onlineUser);
-		GameMemory.onlineUsers.put(user.getUsername(), onlineUser);
+		GameMemory.ONLINE_USERS.put(user.getUsername(), onlineUser);
 	}
 }

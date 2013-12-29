@@ -48,7 +48,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		newItem.setUsername(data.getUsername());
 		newItem.setMd5Password(DigestUtils.md5Hex(data.getPassword()));
 		newItem.setNickName(data.getNickname());
-		newItem.setHeartNum(5);
+		newItem.setHeartNum(User.CONSTANT_FULL_HEART);
 		newItem.setLevel(1);
 		newItem.setLoserNum(0);
 		newItem.setPortrait(0);
@@ -56,6 +56,9 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		newItem.setVictoryNum(0);
 		newItem.setGmtCreate(now);
 		newItem.setGmtModified(now);
+		newItem.setFullHeart(User.CONSTANT_FULL_HEART);
+		newItem.setBloodTime(new Date(-1));
+		newItem.setEnable(true);
 		newItem.setGold(WealthBudget.DEFAULT_WEALTH);
 		newItem.setInGot(WealthBudget.DEFAULT_WEALTH);
 		add(newItem);
@@ -72,6 +75,15 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		wealth.setQuantity(WealthBudget.DEFAULT_WEALTH);
 		wealth.setUid(userFromDB.getId());
 		wealthBudgetDao.add(wealth);
+	}
+
+
+	@Override
+	public void updateUserBloodWithLock(User user) {
+		
+		//try to get locker
+		this.getByCondition("id = ? for update", user.getId());
+		updateSelectiveByCondition(user, "id = ? for update", user.getId());
 	}
 	
 	

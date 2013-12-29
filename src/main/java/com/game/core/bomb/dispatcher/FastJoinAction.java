@@ -15,8 +15,10 @@ import org.springframework.stereotype.Component;
 
 import com.game.bomb.Dao.MatchPolicyDao;
 import com.game.bomb.domain.MatchPolicy;
+import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobRoomDto;
 import com.game.bomb.mobile.dto.MobileUserDto;
+import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.bomb.dto.ActionNameEnum;
 import com.game.core.bomb.dto.BaseActionDataDto;
@@ -47,12 +49,18 @@ public class FastJoinAction implements BaseAction {
 	@Autowired
 	MatchPolicyDao matchPolicyDao;
 
+	
+	
+	@Autowired
+	UserService userService;
+	
+	
 	private static Logger		LOG	= LoggerFactory.getLogger(FastJoinAction.class);
 
 	@Override
 	public void doAction(IoSession session, BaseActionDataDto data) throws Exception {
 		// check user status
-		OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
+		OnlineUserDto user = GameMemory.SESSION_USERS.get(session.getId());
 		checkUserStatus(user);
 		
 		//查找一个level
@@ -113,11 +121,17 @@ public class FastJoinAction implements BaseAction {
 
 			//send back players infos
 			if (room.isReadyToStart()) {
-
 				// online users
 				List<MobileUserDto> players = Lists.newArrayList();
+				List<Long> userIds = Lists.newArrayList();
+				
 				for (OnlineUserDto oUser : room.getUsers()) {
-					MobileUserDto mUser = new MobileUserDto(oUser);
+					userIds.add(oUser.getId());
+				}
+				
+				List<User> users = userService.getByIdList(userIds);
+				for (User userFromDB : users) {
+					MobileUserDto mUser = MobileUserDto.buildMobileUser(userFromDB);
 					players.add(mUser);
 				}
 

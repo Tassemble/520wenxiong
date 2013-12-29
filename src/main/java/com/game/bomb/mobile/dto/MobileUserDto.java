@@ -39,12 +39,20 @@ public class MobileUserDto {
 	Long				inGot;
 	Long				gold;
 	Integer 			heart;
+	
+	
+	
 
 	// should set it alone
 	String				status;
 	
 	@SerializedName("in_use")
 	Map<Object, Object>	inUse;
+	
+	
+	
+	private Long leftTime; //ms 
+	
 
 	private MobileUserDto(User user) {
 		this.id = user.getId();
@@ -58,22 +66,6 @@ public class MobileUserDto {
 		this.lose = user.getLoserNum() == null ? 0 : user.getLoserNum();
 		this.gold = user.getGold();
 		this.inGot = user.getInGot();
-		// int victoryNum = user.getVictoryNum() == null ? 0 :
-		// user.getVictoryNum();
-		// int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
-		// int runawayNum = user.getRunawayNum() == null ? 0 :
-		// user.getRunawayNum();
-		//
-		// int total = victoryNum + loseNum + runawayNum;
-		// if (total == 0) {
-		// this.win = 0.0f;
-		// this.runaway = 0.0f;
-		// this.lose = 0.0f;
-		// } else {
-		// this.win = (float)victoryNum / (float)(total);
-		// this.runaway = (float)runawayNum/(float)(total);
-		// this.lose = (float)loseNum /(float)(total);
-		// }
 	}
 
 	@SuppressWarnings("unchecked")
@@ -89,21 +81,6 @@ public class MobileUserDto {
 		this.lose = user.getLoserNum() == null ? 0 : user.getLoserNum();
 		this.gold = user.getGold();
 		this.inGot = user.getInGot();
-		// int victoryNum = user.getVictoryNum() == null ? 0 :
-		// user.getVictoryNum();
-		// int loseNum = user.getLoserNum() == null ? 0 : user.getLoserNum();
-		// int runawayNum = user.getRunawayNum() == null ? 0 :
-		// user.getRunawayNum();
-		// int total = victoryNum + loseNum + runawayNum;
-		// if (total == 0) {
-		// this.win = 0.0f;
-		// this.lose = 0.0f;
-		// this.runaway = 0.0f;
-		// } else {
-		// this.win = (float)victoryNum / (float)(total);
-		// this.runaway = (float)runawayNum/(float)(total);
-		// this.lose = (float)loseNum /(float)(total);
-		// }
 		this.status = user.getStatus();
 		if (!StringUtils.isBlank(user.getInUse())) {
 			this.inUse = new ObjectMapper().readValue(user.getInUse(), HashMap.class);
@@ -120,9 +97,11 @@ public class MobileUserDto {
 		}
 		MobileUserDto mobData = new MobileUserDto(user);
 		mobData.setStatus(onlineUser.getStatus());
+		mobData.setLeftTime(System.currentTimeMillis() - user.getBloodTime().getTime());
 		if (!StringUtils.isBlank(user.getInUse())) {
 			mobData.setInUse(new ObjectMapper().readValue(user.getInUse(), HashMap.class));
 		}
+
 		return mobData;
 	}
 
@@ -204,6 +183,14 @@ public class MobileUserDto {
 
 	public void setInUse(Map<Object, Object> inUse) {
 		this.inUse = inUse;
+	}
+
+	public Long getLeftTime() {
+		return leftTime;
+	}
+
+	public void setLeftTime(Long leftTime) {
+		this.leftTime = leftTime;
 	}
 
 }

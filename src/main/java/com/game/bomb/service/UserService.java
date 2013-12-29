@@ -12,5 +12,8 @@ import com.wenxiong.blog.commons.service.BaseService;
 public interface UserService extends BaseService<User>{
 
 	void addNewUser(GameSignUpData data);
+	
+	
+	void updateUserBloodWithLock(User update);
 
 }

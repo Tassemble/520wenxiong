@@ -228,7 +228,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		// ~ 老代码 需要移植到新的逻辑上去
 			List<OnlineUserDto> users = Lists.newArrayList();
 			int limit = 100;
-			for (Entry<String, OnlineUserDto> entry : GameMemory.onlineUsers.entrySet()) {
+			for (Entry<String, OnlineUserDto> entry : GameMemory.ONLINE_USERS.entrySet()) {
 				limit--;
 				if (limit == 0) {
 					break;

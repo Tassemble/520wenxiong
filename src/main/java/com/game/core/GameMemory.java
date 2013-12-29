@@ -23,9 +23,9 @@ public class GameMemory {
 	
 	static final int MAX_PLAYERS = 5000;
 
-	public static Map<Long, OnlineUserDto> sessionUsers;
+	public static Map<Long, OnlineUserDto> SESSION_USERS;
 	
-	public static Map<String, OnlineUserDto> onlineUsers;
+	public static Map<String, OnlineUserDto> ONLINE_USERS;
 	
 	public static Map<String, Object> actionMapping = new HashMap<String, Object>();
 	
@@ -60,9 +60,9 @@ public class GameMemory {
 		//用于用于超时通知
 		executor = Executors.newFixedThreadPool(MAX_PLAYERS);
 		//key is session id , value is user
-		sessionUsers = new ConcurrentHashMap<Long, OnlineUserDto>();
+		SESSION_USERS = new ConcurrentHashMap<Long, OnlineUserDto>();
 		//key is username , value is user
-		onlineUsers = new ConcurrentHashMap<String, OnlineUserDto>();
+		ONLINE_USERS = new ConcurrentHashMap<String, OnlineUserDto>();
 		room = new ConcurrentHashMap<String, PlayRoomDto>();
 		
 		// for biz context
@@ -81,7 +81,7 @@ public class GameMemory {
 	
 	
 	public static OnlineUserDto getUserByUsername(String username) {
-		return onlineUsers.get(username);
+		return ONLINE_USERS.get(username);
 	}
 	
 	
@@ -94,7 +94,7 @@ public class GameMemory {
 	}
 	
 	public static OnlineUserDto getOnlineUserBySessionId(Long id) {
-		return sessionUsers.get(id);
+		return SESSION_USERS.get(id);
 	}
 	
 	public static PlayRoomDto getRoomByRoomId(String id) {
@@ -109,22 +109,22 @@ public class GameMemory {
 	}
 	
 	public static void put(Long key, OnlineUserDto value) {
-		sessionUsers.put(key, value);
+		SESSION_USERS.put(key, value);
 	}
 	
 	
 	public static Object get(Long key) {
-		return sessionUsers.get(key);
+		return SESSION_USERS.get(key);
 	}
 	
 	
 	public static void removeSessionUserByKey(Long key) {
-		sessionUsers.remove(key);
+		SESSION_USERS.remove(key);
 	}
 
 
 	public static Map<Long, OnlineUserDto> getMap() {
-		return sessionUsers;
+		return SESSION_USERS;
 	}
 
 
@@ -134,7 +134,7 @@ public class GameMemory {
 	
 	
 	public static IoSession getSessionByUsername(String username) {
-		OnlineUserDto dto = onlineUsers.get(username);
+		OnlineUserDto dto = ONLINE_USERS.get(username);
 		if (dto != null) {
 			return dto.getSession();
 		}

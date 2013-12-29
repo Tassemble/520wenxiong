@@ -79,7 +79,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 
 		//
 		// locker.lock("", key);
-		OnlineUserDto user = GameMemory.sessionUsers.get(session.getId());
+		OnlineUserDto user = GameMemory.SESSION_USERS.get(session.getId());
 		if (user == null) {
 			return;
 		}
@@ -87,7 +87,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 		if (room != null) {
 			roomLogic.doUserQuit(room, user.getUsername());
 		}
-		GameMemory.onlineUsers.remove(user.getUsername());
+		GameMemory.ONLINE_USERS.remove(user.getUsername());
 		GameMemory.removeSessionUserByKey(session.getId());
 	}
 

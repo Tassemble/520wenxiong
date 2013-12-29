@@ -93,6 +93,7 @@ public class RoomLogic {
 			return;
 		}
 		List<OnlineUserDto> users = room.getUsers();
+		
 		for (OnlineUserDto u : users) {
 			u.getSession().write(message);
 		}
@@ -104,6 +105,7 @@ public class RoomLogic {
 	}
 	
 	public void doUserQuit(PlayRoomDto room, String username) throws Exception {
+		//这里是处理快速开始游戏的逻辑处理，如果期间有人退出就直接全部退出好了，重新再进行一次游戏匹配
 		if (room.getRoomStatus().equals(PlayRoomDto.ROOM_STATUS_OPEN)) {//not playing
 			shutdownRoom(room);
 			return;
