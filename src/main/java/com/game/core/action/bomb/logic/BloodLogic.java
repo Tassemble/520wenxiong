@@ -27,7 +27,7 @@ public class BloodLogic {
 	GameAttributeDao gameAttributeDao;
 	
 	
-	public static Long DefaultBloodRecoveryOfDuration = 10 * 60 * 1000L;//ten minites;
+	public volatile static Long DefaultBloodRecoveryOfDuration = 10 * 60 * 1000L;//ten minites;
 	
 	
 	
@@ -71,6 +71,7 @@ public class BloodLogic {
 			User update = new User();
 			update.setId(user.getId());
 			update.setBloodTime(new Date(curTime));
+			update.setGmtModified(new Date(curTime));
 			userService.updateSelectiveById(update);
 			user.setBloodTime(new Date(curTime));
 		}
@@ -79,8 +80,6 @@ public class BloodLogic {
 		long heardGain = (curTime - user.getBloodTime().getTime()) / getBloodRecoveryOfDuration();
 		
 		if (heardGain > 1) {
-			//so should change curTime
-			curTime = System.currentTimeMillis();
 			
 			int heartNow = user.getHeartNum() + (int)heardGain;
 			if (heartNow > user.getFullHeart()) {
@@ -90,8 +89,10 @@ public class BloodLogic {
 			update.setId(user.getId());
 			update.setBloodTime(new Date(curTime));
 			update.setHeartNum(heartNow);
+			update.setGmtModified(new Date(curTime));
 			userService.updateUserBloodWithLock(update);
 			user.setBloodTime(new Date(curTime));
+			user.setHeartNum(heartNow);
 		}
 	}
 	
