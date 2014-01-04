@@ -28,7 +28,7 @@ public class ActionFailedException extends BombException{
 	
 	
 	public ActionFailedException(String message, String action) {
-		super(ExceptionConstant.ACTION_FAILED_CODE, message);
+		super(ExceptionConstant.ACTION_FAILED_CODE, action, message);
 		this.code = ExceptionConstant.ACTION_FAILED_CODE;
 		this.message = message;
 		this.action = action;
@@ -36,7 +36,7 @@ public class ActionFailedException extends BombException{
 	
 	
 	public ActionFailedException(String action) {
-		super(ExceptionConstant.ACTION_FAILED_CODE, "action is:" + action);
+		super(ExceptionConstant.ACTION_FAILED_CODE, action, "");
 		this.code = ExceptionConstant.ACTION_FAILED_CODE;
 		this.action = action;
 		this.message = "please refresh friends list";

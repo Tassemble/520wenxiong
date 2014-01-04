@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.Assert;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +18,8 @@ import com.game.bomb.Dao.UserMetaDao;
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
+import com.game.core.exception.ActionFailedException;
+import com.game.core.exception.BombException;
 import com.wenxiong.blog.dao.BaseTestCase;
 import com.wenxiong.utils.GsonUtils;
 
@@ -42,18 +46,30 @@ public class GameMainTest extends BaseTestCase {
 		} finally {
 			acceptor.unbind();
 		}
-
+	}
+	
+	public static void main(String[] args) {
+		ActionFailedException failed = new ActionFailedException(0, "msg", "action");
+		
+		if (BombException.class.isAssignableFrom(failed.getClass())) {
+			Assert.assertEquals(true, true);
+			System.out.println(true);
+		} else {
+			System.out.println(false);
+			Assert.assertEquals(true, false);
+		}
+		
 	}
 
 	@Autowired
 	UserMetaDao uesrMetaDao;
 	
-	public static void main(String[] args) {
-		String json = "{\\\"action\\\":\\\"downloadInventoryItem\\\"}";
-		json = StringUtils.replace(json, "\"", "");
-		System.out.println(json);
-	}
-	
+//	public static void main(String[] args) {
+//		String json = "{\\\"action\\\":\\\"downloadInventoryItem\\\"}";
+//		json = StringUtils.replace(json, "\"", "");
+//		System.out.println(json);
+//	}
+//	
 	@Test
 	public void testDao() {
 		uesrMetaDao.getAll();

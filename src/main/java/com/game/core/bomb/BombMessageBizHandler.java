@@ -1,11 +1,11 @@
 package com.game.core.bomb;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import net.sf.json.JSONObject;
 
@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.game.core.GameMemory;
-import com.game.core.JsonSessionWrapper;
-import com.game.core.MessageSenderHelper;
 import com.game.core.action.processor.ActionAnotationProcessor;
 import com.game.core.bomb.auth.AuthIoFilter;
 import com.game.core.bomb.dispatcher.BaseAction;
@@ -36,7 +34,6 @@ import com.game.core.bomb.logic.RoomLogic;
 import com.game.core.bomb.play.dto.PlayRoomDto;
 import com.game.core.exception.BombException;
 import com.game.core.utils.CellLocker;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.wenxiong.utils.GsonUtils;
 
@@ -99,10 +96,17 @@ public class BombMessageBizHandler implements BombMessageHandler{
 	@Override
 	public void exceptionCaught(IoSession session, Throwable throwable) throws Exception {
 		
-		if (BombException.class.isAssignableFrom(throwable.getClass())) {
-			BombException exception = (BombException)throwable;
-			session.write(new ReturnDto(exception.getCode(), exception.getAction(), exception.getMessage()));
+		if (hasProcessBombExceptionNicely(session, throwable)) {
 			return;
+		}
+		
+		if (throwable instanceof InvocationTargetException) {
+			Throwable target = ((InvocationTargetException)throwable).getTargetException();
+			if (target != null) {
+				if (hasProcessBombExceptionNicely(session, target)) {
+					return;
+				}
+			}
 		}
 		
 		
@@ -118,6 +122,15 @@ public class BombMessageBizHandler implements BombMessageHandler{
 
 		session.write(new ReturnDto(-100, throwable.getMessage()));
 		return;
+	}
+
+	private boolean hasProcessBombExceptionNicely(IoSession session, Throwable throwable) {
+		if (BombException.class.isAssignableFrom(throwable.getClass())) {
+			BombException exception = (BombException)throwable;
+			session.write(new ReturnDto(exception.getCode(), exception.getAction(), exception.getMessage()));
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -203,7 +216,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 					}
 				} else {
 					//nothing to do
-					
+					session.write(model);
 						
 				}
 				return;

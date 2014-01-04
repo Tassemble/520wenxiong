@@ -19,6 +19,12 @@ public class BombException extends RuntimeException {
 		this.code = code;
 		this.message = message;
 	}
+	public BombException(int code, String action, String message) {
+		super(message);
+		this.code = code;
+		this.message = message;
+		this.action = action;
+	}
 
 
 	public int getCode() {

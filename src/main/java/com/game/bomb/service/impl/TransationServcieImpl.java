@@ -190,7 +190,7 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 			return map;
 		} catch (Exception e) {
 			LOG.error(e.getMessage() + " buyer " + GsonUtils.toJson(user), e);
-			throw new ActionFailedException("receipt 交易失败");
+			throw new ActionFailedException(e.getMessage(), GameMemory.LOCAL_SESSION_CONTEXT.get().getAction());
 		}
 	}
 	
