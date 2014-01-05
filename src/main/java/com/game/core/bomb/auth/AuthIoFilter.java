@@ -13,17 +13,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.game.bomb.constant.LoginConstant;
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.JsonSessionWrapper;
 import com.game.core.bomb.dto.ActionNameEnum;
 import com.game.core.bomb.dto.BaseActionDataDto;
+import com.game.core.bomb.dto.BaseActionDataDto.GameSignUpData;
 import com.game.core.bomb.dto.BaseActionDataDto.LoginData;
 import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.exception.BombException;
+import com.game.core.exception.GamePlayException;
 import com.wenxiong.utils.GsonUtils;
 
 /**
@@ -82,16 +85,24 @@ public class AuthIoFilter extends IoFilterAdapter {
 				
 				
 				// is login?
-				if (StringUtils.isBlank(action) || !action.equals(ActionNameEnum.ACTION_LOGIN.getAction())) {
+				if (StringUtils.isBlank(action) || !(action.equals(ActionNameEnum.ACTION_LOGIN.getAction())
+						|| action.equals("sinalogin")) ) 
+				{
 					jsonSession.write(new ReturnDto(403, action, "no authentication"));
 					return;
 				}
+				
+				String loginType = "";
+				if (ActionNameEnum.ACTION_LOGIN.getAction().equals(action)) {
+					loginType = LoginConstant.LOGIN_TYPE_DEFAULT;
+				} else if (ActionNameEnum.ACTION_SINA_LOGIN.getAction().equals(action)) {
+					loginType = LoginConstant.LOGIN_TYPE_SINA;
+				} else {
+					jsonSession.write(new ReturnDto(201, action, "function not implemented"));
+					return;
+				}
 
-				LoginData loginData = (LoginData) GsonUtils.getFromJson(message.toString(),
-						BaseActionDataDto.getClassByAction(action));
-
-				OnlineUserDto dto = validateLogin(loginData);
-
+				OnlineUserDto dto = login(message.toString(), loginType);
 				if (dto != null) {// TODO 实现验证用户名和密码
 					dto.setSession(jsonSession);
 
@@ -149,6 +160,51 @@ public class AuthIoFilter extends IoFilterAdapter {
 		}
 
 	}
+	
+	
+	public OnlineUserDto login(String message, String loginType) {
+		JSONObject json = JSONObject.fromObject(message);
+		String action = json.getString("action");
+		if (LoginConstant.LOGIN_TYPE_DEFAULT.equals(loginType)) {
+			LoginData loginData = (LoginData) GsonUtils.getFromJson(message.toString(),
+					BaseActionDataDto.getClassByAction(action));
+			loginData.setLoginType(loginType);
+			return validateLogin(loginData);
+		} else if (LoginConstant.LOGIN_TYPE_SINA.equals(loginType)) {
+			//TODO check token if is validate
+			
+			
+			String username = json.getJSONObject("data").getString("userid");
+			String nickname = json.getJSONObject("data").getString("nickname");
+			
+			
+			User query = new User();
+			query.setUsername(username); //是否有注入的可能性
+			query.setLoginType(loginType);
+			List<User> users = userService.getByDomainObjectSelective(query);
+			if (CollectionUtils.isEmpty(users)) { //no users register
+				GameSignUpData signUpData = new GameSignUpData();
+				signUpData.setUsername(username);
+				signUpData.setAction(action);
+				signUpData.setNickname(nickname);
+				signUpData.setLoginType(loginType);
+				userService.addNewUser(signUpData); // add new one
+				
+				
+				users = userService.getByDomainObjectSelective(query); //query again
+				OnlineUserDto dto = new OnlineUserDto(users.get(0));
+				dto.setStatus(OnlineUserDto.STATUS_ONLINE);
+				return dto;
+				
+			} else {
+				OnlineUserDto dto = new OnlineUserDto(users.get(0));
+				dto.setStatus(OnlineUserDto.STATUS_ONLINE);
+				return dto;
+			}
+		} else {
+			return null;
+		}
+	}
 
 	private OnlineUserDto validateLogin(LoginData loginData) {
 		if (StringUtils.isBlank(loginData.getUsername()) || StringUtils.isBlank(loginData.getPassword())) {
@@ -166,7 +222,8 @@ public class AuthIoFilter extends IoFilterAdapter {
 		} else {
 			User query = new User();
 			query.setMd5Password(DigestUtils.md5Hex(loginData.getPassword()));
-			query.setUsername(loginData.getUsername());
+			query.setUsername(loginData.getUsername()); //是否有注入的可能性
+			query.setLoginType(loginData.getLoginType());
 			List<User> users = userService.getByDomainObjectSelective(query);
 			if (!CollectionUtils.isEmpty(users)) {
 				dto = new OnlineUserDto(users.get(0));

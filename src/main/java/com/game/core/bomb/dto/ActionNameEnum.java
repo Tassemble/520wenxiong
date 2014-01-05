@@ -6,6 +6,7 @@ public enum ActionNameEnum {
 	ACTION_SYSTEM_BROADCAST("system-broadcast", BaseActionDataDto.class),
 	QUIT_GAME("quit-game",BaseActionDataDto.class),
 	ACTION_LOGIN("login",BaseActionDataDto.LoginData.class),
+	ACTION_SINA_LOGIN("sinalogin",null),
 	ACTION_LOGOUT("logout",BaseActionDataDto.LogoutData.class),
 	ACTION_GAME_START("game-start",BaseActionDataDto.class),
 	ACTION_GET_FRIENDLIST("getFriendList",null),

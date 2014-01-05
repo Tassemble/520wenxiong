@@ -16,6 +16,7 @@ public class User extends BaseDo {
 	//不进行序列化
 	String username;
 	String nickName;
+	private String loginType; //@see loginConstant
 	
 	/** md5进行加密*/
 	//不进行序列化
@@ -188,6 +189,14 @@ public class User extends BaseDo {
 	}
 	public void setEnable(Boolean enable) {
 		this.enable = enable;
+	}
+	
+	@DataProperty(column="login_type")
+	public String getLoginType() {
+		return loginType;
+	}
+	public void setLoginType(String loginType) {
+		this.loginType = loginType;
 	}
 
 	

@@ -26,6 +26,17 @@ public class BaseActionDataDto {
 	public static class LoginData extends BaseActionDataDto {
 		private String	username;
 		private String	password;
+		private String  loginType;
+		
+		
+
+		public String getLoginType() {
+			return loginType;
+		}
+
+		public void setLoginType(String loginType) {
+			this.loginType = loginType;
+		}
 
 		public String getUsername() {
 			return username;
@@ -69,6 +80,7 @@ public class BaseActionDataDto {
 		private String	username;
 		private String	nickname;
 		private String	password;
+		private String loginType;
 		
 		public String getUsername() {
 			return username;
@@ -87,6 +99,12 @@ public class BaseActionDataDto {
 		}
 		public void setPassword(String password) {
 			this.password = password;
+		}
+		public String getLoginType() {
+			return loginType;
+		}
+		public void setLoginType(String loginType) {
+			this.loginType = loginType;
 		}
 		
 		

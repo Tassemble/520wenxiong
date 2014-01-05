@@ -3,6 +3,7 @@ package com.game.bomb.service.impl;
 import java.util.Date;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,8 +46,13 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		User newItem = new User();
 		Date now = new Date();
 		
+		newItem.setLoginType(data.getLoginType());
 		newItem.setUsername(data.getUsername());
-		newItem.setMd5Password(DigestUtils.md5Hex(data.getPassword()));
+		if (StringUtils.isNotBlank(data.getPassword())) {
+			newItem.setMd5Password(DigestUtils.md5Hex(data.getPassword()));
+		} else {
+			newItem.setMd5Password("");
+		}
 		newItem.setNickName(data.getNickname());
 		newItem.setHeartNum(User.CONSTANT_FULL_HEART);
 		newItem.setLevel(1);
@@ -65,6 +71,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		
 		User qUser = new User();
 		qUser.setUsername(data.getUsername());
+		qUser.setLoginType(data.getLoginType());
 		User userFromDB = getByDomainObjectSelective(qUser).get(0);
 		
 		WealthBudget wealth = new WealthBudget();

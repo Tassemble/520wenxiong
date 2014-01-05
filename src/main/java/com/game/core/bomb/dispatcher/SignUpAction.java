@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.game.bomb.Dao.WealthBudgetDao;
+import com.game.bomb.constant.LoginConstant;
 import com.game.bomb.domain.User;
 import com.game.bomb.domain.WealthBudget;
 import com.game.bomb.service.UserService;
@@ -40,12 +41,13 @@ public class SignUpAction implements BaseAction{
 		
 		User query = new User();
 		query.setUsername(data.getUsername());
+		query.setLoginType(LoginConstant.LOGIN_TYPE_DEFAULT);
 		List<User> users = userService.getByDomainObjectSelective(query);
 		if (!CollectionUtils.isEmpty(users)) {
 			session.write(new ReturnDto(-1, this.getAction(), "user existed"));
 			return;
 		}
-		
+		data.setLoginType(LoginConstant.LOGIN_TYPE_DEFAULT);
 		userService.addNewUser(data);
 		
 		
