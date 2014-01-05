@@ -216,7 +216,6 @@ public class BombMessageBizHandler implements BombMessageHandler{
 					}
 				} else {
 					//nothing to do
-					session.write(model);
 						
 				}
 				return;

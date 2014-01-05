@@ -14,6 +14,7 @@ import com.game.bomb.service.UserService;
 import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.play.dto.PlayRoomDto;
+import com.game.core.exception.GamePlayException;
 
 
 public class GameMemory {
@@ -90,7 +91,11 @@ public class GameMemory {
 	
 	
 	public static OnlineUserDto getUser() {
-		return LOCAL_SESSION_CONTEXT.get().getOnlineUser();
+		GameSessionContext gsession = LOCAL_SESSION_CONTEXT.get();
+		if (gsession == null) {
+			throw new GamePlayException(-1, "user not online");
+		}
+		return gsession.getOnlineUser();
 	}
 	
 	public static void setUser(OnlineUserDto user) {

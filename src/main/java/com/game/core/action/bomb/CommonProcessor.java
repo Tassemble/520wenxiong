@@ -170,6 +170,8 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		
 		//reload user for online user
 		GameMemory.reloadUser();
+		GameMemory.getCurrentSession().write(map);
+		
 		
 		return;
 	}
