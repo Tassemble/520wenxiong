@@ -28,7 +28,7 @@ public class QuitGameAction implements BaseAction{
 		OnlineUserDto user = GameMemory.getUser();
 		PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
 		
-		roomLogic.doUserQuit(room, user.getUsername());
+		roomLogic.doUserQuit(room, user.getId());
 	}
 	
 	

@@ -184,7 +184,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		
 		OnlineUserDto user = GameMemory.getUser();
 		PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
-		roomLogic.doUserQuit(room, user.getUsername());
+		roomLogic.doUserQuit(room, user.getId());
 		
 		return;
 	}
@@ -194,7 +194,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		validateUserStatus("lose");
 		OnlineUserDto user = GameMemory.getUser();
 		PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
-		roomLogic.doUserQuit(room, user.getUsername());
+		roomLogic.doUserQuit(room, user.getId());
 	}
 	
 	private void validateUserStatus(String action) {
@@ -230,7 +230,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		// ~ 老代码 需要移植到新的逻辑上去
 			List<OnlineUserDto> users = Lists.newArrayList();
 			int limit = 100;
-			for (Entry<String, OnlineUserDto> entry : GameMemory.ONLINE_USERS.entrySet()) {
+			for (Entry<Long, OnlineUserDto> entry : GameMemory.ONLINE_USERS.entrySet()) {
 				limit--;
 				if (limit == 0) {
 					break;

@@ -109,12 +109,12 @@ public class FastJoinAction implements BaseAction {
 				// 这里不需要同步，原因是在没有创建好房间的时候，其他用户是看到这个房间的
 				room = new PlayRoomDto(userNumLimit, user, policyLevel);
 				GameMemory.room.put(room.getId(), room);
-				room.addUserCallback(new FastJoinTimeoutCallback(user.getUsername(), joinData
+				room.addUserCallback(new FastJoinTimeoutCallback(user.getId(), joinData
 						.getTimeoutInSeconds()));
 				LOG.info("user[" + user.getUsername() + "] create room, rid:" + room.getId());
 			} else {
-				roomLogic.doUserJoin(room, user.getUsername());
-				room.addUserCallback(new FastJoinTimeoutCallback(user.getUsername(), joinData
+				roomLogic.doUserJoin(room, user.getId());
+				room.addUserCallback(new FastJoinTimeoutCallback(user.getId(), joinData
 						.getTimeoutInSeconds()));
 				
 				LOG.info("user[" + user.getUsername() + "] join room, rid:" + room.getId());

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.game.bomb.constant.LoginConstant;
 import com.game.bomb.domain.User;
+import com.game.bomb.mobile.dto.GameVersionDto;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.JsonSessionWrapper;
@@ -26,7 +27,6 @@ import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.exception.BombException;
-import com.game.core.exception.GamePlayException;
 import com.wenxiong.utils.GsonUtils;
 
 /**
@@ -65,10 +65,25 @@ public class AuthIoFilter extends IoFilterAdapter {
 			} catch (Exception e) {
 				LOG.warn("sessionID:" + session.getId()+" parse json exeception, message:" + json, e);
 			}
+			
+		
+			
+			
+			
 			JsonSessionWrapper jsonSession = new JsonSessionWrapper(session);;
 			
 			GameSessionContext context = new GameSessionContext();
 			context.setSession(jsonSession);
+			
+			
+			//process update action
+			if ("getVersion".equals(action)) {
+				jsonSession.write(new GameVersionDto(action));
+				return;
+			}
+			
+			
+			
 			
 			GameMemory.LOCAL_SESSION_CONTEXT.set(context);
 			GameMemory.LOCAL_SESSION_CONTEXT.get().setAction(action);
@@ -122,7 +137,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 					//	return;
 					}
 					LOG.info("validate ok for username:" + dto.getUsername());
-					GameMemory.ONLINE_USERS.put(dto.getUsername(), dto);
+					GameMemory.ONLINE_USERS.put(dto.getId(), dto);
 					GameMemory.SESSION_USERS.put(jsonSession.getId(), dto);
 					GameMemory.setUser(user);
 
@@ -162,6 +177,10 @@ public class AuthIoFilter extends IoFilterAdapter {
 	}
 	
 	
+
+
+
+
 	public OnlineUserDto login(String message, String loginType) {
 		JSONObject json = JSONObject.fromObject(message);
 		String action = json.getString("action");

@@ -56,9 +56,11 @@ public class RoomLogic {
 		
 	}
 	
-	public void doUserJoin(PlayRoomDto room, String username) {
+	
+	
+	public void doUserJoin(PlayRoomDto room, Long uid) {
 		synchronized (room.getRoomLock()) {
-			OnlineUserDto user = GameMemory.getUserByUsername(username);
+			OnlineUserDto user = GameMemory.getUserById(uid);
 			room.increaseReadyNum();
 			room.getUsers().add(user);
 			user.setRoomId(room.getId());
@@ -70,6 +72,7 @@ public class RoomLogic {
 			}
 		}
 	}
+	
 	
 	
 	public void startGame(PlayRoomDto room) {
@@ -105,16 +108,16 @@ public class RoomLogic {
 		destroyRoom(room);
 	}
 	
-	public void doUserQuit(PlayRoomDto room, String username) throws Exception {
+	public void doUserQuit(PlayRoomDto room, Long uid) throws Exception {
 		//这里是处理快速开始游戏的逻辑处理，如果期间有人退出就直接全部退出好了，重新再进行一次游戏匹配
 		if (room.getRoomStatus().equals(PlayRoomDto.ROOM_STATUS_OPEN)) {//not playing
 			shutdownRoom(room);
 			return;
 		}
 		
-		OnlineUserDto user = GameMemory.getUserByUsername(username);
+		OnlineUserDto user = GameMemory.getUserById(uid);
+		IoSession session = GameMemory.getSessionById(uid);
 		
-		IoSession session = GameMemory.getSessionByUsername(username);
 		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
 		ro.setExtAttrs(ImmutableMap.of("user", new MobileUserDto(user)));
 
@@ -177,7 +180,7 @@ public class RoomLogic {
 		
 		if (!CollectionUtils.isEmpty(room.getUsers())) {
 			if (room.getUsers().size() == 1) {//last players
-				doUserQuit(room, room.getUsers().get(0).getUsername());
+				doUserQuit(room, room.getUsers().get(0).getId());
 			}
 		}
 		

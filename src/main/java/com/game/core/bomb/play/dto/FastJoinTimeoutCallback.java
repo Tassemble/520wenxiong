@@ -19,13 +19,13 @@ public class FastJoinTimeoutCallback implements Runnable {
 	
 	
 	int			timeoutInSeconds	= 0;
-	String		userId;
+	Long		userId;
 	RoomLogic	roomLogic;
 	
 	
 	
 
-	public FastJoinTimeoutCallback(String userId, int timeoutInSeconds) {
+	public FastJoinTimeoutCallback(Long userId, int timeoutInSeconds) {
 		super();
 		this.userId = userId;
 		this.timeoutInSeconds = timeoutInSeconds;
@@ -33,12 +33,13 @@ public class FastJoinTimeoutCallback implements Runnable {
 		roomLogic = cxt.getBean(RoomLogic.class);
 	}
 
+
 	@Override
 	public void run() {
 
 		try {
 			TimeUnit.SECONDS.sleep(timeoutInSeconds);
-			OnlineUserDto user = GameMemory.getUserByUsername(this.userId);
+			OnlineUserDto user = GameMemory.getUserById(this.userId);
 			if (user == null) {
 				return;
 			}
@@ -48,7 +49,7 @@ public class FastJoinTimeoutCallback implements Runnable {
 			}
 			if (PlayRoomDto.ROOM_STATUS_OPEN.equals(room.getRoomStatus())) {
 				roomLogic.shutdownRoom(room);
-				IoSession session = GameMemory.getSessionByUsername(this.userId);
+				IoSession session = GameMemory.getSessionById(this.userId);
 				session.write(new ReturnDto(-20, ActionNameEnum.FAST_JOIN.getAction(), "fast-join timeout"));
 			} else {
 			}

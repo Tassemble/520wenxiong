@@ -82,7 +82,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 		}
 		PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
 		if (room != null) {
-			roomLogic.doUserQuit(room, user.getUsername());
+			roomLogic.doUserQuit(room, user.getId());
 		}
 		GameMemory.ONLINE_USERS.remove(user.getUsername());
 		GameMemory.removeSessionUserByKey(session.getId());

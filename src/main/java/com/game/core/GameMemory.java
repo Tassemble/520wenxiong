@@ -26,7 +26,7 @@ public class GameMemory {
 
 	public static Map<Long, OnlineUserDto> SESSION_USERS;
 	
-	public static Map<String, OnlineUserDto> ONLINE_USERS;
+	public static Map<Long, OnlineUserDto> ONLINE_USERS;
 	
 	public static Map<String, Object> actionMapping = new HashMap<String, Object>();
 	
@@ -67,7 +67,7 @@ public class GameMemory {
 		//key is session id , value is user
 		SESSION_USERS = new ConcurrentHashMap<Long, OnlineUserDto>();
 		//key is username , value is user
-		ONLINE_USERS = new ConcurrentHashMap<String, OnlineUserDto>();
+		ONLINE_USERS = new ConcurrentHashMap<Long, OnlineUserDto>();
 		room = new ConcurrentHashMap<String, PlayRoomDto>();
 		
 		// for biz context
@@ -87,6 +87,10 @@ public class GameMemory {
 	
 	public static OnlineUserDto getUserByUsername(String username) {
 		return ONLINE_USERS.get(username);
+	}
+	
+	public static OnlineUserDto getUserById(Long uid) {
+		return ONLINE_USERS.get(uid);
 	}
 	
 	
@@ -142,8 +146,8 @@ public class GameMemory {
 	}
 	
 	
-	public static IoSession getSessionByUsername(String username) {
-		OnlineUserDto dto = ONLINE_USERS.get(username);
+	public static IoSession getSessionById(Long uid) {
+		OnlineUserDto dto = ONLINE_USERS.get(uid);
 		if (dto != null) {
 			return dto.getSession();
 		}
