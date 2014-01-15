@@ -92,6 +92,12 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		this.getByCondition("id = ? for update", user.getId());
 		updateSelectiveById(user);
 	}
+
+
+	@Override
+	public void updateForExchangeCoinToHeart(Long uid, int number, int gainHeart) {
+		userDao.updateForExchangeCoinToHeart(uid, number, gainHeart);
+	}
 	
 	
 	

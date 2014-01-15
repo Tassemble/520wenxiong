@@ -15,4 +15,11 @@ import com.game.bomb.domain.User;
 @DomainMetadata(domainClass=User.class, idColumn="id", idProperty="id", tableName="user")
 public class UserDaoImpl extends BaseDaoSqlImpl<User> implements UserDao{
 
+	@Override
+	public void updateForExchangeCoinToHeart(Long uid, int number, int heart) {
+		this.getSqlManager().updateRecords("update " + this.getTableName()  
+				+ " set in_got = in_got - ?, heart_num = ? where id = ? " , number, heart, uid);
+		
+	}
+
 }

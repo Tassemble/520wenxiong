@@ -257,7 +257,7 @@ public class RoomLogic {
 		OnlineUserDto user = GameMemory.getUser();
 		
 		for (OnlineUserDto u : users) {
-			if (!u.getUsername().equals(user.getUsername())) {
+			if (!u.getId().equals(user.getId())) {
 				if (u.getSession().isConnected()) {
 					u.getSession().write(message);
 				}
@@ -285,7 +285,7 @@ public class RoomLogic {
 		}
 		List<OnlineUserDto> users = room.getUsers();
 		for (OnlineUserDto u : users) {
-			if (!u.getUsername().equals(user.getUsername())) {
+			if (!u.getId().equals(user.getId())) {
 				u.getSession().write(message);
 			}
 		}

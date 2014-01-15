@@ -122,7 +122,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 					dto.setSession(jsonSession);
 
 					if (GameMemory.ONLINE_USERS.containsValue(dto)) {
-						OnlineUserDto oldUser = GameMemory.ONLINE_USERS.get(dto.getUsername());
+						OnlineUserDto oldUser = GameMemory.ONLINE_USERS.get(dto.getId());
 						GameMemory.ONLINE_USERS.remove(dto);
 						oldUser.getSession().write("remote client logon");
 						oldUser.getSession().close();

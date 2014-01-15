@@ -16,4 +16,7 @@ public interface UserService extends BaseService<User>{
 	
 	void updateUserBloodWithLock(User update);
 
+
+	void updateForExchangeCoinToHeart(Long id, int number, int gainHeart);
+
 }

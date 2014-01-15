@@ -38,6 +38,7 @@ import com.game.bomb.Dao.TransactionDao;
 import com.game.bomb.Dao.UserMeta;
 import com.game.bomb.Dao.UserMetaDao;
 import com.game.bomb.config.BombConfig;
+import com.game.bomb.constant.BombConstant;
 import com.game.bomb.domain.Transaction;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobileUserDto;
@@ -93,6 +94,48 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	
 	@Autowired
 	TransactionService transactionService;
+	
+	
+	//{"action":"exchangeCoinToHeart", "inGot":20}
+	@ActionAnnotation(action = "exchangeCoinToHeart")
+	public void exchangeCoinToHeart(Object message, Map<String, Object> map) {
+		//20个金币换一颗红心
+		JSONObject jsonRoot = JSONObject.fromObject(message);
+		int number = jsonRoot.getInt("inGot");
+		if (number <= 0 || !(number % BombConstant.EXCHANGE_COIN_TO_HEART_UNIT == 0)) {
+			map.put("action", "exchangeCoinToHeart");
+			map.put("code", -1);
+			if (LOG.isDebugEnabled()) {
+				map.put("message", "make sure coin number bigger than zero, and number can be mod by " + BombConstant.EXCHANGE_COIN_TO_HEART_UNIT);
+			}
+			GameMemory.getCurrentSession().write(map);
+			return;
+		}
+		int gainHeart = (number / BombConstant.EXCHANGE_COIN_TO_HEART_UNIT);
+		
+		OnlineUserDto onlineUser = GameMemory.getUser();
+		User user = userService.getById(onlineUser.getId());
+		if (user.getInGot() == null || user.getInGot() < number) {
+			map.put("action", "exchangeCoinToHeart");
+			map.put("code", -2);
+			if (LOG.isDebugEnabled()) {
+				map.put("message", "not enough inGot, only " + user.getInGot());
+			}
+			GameMemory.getCurrentSession().write(map);
+			return;
+		}
+		int nowHeart = gainHeart + user.getHeartNum();
+		nowHeart = (nowHeart > user.getFullHeart()) ? user.getFullHeart() : nowHeart;
+		
+		userService.updateForExchangeCoinToHeart(user.getId(), number, gainHeart);
+		
+		
+		map.put("action", "exchangeCoinToHeart");
+		map.put("code", 200);
+		GameMemory.getCurrentSession().write(map);
+		return;
+		
+	}
 	
 	@ActionAnnotation(action = "createRoom")
 	public void createRoom(Object message, Map<String, Object> map) {
