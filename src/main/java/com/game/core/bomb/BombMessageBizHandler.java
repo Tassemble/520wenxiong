@@ -34,8 +34,8 @@ import com.game.core.bomb.logic.RoomLogic;
 import com.game.core.bomb.play.dto.PlayRoomDto;
 import com.game.core.exception.BombException;
 import com.game.core.utils.CellLocker;
+import com.game.utils.GsonUtils;
 import com.google.common.collect.Maps;
-import com.wenxiong.utils.GsonUtils;
 
 /**
  * 业务处理点入口，除了登录的action在这个类{@link AuthIoFilter}认证之外，其他

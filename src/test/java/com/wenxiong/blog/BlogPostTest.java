@@ -14,16 +14,19 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
+import com.game.base.Comment;
+import com.game.base.User;
+import com.game.base.WPPost;
+import com.game.base.dao.CommentDao;
+import com.game.base.dao.UserDao;
+import com.game.base.dao.WPPostDao;
+import com.game.base.dto.TmallCommentsDto;
+import com.game.base.service.WPPostService;
+import com.game.crawl.taobao.TmallCrawler;
+import com.game.utils.GsonUtils;
+import com.game.utils.TmallCrawlerUtils;
 import com.google.common.collect.ImmutableMap;
 import com.wenxiong.blog.dao.BaseTestCase;
-import com.wenxiong.blog.dao.CommentDao;
-import com.wenxiong.blog.dao.UserDao;
-import com.wenxiong.blog.dao.WPPostDao;
-import com.wenxiong.blog.dto.TmallCommentsDto;
-import com.wenxiong.blog.service.WPPostService;
-import com.wenxiong.crawl.taobao.TmallCrawler;
-import com.wenxiong.utils.TmallCrawlerUtils;
-import com.wenxiong.utils.GsonUtils;
 
 public class BlogPostTest extends BaseTestCase {
 

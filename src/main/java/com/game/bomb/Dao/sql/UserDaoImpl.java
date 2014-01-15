@@ -2,10 +2,10 @@ package com.game.bomb.Dao.sql;
 
 import org.springframework.stereotype.Component;
 
+import com.game.base.commons.dao.annotation.DomainMetadata;
+import com.game.base.commons.dao.sql.BaseDaoSqlImpl;
 import com.game.bomb.Dao.UserDao;
 import com.game.bomb.domain.User;
-import com.wenxiong.blog.commons.dao.annotation.DomainMetadata;
-import com.wenxiong.blog.commons.dao.sql.BaseDaoSqlImpl;
 
 /**
  * @author CHQ

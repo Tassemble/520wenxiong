@@ -1,8 +1,8 @@
 package com.game.bomb.service;
 
+import com.game.base.commons.service.BaseService;
 import com.game.bomb.domain.User;
 import com.game.core.bomb.dto.BaseActionDataDto.GameSignUpData;
-import com.wenxiong.blog.commons.service.BaseService;
 
 
 /**

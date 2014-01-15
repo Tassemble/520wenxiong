@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.game.core.GameMemory;
 import com.game.core.action.bomb.CommonProcessor;
 import com.game.core.action.processor.PlayerInfoProcessorHelper;
+import com.game.utils.GsonUtils;
 import com.wenxiong.blog.dao.BaseTestCase;
-import com.wenxiong.utils.GsonUtils;
 
 public class CommonProcessorTest extends BaseTestCase {
 

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.game.base.commons.utils.text.JsonUtils;
 import com.game.bomb.Dao.MatchPolicyDao;
 import com.game.bomb.domain.MatchPolicy;
 import com.game.bomb.domain.User;
@@ -34,7 +35,6 @@ import com.game.core.exception.GamePlayException;
 import com.game.core.utils.CellLocker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.wenxiong.blog.commons.utils.text.JsonUtils;
 
 @Component
 public class FastJoinAction implements BaseAction {

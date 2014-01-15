@@ -20,8 +20,8 @@ import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.exception.ActionFailedException;
 import com.game.core.exception.BombException;
+import com.game.utils.GsonUtils;
 import com.wenxiong.blog.dao.BaseTestCase;
-import com.wenxiong.utils.GsonUtils;
 
 public class GameMainTest extends BaseTestCase {
 

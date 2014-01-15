@@ -27,7 +27,7 @@ import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.exception.BombException;
-import com.wenxiong.utils.GsonUtils;
+import com.game.utils.GsonUtils;
 
 /**
  * 用户的登录认证在filter中，同时，由于decode的操作不一定一直都是同一线程，但是顺序肯定是

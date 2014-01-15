@@ -11,7 +11,7 @@ import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.bomb.play.dto.PlayRoomDto;
-import com.wenxiong.utils.GsonUtils;
+import com.game.utils.GsonUtils;
 
 public class MessageSenderHelper {
 

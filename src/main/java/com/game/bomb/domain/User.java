@@ -2,8 +2,8 @@ package com.game.bomb.domain;
 
 import java.util.Date;
 
+import com.game.base.commons.domain.BaseDo;
 import com.netease.framework.dao.sql.annotation.DataProperty;
-import com.wenxiong.blog.commons.domain.BaseDo;
 
 /**
  * @author CHQ

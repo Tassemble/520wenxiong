@@ -2,8 +2,8 @@ package com.game.bomb.service;
 
 import java.util.Map;
 
+import com.game.base.commons.service.BaseService;
 import com.game.bomb.domain.Transaction;
-import com.wenxiong.blog.commons.service.BaseService;
 
 public interface TransactionService extends BaseService<Transaction>{
 

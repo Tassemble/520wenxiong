@@ -7,8 +7,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.game.bomb.domain.User;
 import com.game.core.exception.NoSuchActionException;
+import com.game.utils.GsonUtils;
 import com.google.gson.Gson;
-import com.wenxiong.utils.GsonUtils;
 
 public class BaseActionDataDto {
 

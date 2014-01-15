@@ -1,8 +1,8 @@
 package com.game.bomb.domain;
 
+import com.game.base.commons.domain.BaseDo;
 import com.game.bomb.constant.ProductType;
 import com.netease.framework.dao.sql.annotation.DataProperty;
-import com.wenxiong.blog.commons.domain.BaseDo;
 
 public class Transaction extends BaseDo {
 

@@ -20,7 +20,7 @@ import com.game.core.bomb.dto.BaseActionDataDto;
 import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.bomb.dto.BaseActionDataDto.GameSignUpData;
 import com.game.core.exception.ActionFailedException;
-import com.wenxiong.utils.GsonUtils;
+import com.game.utils.GsonUtils;
 
 @Component
 public class SignUpAction implements BaseAction{
