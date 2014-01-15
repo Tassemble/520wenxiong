@@ -1,4 +1,4 @@
-package com.wenxiong.blog.dao;
+package com.game.base.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -10,17 +10,14 @@ import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.dao.JunitTransactionSpringContextTest;
 
-@ContextConfiguration(locations = { "classpath:/applicationContext-aop-base.xml",
-		"classpath:/applicationContext-dao.xml", "classpath:/applicationContext-service.xml",
-		"classpath:/applicationContext-remote.xml", "classpath:/applicationContext-midware.xml",
-		"classpath:/applicationContext-bo.xml", "classpath:/biz/applicationContext-framework-aop.xml",
+@ContextConfiguration(locations = { "classpath:/applicationContext-bo.xml",
+		"classpath:/biz/applicationContext-framework-aop.xml",
 		"classpath:/biz/applicationContext-framework-dao-base.xml" })
 public class BaseTestCase extends JunitTransactionSpringContextTest {
 
-	
 	@Autowired
-	UserService service;
-	
+	UserService	service;
+
 	public void setOnlineUser(Long id) {
 		GameMemory.LOCAL_SESSION_CONTEXT.set(new GameSessionContext());
 		User user = service.getById(id);

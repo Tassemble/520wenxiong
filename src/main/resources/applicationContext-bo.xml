@@ -24,7 +24,7 @@
 		<property name="debug"><value>${debug}</value></property>
 	</bean>
 
-	<bean id="WebConfig" class="com.wenxiong.web.WebConfig">
+	<bean id="WebConfig" class="com.game.web.WebConfig">
 		<property name="host">
 			<value>http://wenxiong.com</value>
 		</property>

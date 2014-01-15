@@ -10,7 +10,7 @@
 
 
 
-	<bean id="TransactionAspect" class="com.wenxiong.blog.commons.service.aop.TransactionAspect">
+	<bean id="TransactionAspect" class="com.game.base.commons.service.aop.TransactionAspect">
 		<property name="idbTransactionManager" ref="mysqlTransactionManagerAdapter" />
 		<property name="order" value="30" />
 	</bean>

@@ -1,4 +1,4 @@
-package com.wenxiong.blog;
+package com.game.base;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import org.springframework.test.annotation.Rollback;
 import com.game.base.Comment;
 import com.game.base.User;
 import com.game.base.WPPost;
+import com.game.base.dao.BaseTestCase;
 import com.game.base.dao.CommentDao;
 import com.game.base.dao.UserDao;
 import com.game.base.dao.WPPostDao;
@@ -26,7 +27,6 @@ import com.game.crawl.taobao.TmallCrawler;
 import com.game.utils.GsonUtils;
 import com.game.utils.TmallCrawlerUtils;
 import com.google.common.collect.ImmutableMap;
-import com.wenxiong.blog.dao.BaseTestCase;
 
 public class BlogPostTest extends BaseTestCase {
 

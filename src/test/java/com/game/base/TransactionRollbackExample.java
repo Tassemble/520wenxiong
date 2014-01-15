@@ -1,4 +1,4 @@
-package com.wenxiong.blog;
+package com.game.base;
  
 import java.sql.*;
  

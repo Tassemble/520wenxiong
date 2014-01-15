@@ -1,12 +1,12 @@
-package com.wenxiong.blog;
+package com.game.base;
 
 import java.util.List;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.game.base.dao.BaseTestCase;
 import com.game.base.dao.TestDao;
-import com.wenxiong.blog.dao.BaseTestCase;
 
 public class HeyTest extends BaseTestCase{
 

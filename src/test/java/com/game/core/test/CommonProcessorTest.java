@@ -9,11 +9,11 @@ import java.util.Properties;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.game.base.dao.BaseTestCase;
 import com.game.core.GameMemory;
 import com.game.core.action.bomb.CommonProcessor;
 import com.game.core.action.processor.PlayerInfoProcessorHelper;
 import com.game.utils.GsonUtils;
-import com.wenxiong.blog.dao.BaseTestCase;
 
 public class CommonProcessorTest extends BaseTestCase {
 
