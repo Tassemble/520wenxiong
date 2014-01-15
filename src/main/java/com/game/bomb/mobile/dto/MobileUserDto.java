@@ -89,7 +89,7 @@ public class MobileUserDto {
 	@SuppressWarnings("unchecked")
 	public static MobileUserDto buildMobileUser(User user) throws JsonParseException, JsonMappingException,
 			IOException {
-		OnlineUserDto onlineUser = GameMemory.getUserByUsername(user.getUsername());
+		OnlineUserDto onlineUser = GameMemory.getUserById(user.getId());
 
 		if (onlineUser == null) {
 			return null;

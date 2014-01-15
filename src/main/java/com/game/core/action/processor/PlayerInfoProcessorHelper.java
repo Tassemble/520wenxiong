@@ -46,7 +46,6 @@ public class PlayerInfoProcessorHelper {
 			throw new NoAuthenticationException("downloadPlayerInfo");
 		}
 
-		//TODO
 		bloodLogic.processBloodWithRealTime(user);
 		
 		MobileUserDto mobData = MobileUserDto.buildMobileUser(user);

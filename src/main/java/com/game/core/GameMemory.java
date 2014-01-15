@@ -85,9 +85,7 @@ public class GameMemory {
 	}
 	
 	
-	public static OnlineUserDto getUserByUsername(String username) {
-		return ONLINE_USERS.get(username);
-	}
+	
 	
 	public static OnlineUserDto getUserById(Long uid) {
 		return ONLINE_USERS.get(uid);
