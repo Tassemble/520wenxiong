@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.game.base.commons.utils.text.JsonUtils;
 import com.game.bomb.Dao.MatchPolicyDao;
+import com.game.bomb.constant.BombConstant;
 import com.game.bomb.domain.MatchPolicy;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobRoomDto;
@@ -61,7 +62,7 @@ public class FastJoinAction implements BaseAction {
 		checkUserStatus(user);
 		User userInDB = userService.getById(user.getId());
 		if (userInDB.getHeartNum() == null || userInDB.getHeartNum() <= 0) {
-			session.write(new ReturnDto(-1, "no heart, you can wait or buy it"));
+			session.write(new ReturnDto(BombConstant.NOT_ENOUGH_HEART_CODE, data.getAction(), "no heart, you can wait or buy it"));
 			return;
 		}
 		
@@ -224,7 +225,6 @@ public class FastJoinAction implements BaseAction {
 	}
 
 	private void checkUserStatus(OnlineUserDto user) {
-		// TODO Auto-generated method stub
 		if (user.getStatus() != OnlineUserDto.STATUS_ONLINE) {
 			throw new BombException(-100, "user status error");
 		}

@@ -1,10 +1,8 @@
 package com.game.core.action.bomb;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,20 +10,12 @@ import java.util.Random;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.math.RandomUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.mina.core.session.IoSession;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +24,10 @@ import org.springframework.stereotype.Component;
 
 import com.game.base.commons.utils.collection.FieldComparator;
 import com.game.base.commons.utils.text.JsonUtils;
-import com.game.bomb.Dao.TransactionDao;
 import com.game.bomb.Dao.UserMeta;
 import com.game.bomb.Dao.UserMetaDao;
 import com.game.bomb.config.BombConfig;
 import com.game.bomb.constant.BombConstant;
-import com.game.bomb.domain.Transaction;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.FriendRelationService;
@@ -59,7 +47,6 @@ import com.game.core.exception.MessageNullException;
 import com.game.core.exception.NoAuthenticationException;
 import com.game.utils.GsonUtils;
 import com.game.utils.HttpClientUtils;
-import com.game.utils.HttpDataProvider;
 import com.google.common.collect.Lists;
 
 @Component
@@ -83,7 +70,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	RoomLogic roomLogic;
 
 	private static final Logger	LOG			= LoggerFactory.getLogger(CommonProcessor.class);
-
+	private static final Logger	LOG_TRADE			= LoggerFactory.getLogger("transaction");
 	
 	@Autowired
 	BombConfig bombConfig;
@@ -96,27 +83,34 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	TransactionService transactionService;
 	
 	
+	@ActionAnnotation(action = "forward") 
+	public void forward(Object message, Map<String, Object> map) {
+		RoomLogic.forwardMessageToOtherClientsInRoom(message);
+	}
+	
+	
 	//{"action":"exchangeCoinToHeart", "inGot":20}
-	@ActionAnnotation(action = "exchangeCoinToHeart")
+	@ActionAnnotation(action = "exchangeInGotToHeart")
 	public void exchangeCoinToHeart(Object message, Map<String, Object> map) {
 		//20个金币换一颗红心
+		String action = "exchangeInGotToHeart";
 		JSONObject jsonRoot = JSONObject.fromObject(message);
 		int number = jsonRoot.getInt("inGot");
-		if (number <= 0 || !(number % BombConstant.EXCHANGE_COIN_TO_HEART_UNIT == 0)) {
-			map.put("action", "exchangeCoinToHeart");
+		if (number <= 0 || !(number % BombConstant.EXCHANGE_INGOT_TO_HEART_UNIT == 0)) {
+			map.put("action", action);
 			map.put("code", -1);
 			if (LOG.isDebugEnabled()) {
-				map.put("message", "make sure coin number bigger than zero, and number can be mod by " + BombConstant.EXCHANGE_COIN_TO_HEART_UNIT);
+				map.put("message", "make sure coin number bigger than zero, and number can be mod by " + BombConstant.EXCHANGE_INGOT_TO_HEART_UNIT);
 			}
 			GameMemory.getCurrentSession().write(map);
 			return;
 		}
-		int gainHeart = (number / BombConstant.EXCHANGE_COIN_TO_HEART_UNIT);
+		int gainHeart = (number / BombConstant.EXCHANGE_INGOT_TO_HEART_UNIT);
 		
 		OnlineUserDto onlineUser = GameMemory.getUser();
 		User user = userService.getById(onlineUser.getId());
 		if (user.getInGot() == null || user.getInGot() < number) {
-			map.put("action", "exchangeCoinToHeart");
+			map.put("action", action);
 			map.put("code", -2);
 			if (LOG.isDebugEnabled()) {
 				map.put("message", "not enough inGot, only " + user.getInGot());
@@ -127,10 +121,9 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		int nowHeart = gainHeart + user.getHeartNum();
 		nowHeart = (nowHeart > user.getFullHeart()) ? user.getFullHeart() : nowHeart;
 		
-		userService.updateForExchangeCoinToHeart(user.getId(), number, gainHeart);
-		
-		
-		map.put("action", "exchangeCoinToHeart");
+		LOG_TRADE.info("user[ " + JsonUtils.toJson(user) +" ] exchange heart using in_got " + number);
+		userService.updateForExchangeCoinToHeart(user.getId(), number, nowHeart);
+		map.put("action", action);
 		map.put("code", 200);
 		GameMemory.getCurrentSession().write(map);
 		return;

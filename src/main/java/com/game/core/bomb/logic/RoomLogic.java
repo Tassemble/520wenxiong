@@ -15,6 +15,7 @@ import com.game.bomb.Dao.UserDao;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.core.GameMemory;
+import com.game.core.JsonSessionWrapper;
 import com.game.core.bomb.dto.ActionNameEnum;
 import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
@@ -246,8 +247,13 @@ public class RoomLogic {
 		}
 		List<OnlineUserDto> users = room.getUsers();
 		for (OnlineUserDto u : users) {
-			if (!u.getUsername().equals(user.getUsername())) {
-				u.getSession().write(message);
+			if (!u.getId().equals(user.getId())) {
+				if (u.getSession() instanceof JsonSessionWrapper) {
+					JsonSessionWrapper sessionWrapper = (JsonSessionWrapper)u.getSession();
+					sessionWrapper.getSession().write(message);
+				} else {
+					u.getSession().write(message);
+				}
 			}
 		}
 	}

@@ -2,7 +2,6 @@ package com.game.core.bomb.dto;
 
 public enum ActionNameEnum {
 	FAST_JOIN("fast-join", BaseActionDataDto.FastJoinData.class), 
-	MESSAGE_FORWARD("forward", BaseActionDataDto.ForwardData.class),
 	ACTION_SYSTEM_BROADCAST("system-broadcast", BaseActionDataDto.class),
 	QUIT_GAME("quit-game",BaseActionDataDto.class),
 	ACTION_LOGIN("login",BaseActionDataDto.LoginData.class),

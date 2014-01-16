@@ -28,11 +28,25 @@ import com.game.utils.GsonUtils;
  */
 public class JsonSessionWrapper implements IoSession{
 
-	IoSession session;
+	private IoSession session;
 	
 	public JsonSessionWrapper(IoSession session) {
 		this.session = session;
 	}
+	
+	
+
+	public IoSession getSession() {
+		return session;
+	}
+
+
+
+	public void setSession(IoSession session) {
+		this.session = session;
+	}
+
+
 
 	@Override
 	public long getId() {

@@ -16,29 +16,24 @@ import com.game.core.bomb.logic.RoomLogic;
 import com.google.common.collect.Maps;
 
 
-@Component
-public class MessageForwardAction implements BaseAction {
+public class MessageForwardAction {
 
 	
-	@Override
 	public void doAction(IoSession session, BaseActionDataDto baseData) {
-		ForwardData data = (ForwardData) baseData;
-		if (!CollectionUtils.isEmpty(data.getFriendList())) {
-			Map<String, Object> map = Maps.newHashMap();
-			map.put("code", -1);
-			map.put("action", this.getAction());
-			map.put("msg", "forward to other clients error, friendList should be user ids, can't be username");
-			GameSessionContext context = GameMemory.LOCAL_SESSION_CONTEXT.get();
-			//self 
-			context.getSession().write(map);
-		} else {
-			RoomLogic.forwardMessageToOtherClientsInRoom(data.getData());
-		}
+//		ForwardData data = (ForwardData) baseData;
+//		if (!CollectionUtils.isEmpty(data.getFriendList())) {
+//			Map<String, Object> map = Maps.newHashMap();
+//			map.put("code", -1);
+//			map.put("action", this.getAction());
+//			map.put("msg", "forward to other clients error, friendList should be user ids, can't be username");
+//			GameSessionContext context = GameMemory.LOCAL_SESSION_CONTEXT.get();
+//			//self 
+//			context.getSession().write(map);
+//		} else {
+//			RoomLogic.forwardMessageToOtherClientsInRoom(baseData);
+//		}
 	}
 
-	@Override
-	public String getAction() {
-		return ActionNameEnum.MESSAGE_FORWARD.getAction();
-	}
+	
 
 }

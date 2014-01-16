@@ -18,8 +18,8 @@ public class UserDaoImpl extends BaseDaoSqlImpl<User> implements UserDao{
 	@Override
 	public void updateForExchangeCoinToHeart(Long uid, int number, int heart) {
 		this.getSqlManager().updateRecords("update " + this.getTableName()  
-				+ " set in_got = in_got - ?, heart_num = ? where id = ? " , number, heart, uid);
-		
+				+ " set gmt_modified = ?, in_got = in_got - ?, heart_num = ? where id = ? " , 
+				System.currentTimeMillis(), number, heart, uid);
 	}
 
 }
