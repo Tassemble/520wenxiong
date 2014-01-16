@@ -31,7 +31,8 @@ public class WealthBudget extends BaseDo{
 
 	Long orderId;
 	
-	
+	public static final String BUDGET_TYPE_EXCHANGE_HEART = "exchange_heart";
+	public static final String BUDGET_TYPE_EXCHANGE_GOLD = "exchange_gold";
 	public static final String BUDGET_TYPE_PAY = "pay";
 	public static final String BUDGET_TYPE_SIGNUP = "signup";
 	

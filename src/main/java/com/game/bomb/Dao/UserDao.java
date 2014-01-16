@@ -11,5 +11,9 @@ import com.game.bomb.domain.User;
 public interface UserDao extends BaseDao<User>{
 
 	void updateForExchangeCoinToHeart(Long uid, int number, int gainHeart);
+	
+	
+	
+	void lockUser(Long uid);
 
 }

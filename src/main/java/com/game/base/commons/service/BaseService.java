@@ -251,4 +251,5 @@ public interface BaseService<T> {
      * @return
      */
     public List<T> getByDomainObjectSelectiveOpt(T domainObject, ListCondition lc);
+
 }

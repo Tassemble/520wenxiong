@@ -3,6 +3,7 @@ package com.game.bomb.domain;
 import java.util.Date;
 
 import com.game.base.commons.domain.BaseDo;
+import com.game.bomb.constant.BombConstant;
 import com.netease.framework.dao.sql.annotation.DataProperty;
 
 /**
@@ -60,7 +61,7 @@ public class User extends BaseDo {
 	
 	Date bloodTime;
 	
-	public final static int CONSTANT_FULL_HEART = 5;
+	public final static int CONSTANT_FULL_HEART = BombConstant.CONSTANT_FULL_HEART;
 	
 	
 	

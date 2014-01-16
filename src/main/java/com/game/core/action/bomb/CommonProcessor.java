@@ -96,39 +96,26 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		String action = "exchangeInGotToHeart";
 		JSONObject jsonRoot = JSONObject.fromObject(message);
 		int number = jsonRoot.getInt("inGot");
-		if (number <= 0 || !(number % BombConstant.EXCHANGE_INGOT_TO_HEART_UNIT == 0)) {
+		Integer gainHeart = BombConstant.EXCHANGE_INGOT_TO_HEART_MAPPING.get(number);
+		if (gainHeart == null) {
 			map.put("action", action);
-			map.put("code", -1);
-			if (LOG.isDebugEnabled()) {
-				map.put("message", "make sure coin number bigger than zero, and number can be mod by " + BombConstant.EXCHANGE_INGOT_TO_HEART_UNIT);
-			}
+			map.put("code", -3);
+			map.put("message", "make sure enter inGot is right number, right number is " + JsonUtils.toJson(BombConstant.EXCHANGE_INGOT_TO_HEART_MAPPING.keySet()));
 			GameMemory.getCurrentSession().write(map);
 			return;
 		}
-		int gainHeart = (number / BombConstant.EXCHANGE_INGOT_TO_HEART_UNIT);
 		
 		OnlineUserDto onlineUser = GameMemory.getUser();
-		User user = userService.getById(onlineUser.getId());
-		if (user.getInGot() == null || user.getInGot() < number) {
-			map.put("action", action);
-			map.put("code", -2);
-			if (LOG.isDebugEnabled()) {
-				map.put("message", "not enough inGot, only " + user.getInGot());
-			}
-			GameMemory.getCurrentSession().write(map);
-			return;
-		}
-		int nowHeart = gainHeart + user.getHeartNum();
-		nowHeart = (nowHeart > user.getFullHeart()) ? user.getFullHeart() : nowHeart;
-		
-		LOG_TRADE.info("user[ " + JsonUtils.toJson(user) +" ] exchange heart using in_got " + number);
-		userService.updateForExchangeCoinToHeart(user.getId(), number, nowHeart);
+		userService.updateHeartNumber(number, gainHeart, onlineUser.getId());
 		map.put("action", action);
 		map.put("code", 200);
 		GameMemory.getCurrentSession().write(map);
 		return;
 		
 	}
+
+
+	
 	
 	@ActionAnnotation(action = "createRoom")
 	public void createRoom(Object message, Map<String, Object> map) {

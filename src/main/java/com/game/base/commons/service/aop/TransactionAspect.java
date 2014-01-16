@@ -27,8 +27,7 @@ public class TransactionAspect implements Ordered {
     
     //WPPostServiceImpl
     //com.wenxiong.blog.commons.service.impl.BaseServiceImpl.add
-    @Pointcut("execution(* com.wenxiong..*.service..*.add*(..)) || execution(* com.wenxiong..*.service..*.insert*(..))||execution(* com.wenxiong..*.service..*.create*(..))||execution(* com.wenxiong..*.service..*.update*(..))||execution(* com.wenxiong..*.service..*.modify*(..))||execution(* com.wenxiong..*.service..*.delete*(..))||execution(* com.wenxiong..*.service..*.remove*(..))"
-    		+ " || execution(* com.game..*.service..*.add*(..)) || execution(* com.game..*.service..*.insert*(..))||execution(* com.game..*.service..*.create*(..))||execution(* com.game..*.service..*.update*(..))||execution(* com.game..*.service..*.modify*(..))||execution(* com.game..*.service..*.delete*(..))||execution(* com.game..*.service..*.remove*(..))")
+    @Pointcut("execution(* com.game..*.service..*.add*(..)) || execution(* com.game..*.service..*.insert*(..))||execution(* com.game..*.service..*.create*(..))||execution(* com.game..*.service..*.update*(..))||execution(* com.game..*.service..*.modify*(..))||execution(* com.game..*.service..*.delete*(..))||execution(* com.game..*.service..*.remove*(..))")
     public void transaction() {
     }
 

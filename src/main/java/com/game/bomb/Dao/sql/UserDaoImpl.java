@@ -22,4 +22,9 @@ public class UserDaoImpl extends BaseDaoSqlImpl<User> implements UserDao{
 				System.currentTimeMillis(), number, heart, uid);
 	}
 
+	@Override
+	public void lockUser(Long uid) {
+		this.getSqlManager().executeQuery("select * from user where id = ? for update", uid); 
+	}
+
 }

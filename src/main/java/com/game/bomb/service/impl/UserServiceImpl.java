@@ -1,20 +1,27 @@
 package com.game.bomb.service.impl;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.game.base.commons.dao.BaseDao;
 import com.game.base.commons.service.impl.BaseServiceImpl;
+import com.game.base.commons.utils.text.JsonUtils;
 import com.game.bomb.Dao.UserDao;
 import com.game.bomb.Dao.WealthBudgetDao;
 import com.game.bomb.domain.User;
 import com.game.bomb.domain.WealthBudget;
 import com.game.bomb.service.UserService;
+import com.game.core.GameMemory;
+import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.BaseActionDataDto.GameSignUpData;
+import com.game.core.exception.BombException;
 
 /**
  * @author CHQ
@@ -25,6 +32,8 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 
 	UserDao userDao;
 	
+	
+	private static final Logger	LOG_TRADE			= LoggerFactory.getLogger("transaction");
 	
 	@Autowired
 	WealthBudgetDao wealthBudgetDao;
@@ -93,6 +102,30 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		updateSelectiveById(user);
 	}
 
+	
+	
+	@Override
+	public void updateHeartNumber(int number, Integer gainHeart, Long uid) {
+		this.getUserDao().lockUser(uid);
+		User user = getById(uid);
+		if (user.getInGot() == null || user.getInGot() < number) {
+			throw new BombException(-1000, "not enough inGot, only "+ user.getInGot());
+		}
+		int nowHeart = gainHeart + user.getHeartNum();
+		
+		//record
+		WealthBudget wealthBudget = new WealthBudget();
+		wealthBudget.setBudgetType(WealthBudget.BUDGET_TYPE_EXCHANGE_HEART);
+		wealthBudget.setGmtCreate(new Date());
+		wealthBudget.setGmtModified(new Date());
+		wealthBudget.setOrderId(0L);
+		wealthBudget.setQuantity((long)number);
+		wealthBudget.setUid(uid);
+		wealthBudgetDao.add(wealthBudget);
+		
+		LOG_TRADE.info("user[ " + JsonUtils.toJson(user) +" ] exchange heart using in_got " + number);
+		updateForExchangeCoinToHeart(uid, number, nowHeart);
+	}
 
 	@Override
 	public void updateForExchangeCoinToHeart(Long uid, int number, int gainHeart) {

@@ -19,4 +19,7 @@ public interface UserService extends BaseService<User>{
 
 	void updateForExchangeCoinToHeart(Long id, int number, int gainHeart);
 
+
+	void updateHeartNumber(int number, Integer gainHeart, Long uid);
+
 }
