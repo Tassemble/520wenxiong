@@ -18,6 +18,7 @@ import com.game.base.dao.BaseTestCase;
 import com.game.bomb.Dao.UserMetaDao;
 import com.game.bomb.domain.User;
 import com.game.bomb.service.UserService;
+import com.game.bomb.thirdaccount.service.SinaWeiboService;
 import com.game.core.GameMemory;
 import com.game.core.exception.ActionFailedException;
 import com.game.core.exception.BombException;
@@ -30,6 +31,13 @@ public class GameMainTest extends BaseTestCase {
 
 	@Autowired
 	ApplicationContext	ctx;
+	@Autowired
+	SinaWeiboService sinaWeiboService;
+	
+	@Test
+	public void testWeibo() {
+		sinaWeiboService.validateAndGetWeiboUser("2.00Uk7pWDVaYNQBcbec6c7ed1vUJoyB", "1772403527");
+	}
 
 	@Test
 	public void testRun() throws IOException {

@@ -13,10 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import weibo4j.Users;
+import weibo4j.model.WeiboException;
+
 import com.game.bomb.constant.LoginConstant;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.GameVersionDto;
 import com.game.bomb.service.UserService;
+import com.game.bomb.thirdaccount.service.SinaWeiboService;
 import com.game.core.GameMemory;
 import com.game.core.JsonSessionWrapper;
 import com.game.core.bomb.dto.ActionNameEnum;
@@ -50,6 +54,9 @@ public class AuthIoFilter extends IoFilterAdapter {
 
 	@Autowired
 	UserService					userService;
+	
+	@Autowired
+	SinaWeiboService sinaWeiboService;
 
 	final boolean				isMock	= false;
 
@@ -175,9 +182,6 @@ public class AuthIoFilter extends IoFilterAdapter {
 		}
 
 	}
-	
-	
-
 
 
 
@@ -190,12 +194,9 @@ public class AuthIoFilter extends IoFilterAdapter {
 			loginData.setLoginType(loginType);
 			return validateLogin(loginData);
 		} else if (LoginConstant.LOGIN_TYPE_SINA.equals(loginType)) {
-			//TODO check token if is validate
-			
-			
 			String username = json.getJSONObject("data").getString("userid");
-			String nickname = json.getJSONObject("data").getString("nickname");
-			
+			String token = json.getJSONObject("data").getString("token");
+			User userFromWeibo = validateAndGetWeiboUser(token, username);
 			
 			User query = new User();
 			query.setUsername(username); //是否有注入的可能性
@@ -205,16 +206,14 @@ public class AuthIoFilter extends IoFilterAdapter {
 				GameSignUpData signUpData = new GameSignUpData();
 				signUpData.setUsername(username);
 				signUpData.setAction(action);
-				signUpData.setNickname(nickname);
+				signUpData.setNickname(userFromWeibo.getNickName());
 				signUpData.setLoginType(loginType);
 				userService.addNewUser(signUpData); // add new one
-				
 				
 				users = userService.getByDomainObjectSelective(query); //query again
 				OnlineUserDto dto = new OnlineUserDto(users.get(0));
 				dto.setStatus(OnlineUserDto.STATUS_ONLINE);
 				return dto;
-				
 			} else {
 				OnlineUserDto dto = new OnlineUserDto(users.get(0));
 				dto.setStatus(OnlineUserDto.STATUS_ONLINE);
@@ -225,6 +224,10 @@ public class AuthIoFilter extends IoFilterAdapter {
 		}
 	}
 
+	
+	public User validateAndGetWeiboUser(String accessToken, String uid) {
+		  return sinaWeiboService.validateAndGetWeiboUser(accessToken, uid);
+	}
 	private OnlineUserDto validateLogin(LoginData loginData) {
 		if (StringUtils.isBlank(loginData.getUsername()) || StringUtils.isBlank(loginData.getPassword())) {
 			return null;

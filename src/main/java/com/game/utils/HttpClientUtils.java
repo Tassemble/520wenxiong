@@ -47,7 +47,12 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 	private static final int				SO_TIMEOUT			= 5000;											// 等待数据超时时间
 	private PoolingClientConnectionManager	taobaoHttpManager	= null;
 
-	private int								taobaoMaxConnection	= 200;												// 每条通道最大并发连接数
+	private int								taobaoMaxConnection	= 200;	
+	
+	
+	private PoolingClientConnectionManager	commonHttpManager	= null;
+
+	private int								commonMaxConnection	= 200;	// 每条通道最大并发连接数
 
 	
 	private PoolingClientConnectionManager	verifyReceiptDataHttpManager	= null;
@@ -57,6 +62,12 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 		
 	}
 
+	
+	public HttpClient getCommonHttpManager() {
+		return new DefaultHttpClient(commonHttpManager, getParams());
+	}
+	
+	
 	
 	public HttpClient getVerifyReceiptDataHttpManager() {
 		return new DefaultHttpClient(verifyReceiptDataHttpManager, getParams());
@@ -228,10 +239,29 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 		taobaoHttpManager = new PoolingClientConnectionManager(schemeRegistry);
 		taobaoHttpManager.setMaxTotal(taobaoMaxConnection);
 		taobaoHttpManager.setDefaultMaxPerRoute(taobaoMaxConnection); // 每条通道最大并发连接数
+		log.info("Feedback http connection pool has start up..., max total is:" + taobaoMaxConnection);
+		
 		
 		verifyReceiptDataHttpManager = new PoolingClientConnectionManager(schemeRegistry);;
 		verifyReceiptDataHttpManager.setMaxTotal(verifyReceiptMaxConnection);
 		verifyReceiptDataHttpManager.setDefaultMaxPerRoute(verifyReceiptMaxConnection);
-		log.info("Feedback http connection pool has start up..., max total is:" + taobaoMaxConnection);
+		log.info("Feedback http connection pool has start up..., max total is:" + verifyReceiptDataHttpManager);
+		
+		commonHttpManager = new PoolingClientConnectionManager(schemeRegistry);;
+		commonHttpManager.setMaxTotal(commonMaxConnection);
+		commonHttpManager.setDefaultMaxPerRoute(commonMaxConnection);
+		
+		
+		log.info("Feedback http connection pool has start up..., max total is:" + commonHttpManager);
 	}
+
+
+	
+
+
+	public void setCommonHttpManager(PoolingClientConnectionManager commonHttpManager) {
+		this.commonHttpManager = commonHttpManager;
+	}
+
+
 }
