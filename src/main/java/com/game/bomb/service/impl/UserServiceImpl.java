@@ -215,7 +215,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		refreshMaxAddedGolds(user);
 		
 		if (user.getMaxAddedGoldsDay() == null || user.getMaxAddedGoldsDay() < goldNum) {
-			throw new BombException(-1005, "award gold has reach max :"+ user.getInGot());
+			throw new BombException(-1005, "award gold has reach max :"+ user.getMaxAddedGoldsDay());
 		}
 		User update = new User();
 		update.setGold(user.getGold() + goldNum);

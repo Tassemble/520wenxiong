@@ -101,7 +101,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	@ActionAnnotation(action = "buyEquip") 
 	public void buyEquip(Object message, Map<String, Object> map) {
 		Integer goldNum = JSONObject.fromObject(message).getInt("gold");
-		userService.updateGoldForMinus(-goldNum, GameMemory.getUser().getId());
+		userService.updateGoldForMinus(goldNum, GameMemory.getUser().getId());
 		map.put("action", "buyEquip");
 		map.put("code", 200);
 		GameMemory.getCurrentSession().write(map);
