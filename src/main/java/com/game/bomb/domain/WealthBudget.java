@@ -6,7 +6,8 @@ import com.netease.framework.dao.sql.annotation.DataProperty;
 public class WealthBudget extends BaseDo{
 
 	
-	public static final Long DEFAULT_WEALTH = 10L;
+	public static final Long DEFAULT_WEALTH = 20L;
+	public static final Long DEFAULT_WEALTH_INGOT = 0L;
 	/**
 	 * 
 	 */

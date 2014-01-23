@@ -22,4 +22,14 @@ public interface UserService extends BaseService<User>{
 
 	void updateHeartNumber(int number, Integer gainHeart, Long uid);
 
+
+
+	void updateGoldForMinus(int goldNum, Long uid);
+
+
+	void updateGoldForPlus(Integer goldNum, Long id);
+
+
+	void updateGoldNumber(int number, Integer gainGold, Long uid);
+
 }

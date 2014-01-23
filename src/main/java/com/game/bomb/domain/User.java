@@ -61,6 +61,9 @@ public class User extends BaseDo {
 	
 	Date bloodTime;
 	
+	private Integer maxAddedGoldsDay;
+	private Long lastGoldsaddedTime;
+	public final static int CONSTANT_MAX_ADDED_GOLDS_DAY = 150;
 	public final static int CONSTANT_FULL_HEART = BombConstant.CONSTANT_FULL_HEART;
 	
 	
@@ -199,7 +202,24 @@ public class User extends BaseDo {
 	public void setLoginType(String loginType) {
 		this.loginType = loginType;
 	}
-
+	
+	
+	@DataProperty(column="max_added_golds_day")
+	public Integer getMaxAddedGoldsDay() {
+		return maxAddedGoldsDay;
+	}
+	public void setMaxAddedGoldsDay(Integer maxAddedGoldsDay) {
+		this.maxAddedGoldsDay = maxAddedGoldsDay;
+	}
+	
+	@DataProperty(column="last_golds_added_time")
+	public Long getLastGoldsaddedTime() {
+		return lastGoldsaddedTime;
+	}
+	public void setLastGoldsaddedTime(Long lastGoldsaddedTime) {
+		this.lastGoldsaddedTime = lastGoldsaddedTime;
+	}
+	
 	
 	
 	

@@ -1,9 +1,11 @@
 package com.game.core.bomb.auth;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -206,7 +208,14 @@ public class AuthIoFilter extends IoFilterAdapter {
 				GameSignUpData signUpData = new GameSignUpData();
 				signUpData.setUsername(username);
 				signUpData.setAction(action);
-				signUpData.setNickname(userFromWeibo.getNickName());
+				if (StringUtils.isNotBlank(userFromWeibo.getNickName())) {
+					try {
+						signUpData.setNickname(Base64.encodeBase64String(userFromWeibo.getNickName().getBytes("UTF-8")));
+					} catch (UnsupportedEncodingException e) {
+						LOG.warn("exception of base64 encode for nickname");
+					}
+				}
+				
 				signUpData.setLoginType(loginType);
 				userService.addNewUser(signUpData); // add new one
 				
@@ -222,6 +231,13 @@ public class AuthIoFilter extends IoFilterAdapter {
 		} else {
 			return null;
 		}
+	}
+	
+	public static void main(String[] args) throws UnsupportedEncodingException {
+		String result = Base64.encodeBase64String("sjdfoijsofjsoijfsio".getBytes("UTF-8"));
+		System.out.println(result);
+		System.out.println(new String(Base64.decodeBase64(result)));
+		
 	}
 
 	

@@ -1,5 +1,6 @@
 package com.game.bomb.service.impl;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -48,6 +49,8 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		super.setBaseDao(userDao);
 		this.userDao = userDao;
 	}
+	
+	
 
 
 	@Override
@@ -75,7 +78,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		newItem.setBloodTime(new Date(-1));
 		newItem.setEnable(true);
 		newItem.setGold(WealthBudget.DEFAULT_WEALTH);
-		newItem.setInGot(WealthBudget.DEFAULT_WEALTH);
+		newItem.setInGot(WealthBudget.DEFAULT_WEALTH_INGOT);
 		add(newItem);
 		
 		User qUser = new User();
@@ -83,14 +86,16 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		qUser.setLoginType(data.getLoginType());
 		User userFromDB = getByDomainObjectSelective(qUser).get(0);
 		
-		WealthBudget wealth = new WealthBudget();
-		wealth.setBudgetType(WealthBudget.BUDGET_TYPE_SIGNUP);
-		wealth.setGmtCreate(now);
-		wealth.setGmtModified(now);
-		wealth.setOrderId(0L);
-		wealth.setQuantity(WealthBudget.DEFAULT_WEALTH);
-		wealth.setUid(userFromDB.getId());
-		wealthBudgetDao.add(wealth);
+		if (WealthBudget.DEFAULT_WEALTH_INGOT > 0) {
+			WealthBudget wealth = new WealthBudget();
+			wealth.setBudgetType(WealthBudget.BUDGET_TYPE_SIGNUP);
+			wealth.setGmtCreate(now);
+			wealth.setGmtModified(now);
+			wealth.setOrderId(0L);
+			wealth.setQuantity(WealthBudget.DEFAULT_WEALTH_INGOT);
+			wealth.setUid(userFromDB.getId());
+			wealthBudgetDao.add(wealth);
+		}
 	}
 
 
@@ -102,6 +107,34 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		updateSelectiveById(user);
 	}
 
+	@Override
+	public void updateGoldNumber(int number, Integer gainGold, Long uid) {
+		this.getUserDao().lockUser(uid);
+		User user = getById(uid);
+		if (user.getInGot() == null || user.getInGot() < number) {
+			throw new BombException(-1000, "not enough inGot, only "+ user.getInGot());
+		}
+		long nowGold = gainGold + user.getGold();
+		
+		//record
+		WealthBudget wealthBudget = new WealthBudget();
+		wealthBudget.setBudgetType(WealthBudget.BUDGET_TYPE_EXCHANGE_GOLD);
+		wealthBudget.setGmtCreate(new Date());
+		wealthBudget.setGmtModified(new Date());
+		wealthBudget.setOrderId(0L);
+		wealthBudget.setQuantity((long)number);
+		wealthBudget.setUid(uid);
+		wealthBudgetDao.add(wealthBudget);
+		
+		LOG_TRADE.info("user[ " + JsonUtils.toJson(user) +" ] exchange gold using in_got " + number);
+		
+		User update = new User();
+		update.setGold(nowGold);
+		update.setInGot(user.getInGot() - number);
+		update.setId(uid);
+		update.setGmtModified(new Date());
+		this.updateSelectiveById(update);
+	}
 	
 	
 	@Override
@@ -130,6 +163,66 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 	@Override
 	public void updateForExchangeCoinToHeart(Long uid, int number, int gainHeart) {
 		userDao.updateForExchangeCoinToHeart(uid, number, gainHeart);
+	}
+
+
+	
+	
+	@Override
+	public void updateGoldForMinus(int goldNum, Long uid) {
+		
+		userDao.lockUser(GameMemory.getUser().getId());
+		
+		User user = getById(uid);
+		if (user.getGold() == null || user.getGold() < goldNum) {
+			throw new BombException(-1001, "not enough gold, only "+ user.getInGot());
+		}
+		
+		User update = new User();
+		update.setGold(user.getGold() - goldNum);
+		update.setId(uid);
+		updateSelectiveById(update);
+	}
+
+	public void refreshMaxAddedGolds(User user) {
+		Long now = System.currentTimeMillis();
+		if (user.getLastGoldsaddedTime() == null) {
+			user.setLastGoldsaddedTime(0L);
+		}
+		
+		Calendar cal = Calendar.getInstance(); 
+		cal.set(Calendar.HOUR_OF_DAY, 0); 
+		cal.set(Calendar.SECOND, 0); 
+		cal.set(Calendar.MINUTE, 0); 
+		cal.set(Calendar.MILLISECOND, 0); 
+		Long todayStartTime = cal.getTimeInMillis();
+		
+		if (user.getLastGoldsaddedTime() < todayStartTime) {//说明是昨天更新的，这时候将gold又可以继续增加
+			User update = new User();
+			update.setMaxAddedGoldsDay(User.CONSTANT_MAX_ADDED_GOLDS_DAY);
+			update.setLastGoldsaddedTime(now);
+			update.setId(user.getId());
+			updateSelectiveById(update);
+			user.setMaxAddedGoldsDay(User.CONSTANT_MAX_ADDED_GOLDS_DAY);
+		}
+	}
+
+	@Override
+	public void updateGoldForPlus(Integer goldNum, Long uid) {
+		userDao.lockUser(GameMemory.getUser().getId());
+		
+		User user = getById(uid);
+		refreshMaxAddedGolds(user);
+		
+		if (user.getMaxAddedGoldsDay() == null || user.getMaxAddedGoldsDay() < goldNum) {
+			throw new BombException(-1005, "award gold has reach max :"+ user.getInGot());
+		}
+		User update = new User();
+		update.setGold(user.getGold() + goldNum);
+		update.setMaxAddedGoldsDay(user.getMaxAddedGoldsDay() - goldNum);
+		update.setLastGoldsaddedTime(System.currentTimeMillis());
+		update.setId(uid);
+		updateSelectiveById(update);
 	}
 	
 	

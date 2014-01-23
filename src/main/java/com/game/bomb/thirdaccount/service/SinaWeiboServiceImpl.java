@@ -1,5 +1,6 @@
 package com.game.bomb.thirdaccount.service;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,10 @@ public class SinaWeiboServiceImpl implements SinaWeiboService {
 					.append("&access_token=").append(accessToken);
 			String result = HttpClientUtils.getHtmlByGetMethod(httpClientUtils.getCommonHttpManager(), sb.toString());
 			
+			
+			if (StringUtils.isBlank(result)) {
+				throw new BombException(-201, "token may be invalidate.");
+			}
 			if (LOG.isDebugEnabled()) {
 				LOG.info("request url:" + sb.toString() + ",get from weibo:" + result);
 			}
@@ -33,7 +38,7 @@ public class SinaWeiboServiceImpl implements SinaWeiboService {
 			user.setNickName(net.sf.json.JSONObject.fromObject(result).getString("screen_name"));
 			return user;
 		} catch (Exception e) {
-			throw new BombException(-202, "token:" + accessToken + ", uid:" + uid + ",parse data error:" + e.getMessage());
+			throw new BombException(-202, "token:" + accessToken + ", uid:" + uid + ",error:" + e.getMessage());
 		}
 	}
 

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import com.game.base.commons.utils.collection.FieldComparator;
 import com.game.base.commons.utils.text.JsonUtils;
+import com.game.bomb.Dao.UserDao;
 import com.game.bomb.Dao.UserMeta;
 import com.game.bomb.Dao.UserMetaDao;
 import com.game.bomb.config.BombConfig;
@@ -82,12 +83,63 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	@Autowired
 	TransactionService transactionService;
 	
+	@Autowired
+	UserDao userDao;
+	
+	//{“action”:"AIAward","gold":'"0~5”}
+	@ActionAnnotation(action = "AIAward") 
+	public void AIAward(Object message, Map<String, Object> map) {
+		Integer goldNum = JSONObject.fromObject(message).getInt("gold");
+		userService.updateGoldForPlus(goldNum, GameMemory.getUser().getId());
+		map.put("action", "AIAward");
+		map.put("code", 200);
+		GameMemory.getCurrentSession().write(map);
+	}
+	
+	
+	//{"action":"buyEquip","gold":"100”}
+	@ActionAnnotation(action = "buyEquip") 
+	public void buyEquip(Object message, Map<String, Object> map) {
+		Integer goldNum = JSONObject.fromObject(message).getInt("gold");
+		userService.updateGoldForMinus(-goldNum, GameMemory.getUser().getId());
+		map.put("action", "buyEquip");
+		map.put("code", 200);
+		GameMemory.getCurrentSession().write(map);
+	}
+	
 	
 	@ActionAnnotation(action = "forward") 
 	public void forward(Object message, Map<String, Object> map) {
 		RoomLogic.forwardMessageToOtherClientsInRoom(message);
 	}
 	
+	//{"action":"exchangeCoinToGold", "inGot":20}
+	@ActionAnnotation(action = "exchangeInGotToGold")
+	public void exchangeInGotToGold(Object message, Map<String, Object> map) {
+		// 20个金币换一颗红心
+		String action = "exchangeInGotToGold";
+		JSONObject jsonRoot = JSONObject.fromObject(message);
+		int number = jsonRoot.getInt("inGot");
+		Integer gainGold = BombConstant.EXCHANGE_INGOT_TO_GOLD_MAPPING.get(number);
+		if (gainGold == null) {
+			map.put("action", action);
+			map.put("code", -4);
+			map.put("message",
+					"make sure enter inGot is right number, right number is "
+							+ JsonUtils.toJson(BombConstant.EXCHANGE_INGOT_TO_GOLD_MAPPING.keySet()));
+			GameMemory.getCurrentSession().write(map);
+			return;
+		}
+
+		OnlineUserDto onlineUser = GameMemory.getUser();
+		userService.updateGoldNumber(number, gainGold, onlineUser.getId());
+		map.put("action", action);
+		map.put("code", 200);
+		GameMemory.getCurrentSession().write(map);
+		return;
+
+	}
+		
 	
 	//{"action":"exchangeCoinToHeart", "inGot":20}
 	@ActionAnnotation(action = "exchangeInGotToHeart")

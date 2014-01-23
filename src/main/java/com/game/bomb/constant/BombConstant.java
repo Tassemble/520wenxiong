@@ -37,7 +37,7 @@ public class BombConstant {
 			};
 
 			//上线的时候要注意
-	public static final int	CONSTANT_FULL_HEART	= 1000;
+	public static final int	CONSTANT_FULL_HEART	= 6;
 			
 			
 
