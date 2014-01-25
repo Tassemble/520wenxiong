@@ -32,4 +32,7 @@ public interface UserService extends BaseService<User>{
 
 	void updateGoldNumber(int number, Integer gainGold, Long uid);
 
+
+	void refreshMaxAddedGolds(User user);
+
 }

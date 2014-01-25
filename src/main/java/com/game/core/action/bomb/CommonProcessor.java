@@ -10,6 +10,7 @@ import java.util.Random;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
@@ -86,6 +87,23 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	@Autowired
 	UserDao userDao;
 	
+	
+	
+	//{"action":"feedback":msg":"base64(msg)"}
+	@ActionAnnotation(action = "feedback") 
+	public void feedback(Object message, Map<String, Object> map) {
+		String msg = JSONObject.fromObject(message).getString("msg");
+		OnlineUserDto user = GameMemory.getUser();
+		LOG.info("feedback from :id" + user.getId() +"username:" + user.getUsername() 
+				+ ", msg:" + new String(Base64.decodeBase64(msg))) ;
+		map.put("action", "feedback");
+		map.put("code", 200);
+		GameMemory.getCurrentSession().write(map);
+	}
+	
+	
+	
+	
 	//{“action”:"AIAward","gold":'"0~5”}
 	@ActionAnnotation(action = "AIAward") 
 	public void AIAward(Object message, Map<String, Object> map) {
@@ -113,7 +131,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		RoomLogic.forwardMessageToOtherClientsInRoom(message);
 	}
 	
-	//{"action":"exchangeCoinToGold", "inGot":20}
+	//{"action":"exchangeInGotToGold", "inGot":20}
 	@ActionAnnotation(action = "exchangeInGotToGold")
 	public void exchangeInGotToGold(Object message, Map<String, Object> map) {
 		// 20个金币换一颗红心

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.game.bomb.Dao.UserDao;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobileUserDto;
+import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.JsonSessionWrapper;
 import com.game.core.bomb.dto.ActionNameEnum;
@@ -156,6 +157,7 @@ public class RoomLogic {
 			User update = new User();
 			update.setId(user.getId());
 			update.setLevel(user.getLevel());
+			update.setGold(user.getGold() + 4);
 			update.setHeartNum(user.getHeartNum());
 			update.setVictoryNum(user.getVictoryNum());
 			update.setBloodTime(new Date());
@@ -170,6 +172,7 @@ public class RoomLogic {
 			
 			User update = new User();
 			update.setId(user.getId());
+			update.setGold(user.getGold() + 1);
 			update.setBloodTime(new Date());
 			update.setHeartNum(user.getHeartNum());
 			update.setGmtModified(new Date());

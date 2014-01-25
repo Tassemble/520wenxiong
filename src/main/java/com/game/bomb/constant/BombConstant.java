@@ -16,9 +16,9 @@ public class BombConstant {
     {
 		private static final long	serialVersionUID	= -3703929355568521604L;
 		{
-			put(20, 30);
-			put(40, 70);
-			put(60, 110);
+			put(10, 30);
+			put(20, 70);
+			put(30, 110);
 		}
 	};
 	
@@ -32,7 +32,7 @@ public class BombConstant {
 					put(2, 20);
 					put(4, 50);
 					put(6, 120);
-					put(12, 300);
+					put(15, 300);
 				}
 			};
 
