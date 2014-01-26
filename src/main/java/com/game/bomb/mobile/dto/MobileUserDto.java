@@ -108,6 +108,12 @@ public class MobileUserDto {
 
 		return mobData;
 	}
+	
+	public static void main(String[] args) {
+		System.out.println(BloodLogic.DefaultBloodRecoveryOfDuration);
+		System.out.println(System.currentTimeMillis() - 1390748123301L);
+		System.out.println(BloodLogic.DefaultBloodRecoveryOfDuration - (System.currentTimeMillis() - 1390748123301L));
+	}
 
 	public Integer getWin() {
 		return win;

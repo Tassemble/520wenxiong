@@ -98,23 +98,24 @@ public class BloodLogic {
 	
 	
 	public Long getBloodRecoveryOfDuration() {
-		GameAttribute attr = new GameAttribute();
-		attr.setAttrName(GameAttribute.KEY_DURATION_OF_RENEW_BLOOD);
-		List<GameAttribute> results = gameAttributeDao.getByDomainObjectSelective(attr);
-		if (CollectionUtils.isEmpty(results)) {
-			return DefaultBloodRecoveryOfDuration;
-		}
-		
-		try {
-			Long duration = Long.valueOf(results.get(0).getAttrValue());
-			if (!duration.equals(DefaultBloodRecoveryOfDuration)) {
-				DefaultBloodRecoveryOfDuration = duration;
-			}
-			return DefaultBloodRecoveryOfDuration;
-		} catch (NumberFormatException e) {
-			LOG.error(e.getMessage(), e);
-			return DefaultBloodRecoveryOfDuration;
-		}
+		return DefaultBloodRecoveryOfDuration;
+//		GameAttribute attr = new GameAttribute();
+//		attr.setAttrName(GameAttribute.KEY_DURATION_OF_RENEW_BLOOD);
+//		List<GameAttribute> results = gameAttributeDao.getByDomainObjectSelective(attr);
+//		if (CollectionUtils.isEmpty(results)) {
+//			return DefaultBloodRecoveryOfDuration;
+//		}
+//		
+//		try {
+//			Long duration = Long.valueOf(results.get(0).getAttrValue());
+//			if (!duration.equals(DefaultBloodRecoveryOfDuration)) {
+//				DefaultBloodRecoveryOfDuration = duration;
+//			}
+//			return DefaultBloodRecoveryOfDuration;
+//		} catch (NumberFormatException e) {
+//			LOG.error(e.getMessage(), e);
+//			return DefaultBloodRecoveryOfDuration;
+//		}
 		
 	}
 }

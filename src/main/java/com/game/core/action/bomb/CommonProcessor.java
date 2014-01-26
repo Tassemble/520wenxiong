@@ -42,6 +42,7 @@ import com.game.core.action.processor.PlayerInfoProcessorHelper;
 import com.game.core.annotation.ActionAnnotation;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnConstant;
+import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.bomb.logic.RoomLogic;
 import com.game.core.bomb.play.dto.PlayRoomDto;
 import com.game.core.exception.ActionFailedException;
@@ -89,6 +90,30 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	UserDao userDao;
 	
 	
+	//{"action":"AIStart"} 
+	@ActionAnnotation(action = "AIStart") 
+	public void AIStart(Object message, Map<String, Object> map) {
+		OnlineUserDto user = GameMemory.getUser();
+		
+		User userInDB = userService.getById(user.getId());
+		if (userInDB.getHeartNum() == null || userInDB.getHeartNum() <= 0) {
+			map.put("code", BombConstant.NOT_ENOUGH_HEART_CODE);
+			map.put("action", "AIStart");
+			map.put("message", "no heart, you can wait or buy it");
+			GameMemory.getCurrentSession().write(map);
+			return;
+		}
+		
+		User update = new User();
+		update.setId(user.getId());
+		update.setHeartNum(userInDB.getHeartNum() - 1);
+		update.setGmtModified(new Date());
+		userService.updateSelectiveById(update);
+		
+		map.put("code", 200);
+		map.put("action", "AIStart");
+		GameMemory.getCurrentSession().write(map);
+	}
 	
 	
 

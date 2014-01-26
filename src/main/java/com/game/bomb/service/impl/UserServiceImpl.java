@@ -227,7 +227,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 			throw new BombException(-1005, "award gold has reach max :"+ user.getMaxAddedGoldsDay());
 		}
 		User update = new User();
-		update.setHeartNum(user.getHeartNum() - 1);
+		update.setHeartNum(user.getHeartNum() + 1);
 		update.setVictoryNum(user.getVictoryNum() + 1);
 		update.setGold(user.getGold() + goldNum);
 		update.setMaxAddedGoldsDay(user.getMaxAddedGoldsDay() - goldNum);
