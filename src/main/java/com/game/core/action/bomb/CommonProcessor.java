@@ -31,6 +31,7 @@ import com.game.bomb.Dao.UserMetaDao;
 import com.game.bomb.config.BombConfig;
 import com.game.bomb.constant.BombConstant;
 import com.game.bomb.domain.User;
+import com.game.bomb.mobile.dto.DayAward;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.FriendRelationService;
 import com.game.bomb.service.TransactionService;
@@ -89,6 +90,25 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	
 	
 	
+	
+
+	
+	// 登陆奖赏
+	//{"action":"everydayAward"}
+	//response:{"action":"everydayAward","code":200,"gold":5,"heart":5,"days":7}
+	//{"action":"everydayAward","code":201}
+	@ActionAnnotation(action = "everydayAward") 
+	public void everydayAward(Object message, Map<String, Object> map) {
+		OnlineUserDto user = GameMemory.getUser();
+		
+		//should locker
+		userService.updateForAwardNextDayAndResponse(user.getId(), map);
+		
+		GameMemory.getCurrentSession().write(map);
+	}
+	
+	
+	
 	//{"action":"feedback":msg":"base64(msg)"}
 	@ActionAnnotation(action = "feedback") 
 	public void feedback(Object message, Map<String, Object> map) {
@@ -107,8 +127,8 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	//{“action”:"AIAward","gold":'"0~5”}
 	@ActionAnnotation(action = "AIAward") 
 	public void AIAward(Object message, Map<String, Object> map) {
-		Integer goldNum = JSONObject.fromObject(message).getInt("gold");
-		userService.updateGoldForPlus(goldNum, GameMemory.getUser().getId());
+//		Integer goldNum = JSONObject.fromObject(message).getInt("gold");
+		userService.updateGoldForPlus(BombConstant.AIAWARD_AFTER_WIN, GameMemory.getUser().getId());
 		map.put("action", "AIAward");
 		map.put("code", 200);
 		GameMemory.getCurrentSession().write(map);

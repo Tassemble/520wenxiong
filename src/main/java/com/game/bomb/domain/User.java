@@ -68,6 +68,28 @@ public class User extends BaseDo {
 	
 	
 	
+	
+	private Integer awardDays; //从下载app到之后的几天领奖情况
+	private Long lastAwardTime;//上一次登陆奖赏的时间
+	public final static Integer MAX_AWARD_DAYS = 7;
+	
+	
+	
+	@DataProperty(column="award_days")
+	public Integer getAwardDays() {
+		return awardDays;
+	}
+	public void setAwardDays(Integer awardDays) {
+		this.awardDays = awardDays;
+	}
+	
+	@DataProperty(column="last_award_time")
+	public Long getLastAwardTime() {
+		return lastAwardTime;
+	}
+	public void setLastAwardTime(Long lastAwardTime) {
+		this.lastAwardTime = lastAwardTime;
+	}
 	@DataProperty(column="full_heart")
 	public Integer getFullHeart() {
 		return fullHeart;

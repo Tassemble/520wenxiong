@@ -1,5 +1,7 @@
 package com.game.bomb.service;
 
+import java.util.Map;
+
 import com.game.base.commons.service.BaseService;
 import com.game.bomb.domain.User;
 import com.game.core.bomb.dto.BaseActionDataDto.GameSignUpData;
@@ -34,5 +36,7 @@ public interface UserService extends BaseService<User>{
 
 
 	void refreshMaxAddedGolds(User user);
+
+	void updateForAwardNextDayAndResponse(Long id, Map<String, Object> map);
 
 }

@@ -16,11 +16,13 @@ import com.game.base.commons.service.impl.BaseServiceImpl;
 import com.game.base.commons.utils.text.JsonUtils;
 import com.game.bomb.Dao.UserDao;
 import com.game.bomb.Dao.WealthBudgetDao;
+import com.game.bomb.constant.BombConstant;
 import com.game.bomb.domain.User;
 import com.game.bomb.domain.WealthBudget;
+import com.game.bomb.mobile.dto.DayAward;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
-import com.game.core.bomb.dto.OnlineUserDto;
+import com.game.core.action.bomb.logic.BloodLogic;
 import com.game.core.bomb.dto.BaseActionDataDto.GameSignUpData;
 import com.game.core.exception.BombException;
 
@@ -35,6 +37,11 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 	
 	
 	private static final Logger	LOG_TRADE			= LoggerFactory.getLogger("transaction");
+	
+	
+	@Autowired
+	BloodLogic bloodLogic;
+	
 	
 	@Autowired
 	WealthBudgetDao wealthBudgetDao;
@@ -75,6 +82,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		newItem.setGmtCreate(now);
 		newItem.setGmtModified(now);
 		newItem.setFullHeart(User.CONSTANT_FULL_HEART);
+		newItem.setAwardDays(0); //
 		newItem.setBloodTime(new Date(-1));
 		newItem.setEnable(true);
 		newItem.setGold(WealthBudget.DEFAULT_WEALTH);
@@ -226,6 +234,62 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		update.setLastGoldsaddedTime(System.currentTimeMillis());
 		update.setId(uid);
 		updateSelectiveById(update);
+	}
+
+
+	@Override
+	public void updateForAwardNextDayAndResponse(Long id,  Map<String, Object> map) {
+		map.put("action", "everydayAward");
+		map.put("code", 201); // award days end!!!, please attend activities
+		
+		if (id == null) {
+			return;
+		}
+		
+		userDao.lockUser(id);
+		
+		// get awardDays if it is largher than max_award_days then return code 201
+		User userInDB = userDao.getById(id);
+		if (userInDB == null) {
+			return;
+		}
+		
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.HOUR_OF_DAY, 0); 
+		cal.set(Calendar.SECOND, 0); 
+		cal.set(Calendar.MINUTE, 0); 
+		cal.set(Calendar.MILLISECOND, 0); 
+		Long todayStartTime = cal.getTimeInMillis();
+		
+		if (userInDB.getLastAwardTime() == null || userInDB.getLastAwardTime() < todayStartTime) { //如果比今天的时间要小 那就更新一下
+			
+			bloodLogic.processBloodWithRealTime(userInDB);
+			
+			int awardDay = userInDB.getAwardDays() + 1;
+			
+			Long now = System.currentTimeMillis();
+			User update = new User();
+			update.setAwardDays(awardDay);
+			update.setLastAwardTime(now);
+			update.setGmtModified(new Date(now));
+			update.setId(userInDB.getId());
+			
+			DayAward award = BombConstant.EVERYDAY_AWARDS.get(awardDay);
+			//检查是否能获得奖品
+			if (award != null) {
+				update.setGold(userInDB.getGold() + award.getGold());
+				update.setHeartNum(userInDB.getHeartNum() + award.getHeart());
+				
+				//response
+				map.put("days", awardDay);
+				map.put("heart", award.getHeart());
+				map.put("gold", award.getGold());
+				map.put("code", 200);
+			} else {
+				//nothing to do, you can't award
+			}
+			this.updateSelectiveById(update);
+		}
 	}
 	
 	
