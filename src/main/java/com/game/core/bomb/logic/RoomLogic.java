@@ -134,7 +134,7 @@ public class RoomLogic {
 			} else {
 				user.setLoserNum(user.getLoserNum() + 1);
 			}
-			user.setHeartNum(user.getHeartNum() - 1);
+			
 			user.setRoomId("");
 			user.setStatus(OnlineUserDto.STATUS_ONLINE);
 			room.getUsers().remove(user);
@@ -147,6 +147,7 @@ public class RoomLogic {
 		}
 		
 		if (isLastPlayer) {
+			//最后一人胜利 不减红心
 			Map<String, Object> maps = Maps.newHashMap();
 			maps.put("action", "win");
 			maps.put("user", new MobileUserDto(user));
@@ -164,6 +165,7 @@ public class RoomLogic {
 			update.setGmtModified(new Date());
 			userDao.updateSelectiveById(update);
 		} else {
+			user.setHeartNum(user.getHeartNum() - 1);
 			Map<String, Object> maps = Maps.newHashMap();
 			maps.put("action", "lose");
 			maps.put("user", new MobileUserDto(user));
