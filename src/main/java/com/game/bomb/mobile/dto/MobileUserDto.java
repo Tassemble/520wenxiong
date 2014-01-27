@@ -101,6 +101,9 @@ public class MobileUserDto {
 		} else {
 			mobData.setLeftTime(BloodLogic.DefaultBloodRecoveryOfDuration - 
 					(System.currentTimeMillis() - user.getBloodTime().getTime()));
+			
+			
+			
 		}
 		if (!StringUtils.isBlank(user.getInUse())) {
 			mobData.setInUse(new ObjectMapper().readValue(user.getInUse(), HashMap.class));
@@ -110,9 +113,11 @@ public class MobileUserDto {
 	}
 	
 	public static void main(String[] args) {
+		//-103054
 		System.out.println(BloodLogic.DefaultBloodRecoveryOfDuration);
-		System.out.println(System.currentTimeMillis() - 1390748123301L);
-		System.out.println(BloodLogic.DefaultBloodRecoveryOfDuration - (System.currentTimeMillis() - 1390748123301L));
+		System.out.println(System.currentTimeMillis() - 1390835247647L);
+		System.out.println( (System.currentTimeMillis() -1390835247647L)/ BloodLogic.DefaultBloodRecoveryOfDuration);
+		System.out.println(BloodLogic.DefaultBloodRecoveryOfDuration - (System.currentTimeMillis() - 1390835247647L));
 	}
 
 	public Integer getWin() {

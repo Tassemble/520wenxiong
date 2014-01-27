@@ -79,7 +79,7 @@ public class BloodLogic {
 		
 		long heardGain = (curTime - user.getBloodTime().getTime()) / getBloodRecoveryOfDuration();
 		
-		if (heardGain > 1) {
+		if (heardGain >= 1) {
 			
 			int heartNow = user.getHeartNum() + (int)heardGain;
 			if (heartNow > user.getFullHeart()) {

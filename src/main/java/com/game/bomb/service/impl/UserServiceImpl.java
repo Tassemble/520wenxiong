@@ -83,7 +83,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		newItem.setGmtModified(now);
 		newItem.setFullHeart(User.CONSTANT_FULL_HEART);
 		newItem.setAwardDays(0); //
-		newItem.setBloodTime(new Date(-1));
+		newItem.setBloodTime(new Date());
 		newItem.setEnable(true);
 		newItem.setGold(WealthBudget.DEFAULT_WEALTH);
 		newItem.setInGot(WealthBudget.DEFAULT_WEALTH_INGOT);
