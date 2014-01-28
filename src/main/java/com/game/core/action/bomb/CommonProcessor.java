@@ -128,7 +128,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		
 		//should locker
 		userService.updateForAwardNextDayAndResponse(user.getId(), map);
-		
+		GameMemory.reloadUser();
 		GameMemory.getCurrentSession().write(map);
 	}
 	
