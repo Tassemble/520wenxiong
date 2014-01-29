@@ -68,28 +68,28 @@ public class MobileUserDto {
 	}
 
 	@SuppressWarnings("unchecked")
-	public MobileUserDto(OnlineUserDto user) throws Exception {
+	public MobileUserDto(OnlineUserDto user, User userInDB) throws Exception {
 		this.id = user.getId();
-		this.heart = user.getHeartNum();
+		this.heart = userInDB.getHeartNum();
 		this.username = user.getUsername();
-		this.nickName = user.getNickname();
-		this.portrait = user.getPortrait();
-		this.level = user.getLevel();
-		this.win = user.getVictoryNum() == null ? 0 : user.getVictoryNum();
-		this.runaway = user.getRunawayNum() == null ? 0 : user.getRunawayNum();
-		this.lose = user.getLoserNum() == null ? 0 : user.getLoserNum();
-		this.gold = user.getGold();
-		this.inGot = user.getInGot();
+		this.nickName = userInDB.getNickName();
+		this.portrait = userInDB.getPortrait();
+		this.level = userInDB.getLevel();
+		this.win = userInDB.getVictoryNum() == null ? 0 : userInDB.getVictoryNum();
+		this.runaway = userInDB.getRunawayNum() == null ? 0 : userInDB.getRunawayNum();
+		this.lose = userInDB.getLoserNum() == null ? 0 : userInDB.getLoserNum();
+		this.gold = userInDB.getGold();
+		this.inGot = userInDB.getInGot();
 		this.status = user.getStatus();
-		if (!StringUtils.isBlank(user.getInUse())) {
-			this.inUse = new ObjectMapper().readValue(user.getInUse(), HashMap.class);
+		if (!StringUtils.isBlank(userInDB.getInUse())) {
+			this.inUse = new ObjectMapper().readValue(userInDB.getInUse(), HashMap.class);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public static MobileUserDto buildMobileUser(User user) throws JsonParseException, JsonMappingException,
 			IOException {
-		OnlineUserDto onlineUser = GameMemory.getUserById(user.getId());
+		OnlineUserDto onlineUser = GameMemory.getOnlineUserById(user.getId());
 
 		if (onlineUser == null) {
 			return null;

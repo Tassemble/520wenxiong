@@ -97,7 +97,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 			GameMemory.LOCAL_SESSION_CONTEXT.set(context);
 			GameMemory.LOCAL_SESSION_CONTEXT.get().setAction(action);
 
-			OnlineUserDto user = GameMemory.SESSION_USERS.get(jsonSession.getId());
+			OnlineUserDto user = GameMemory.getOnlineUserBySessionId(jsonSession.getId());
 			if (user == null) {
 
 				
@@ -130,9 +130,9 @@ public class AuthIoFilter extends IoFilterAdapter {
 				if (dto != null) {// TODO 实现验证用户名和密码
 					dto.setSession(jsonSession);
 
-					if (GameMemory.ONLINE_USERS.containsValue(dto)) {
-						OnlineUserDto oldUser = GameMemory.ONLINE_USERS.get(dto.getId());
-						GameMemory.ONLINE_USERS.remove(dto);
+					if (GameMemory.isUserOnline(dto.getId())) {
+						OnlineUserDto oldUser = GameMemory.getOnlineUserById(dto.getId());
+						GameMemory.removeOnlineUserByUid(dto.getId());
 						oldUser.getSession().write("remote client logon");
 						oldUser.getSession().close();
 					//	if (session.getId() != oldUser.getSession().getId()) {
@@ -146,8 +146,8 @@ public class AuthIoFilter extends IoFilterAdapter {
 					//	return;
 					}
 					LOG.info("validate ok for username:" + dto.getUsername());
-					GameMemory.ONLINE_USERS.put(dto.getId(), dto);
-					GameMemory.SESSION_USERS.put(jsonSession.getId(), dto);
+					GameMemory.addToOnlineUserList(dto);
+					GameMemory.addSessionUser(jsonSession.getId(), dto);
 					GameMemory.setUser(user);
 
 					jsonSession.write(new ReturnDto(200, action, "logon successfully"));
@@ -252,7 +252,6 @@ public class AuthIoFilter extends IoFilterAdapter {
 		OnlineUserDto dto = new OnlineUserDto();
 		dto.setStatus(OnlineUserDto.STATUS_ONLINE);
 		dto.setUsername(loginData.getUsername());
-		dto.setNickname(loginData.getUsername());
 		
 
 		if (isMock) {

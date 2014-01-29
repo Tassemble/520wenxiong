@@ -76,7 +76,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 
 		//
 		// locker.lock("", key);
-		OnlineUserDto user = GameMemory.SESSION_USERS.get(session.getId());
+		OnlineUserDto user = GameMemory.getOnlineUserBySessionId(session.getId());
 		if (user == null) {
 			return;
 		}
@@ -84,8 +84,8 @@ public class BombMessageBizHandler implements BombMessageHandler{
 		if (room != null) {
 			roomLogic.doUserQuit(room, user.getId());
 		}
-		GameMemory.ONLINE_USERS.remove(user.getId());
-		GameMemory.removeSessionUserByKey(session.getId());
+		GameMemory.removeOnlineUserByUid(user.getId());
+		GameMemory.removeSessionUserBySessionId(session.getId());
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public class BombMessageBizHandler implements BombMessageHandler{
 		} else {
 			// ~ 处理request-response的方式 非常简单 使用actionAnotation实现
 			@SuppressWarnings("unchecked")
-			HashMap<String, Object> valueMapper = (HashMap<String, Object>) GameMemory.actionMapping.get(action);
+			HashMap<String, Object> valueMapper = (HashMap<String, Object>) GameMemory.ACTION_MAPPING.get(action);
 			if (valueMapper == null) {
 				throw new NotImplementedException();
 			}

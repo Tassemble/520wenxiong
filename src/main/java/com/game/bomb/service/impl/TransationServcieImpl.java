@@ -91,7 +91,6 @@ public class TransationServcieImpl extends BaseServiceImpl<BaseDao<Transaction>,
 	public Map<String, Object> createAfterVerified(final String data, Map<String, Object> map) {
 		MobileUserDto user = null;
 		try {
-			user = new MobileUserDto(GameMemory.getUser());
 			String responseData = HttpClientUtils.getDefaultHtmlByPostMethod(httpClientUtils.getVerifyReceiptDataHttpManager(), new HttpDataProvider() {
 				
 				@Override

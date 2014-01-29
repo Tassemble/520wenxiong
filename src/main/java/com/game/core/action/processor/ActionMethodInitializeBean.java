@@ -45,7 +45,7 @@ public class ActionMethodInitializeBean implements InitializingBean, DisposableB
 						Map<String, Object> map = Maps.newHashMap();
 						map.put("method", method);
 						map.put("object", actionAnotationProcessor);
-						GameMemory.actionMapping.put(annotation.action(), map);
+						GameMemory.ACTION_MAPPING.put(annotation.action(), map);
 					}
 				}
 						

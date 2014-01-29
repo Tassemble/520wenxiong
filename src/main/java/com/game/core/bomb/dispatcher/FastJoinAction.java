@@ -58,7 +58,7 @@ public class FastJoinAction implements BaseAction {
 	@Override
 	public void doAction(IoSession session, BaseActionDataDto data) throws Exception {
 		// check user status
-		OnlineUserDto user = GameMemory.SESSION_USERS.get(session.getId());
+		OnlineUserDto user = GameMemory.getOnlineUserBySessionId(session.getId());
 		checkUserStatus(user);
 		User userInDB = userService.getById(user.getId());
 		if (userInDB.getHeartNum() == null || userInDB.getHeartNum() <= 0) {
@@ -183,15 +183,17 @@ public class FastJoinAction implements BaseAction {
 			throw new BombException(-1, "find best policy failed, policy is empty or user null, for user:" + JsonUtils.toJson(user));
 		}
 		
-		if (user.getVictoryNum() == null || user.getLoserNum() == null) {
+		User userInDB = userService.getById(user.getId());
+		
+		if (userInDB.getVictoryNum() == null || userInDB.getLoserNum() == null) {
 			throw new BombException(-1, "user victory null is null or lose number is null, for user:" + JsonUtils.toJson(user));
 		}
 		
 		
 		for (int idx = 0; idx < policies.size(); idx++) {
 			MatchPolicy matchPolicy = policies.get(idx);
-			if (user.getVictoryNum() >= matchPolicy.getWinLow() && user.getVictoryNum() < matchPolicy.getWinHigh()
-					&&  user.getLoserNum() >= matchPolicy.getLoseLow() &&  user.getLoserNum() < matchPolicy.getLoseHigh())
+			if (userInDB.getVictoryNum() >= matchPolicy.getWinLow() && userInDB.getVictoryNum() < matchPolicy.getWinHigh()
+					&&  userInDB.getLoserNum() >= matchPolicy.getLoseLow() &&  userInDB.getLoserNum() < matchPolicy.getLoseHigh())
 			{
 				map.put("position", idx);
 				map.put("policy", matchPolicy);

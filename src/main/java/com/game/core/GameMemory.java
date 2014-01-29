@@ -19,22 +19,28 @@ import com.game.core.exception.GamePlayException;
 
 public class GameMemory {
 	
-	
 	public static final String CONTEXT_NAME = "ctx";
 	
 	static final int MAX_PLAYERS = 5000;
 
-	public static Map<Long, OnlineUserDto> SESSION_USERS;
-	
-	public static Map<Long, OnlineUserDto> ONLINE_USERS;
-	
-	public static Map<String, Object> actionMapping = new HashMap<String, Object>();
+	public static Map<String, Object> ACTION_MAPPING = new HashMap<String, Object>();
 	
 	public static Map<String, PlayRoomDto> room;
 	
 	public static ExecutorService executor = null;
 	
 	public static Map<String, Object> bizContext;
+	
+	
+	//定义为会话题有效 key is session id , value is user
+	private static Map<Long, OnlineUserDto> SESSION_USERS;
+	
+	
+	//定义为在线的游戏玩家 通过uid来查找其他的用户  目前一个session 对应一个用户
+	private static Map<Long, OnlineUserDto> ONLINE_USERS;
+	
+	//使用类似request-response的方式  
+	public static ThreadLocal<GameSessionContext> LOCAL_SESSION_CONTEXT = new ThreadLocal<GameSessionContext>();
 	
 	
 	
@@ -44,37 +50,33 @@ public class GameMemory {
 		}
 		return false;
 	}
-	
-	public static void reloadUser() {
-		UserService userService = ApplicationContextHolder.get().getBean(UserService.class);
-		if (getUser() == null) {
-			throw new RuntimeException("reload user error due to threadlocal no user find");
-		}
-		
-		User user = userService.getById(getUser().getId());
-		OnlineUserDto onlineUser = new OnlineUserDto(user);
-		onlineUser.setStatus(getUser().getStatus());
-		onlineUser.setSession(getUser().getSession());
-		setUser(onlineUser);
-	}
-	
-	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
-	public static ThreadLocal<GameSessionContext> LOCAL_SESSION_CONTEXT = new ThreadLocal<GameSessionContext>();
-	
 	static {
 		//用于用于超时通知
 		executor = Executors.newFixedThreadPool(MAX_PLAYERS);
+		
 		//key is session id , value is user
 		SESSION_USERS = new ConcurrentHashMap<Long, OnlineUserDto>();
-		//key is username , value is user
+		//key is uid , value is user
 		ONLINE_USERS = new ConcurrentHashMap<Long, OnlineUserDto>();
+		
 		room = new ConcurrentHashMap<String, PlayRoomDto>();
 		
 		// for biz context
 		bizContext  = new ConcurrentHashMap<String, Object>();
 	}
 	
+	public static void addSessionUser(Long sessionId, OnlineUserDto user) {
+		SESSION_USERS.put(sessionId, user);
+	}
 	
+	
+	public static void addToOnlineUserList(OnlineUserDto user) {
+		ONLINE_USERS.put(user.getId(), user);
+	}
+	
+	public static void removeOnlineUserByUid(Long uid) {
+		ONLINE_USERS.remove(uid);
+	}
 	
 	public static IoSession getCurrentSession() {
 		return LOCAL_SESSION_CONTEXT.get().getSession();
@@ -85,9 +87,11 @@ public class GameMemory {
 	}
 	
 	
+	public static boolean isUserOnline(Long uid) {
+		return ONLINE_USERS.containsKey(uid);
+	}
 	
-	
-	public static OnlineUserDto getUserById(Long uid) {
+	public static OnlineUserDto getOnlineUserById(Long uid) {
 		return ONLINE_USERS.get(uid);
 	}
 	
@@ -115,9 +119,6 @@ public class GameMemory {
 		return room.get(id);
 	}
 	
-	public static void addNewUserToOnlineUserList() {
-		
-	}
 	
 	public static void put(Long key, OnlineUserDto value) {
 		SESSION_USERS.put(key, value);
@@ -129,8 +130,8 @@ public class GameMemory {
 	}
 	
 	
-	public static void removeSessionUserByKey(Long key) {
-		SESSION_USERS.remove(key);
+	public static void removeSessionUserBySessionId(Long sessionId) {
+		SESSION_USERS.remove(sessionId);
 	}
 
 
@@ -144,7 +145,7 @@ public class GameMemory {
 	}
 	
 	
-	public static IoSession getSessionById(Long uid) {
+	public static IoSession getSessionByUid(Long uid) {
 		OnlineUserDto dto = ONLINE_USERS.get(uid);
 		if (dto != null) {
 			return dto.getSession();

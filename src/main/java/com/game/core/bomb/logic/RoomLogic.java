@@ -3,6 +3,7 @@ package com.game.core.bomb.logic;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.mina.core.session.IoSession;
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.game.bomb.Dao.UserDao;
 import com.game.bomb.domain.User;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.UserService;
@@ -22,6 +22,7 @@ import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.bomb.play.dto.PlayRoomDto;
+import com.game.core.bomb.play.dto.PlayersOfRoomStart;
 import com.game.core.exception.ExceptionConstant;
 import com.game.core.exception.GamePlayException;
 import com.google.common.collect.ImmutableMap;
@@ -30,11 +31,8 @@ import com.google.common.collect.Maps;
 @Component
 public class RoomLogic {
 
-	
 	@Autowired
-	UserDao userDao;
-	
-	
+	UserService userService;
 	private static final Logger	LOG		= LoggerFactory.getLogger(RoomLogic.class);
 	
 	
@@ -62,7 +60,7 @@ public class RoomLogic {
 	
 	public void doUserJoin(PlayRoomDto room, Long uid) {
 		synchronized (room.getRoomLock()) {
-			OnlineUserDto user = GameMemory.getUserById(uid);
+			OnlineUserDto user = GameMemory.getOnlineUserById(uid);
 			room.increaseReadyNum();
 			room.getUsers().add(user);
 			user.setRoomId(room.getId());
@@ -111,33 +109,44 @@ public class RoomLogic {
 	}
 	
 	public void doUserQuit(PlayRoomDto room, Long uid) throws Exception {
+		if (room == null) {
+			return;
+		}
+		
+		
 		//这里是处理快速开始游戏的逻辑处理，如果期间有人退出就直接全部退出好了，重新再进行一次游戏匹配
 		if (room.getRoomStatus().equals(PlayRoomDto.ROOM_STATUS_OPEN)) {//not playing
 			shutdownRoom(room);
 			return;
 		}
 		
-		OnlineUserDto user = GameMemory.getUserById(uid);
-		IoSession session = GameMemory.getSessionById(uid);
 		
-		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
-		ro.setExtAttrs(ImmutableMap.of("user", new MobileUserDto(user)));
+		
+		//准备数据
+		OnlineUserDto userInGame = GameMemory.getOnlineUserById(uid);
+		IoSession session = GameMemory.getSessionByUid(uid);
+		//query user from db
+		final User userInDB = userService.getById(uid);
 
-		forwardMessageToOtherClientsInRoom(session, user, ro);
 		
 		boolean isLastPlayer = false;
+		
+		//update 
+		final User update2DB = new User();
+		update2DB.setId(uid);
+		
 		synchronized (room.getRoomLock()) {
 			//如果是最后一个玩家
 			if (room.getReadyNumNow() == 1) {
 				isLastPlayer = true;
-				user.setVictoryNum(user.getVictoryNum() + 1);
+				update2DB.setVictoryNum(userInDB.getVictoryNum() + 1);
 			} else {
-				user.setLoserNum(user.getLoserNum() + 1);
+				update2DB.setLoserNum(userInDB.getLoserNum() + 1);
 			}
 			
-			user.setRoomId("");
-			user.setStatus(OnlineUserDto.STATUS_ONLINE);
-			room.getUsers().remove(user);
+			userInGame.setRoomId("");
+			userInGame.setStatus(OnlineUserDto.STATUS_ONLINE);
+			room.getUsers().remove(userInGame);
 			room.decreaseReadyNum();
 			if (room.isEmpty()) {
 				//把房间删除吧
@@ -150,69 +159,66 @@ public class RoomLogic {
 			//最后一人胜利 不减红心
 			Map<String, Object> maps = Maps.newHashMap();
 			maps.put("action", "win");
-			maps.put("user", new MobileUserDto(user));
+			maps.put("user", new MobileUserDto(userInGame, userInDB));
 			maps.put("code", 200);
 			session.write(maps);
 			
-			changeLevelWhenWin(user);
-			User update = new User();
-			update.setId(user.getId());
-			update.setLevel(user.getLevel());
-			update.setGold(user.getGold() + 4);
-			update.setHeartNum(user.getHeartNum());
-			update.setVictoryNum(user.getVictoryNum());
-			update.setBloodTime(new Date());
-			update.setGmtModified(new Date());
-			userDao.updateSelectiveById(update);
+			update2DB.setLevel(changeLevelWhenWin(update2DB.getVictoryNum()));
+			update2DB.setGold(userInDB.getGold() + 4);
+			update2DB.setBloodTime(new Date());
+			update2DB.setGmtModified(new Date());
+			userService.updateSelectiveById(update2DB);
 		} else {
-			user.setHeartNum(user.getHeartNum() - 1);
+			
 			Map<String, Object> maps = Maps.newHashMap();
 			maps.put("action", "lose");
-			maps.put("user", new MobileUserDto(user));
+			maps.put("user", new MobileUserDto(userInGame, userInDB));
 			maps.put("code", 200);
 			session.write(maps);
 			
-			User update = new User();
-			update.setId(user.getId());
-			update.setGold(user.getGold() + 1);
-			update.setBloodTime(new Date());
-			update.setHeartNum(user.getHeartNum());
-			update.setGmtModified(new Date());
-			update.setLoserNum(user.getLoserNum());
-			update.setRunawayNum(user.getRunawayNum());
-			userDao.updateSelectiveById(update);
+			update2DB.setHeartNum(userInDB.getHeartNum() - 1);
+			update2DB.setGold(userInDB.getGold() + 1);
+			update2DB.setBloodTime(new Date());
+			update2DB.setGmtModified(new Date());
+			userService.updateSelectiveById(update2DB);
 		}
 		
+		//向所有
+		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
+		ro.setExtAttrs(ImmutableMap.of("user", new MobileUserDto(userInGame, userInDB)));
+		forwardMessageToOtherClientsInRoom(session, userInGame, ro);
 		
+		
+		//异常情况，如果对手是逃跑的话，这时候要通知另外一个人，表示他已经断线了 或者逃跑了
 		if (!CollectionUtils.isEmpty(room.getUsers())) {
 			if (room.getUsers().size() == 1) {//last players
 				doUserQuit(room, room.getUsers().get(0).getId());
 			}
 		}
-		
-		GameMemory.reloadUser();
 	}
 	
 	
 	
-	public void changeLevelWhenWin(OnlineUserDto user) {
-		if (user.getVictoryNum() == null || user.getVictoryNum() < 5) {
-			user.setLevel(1);
-		} else if (user.getVictoryNum() < 15 && user.getVictoryNum() >= 5) {
-			user.setLevel(2);
-		} else if (user.getVictoryNum() < 35 && user.getVictoryNum() >= 15) {
-			user.setLevel(3);
-		} else if (user.getVictoryNum() < 80 && user.getVictoryNum() >= 35) {
-			user.setLevel(4);
-		} else if (user.getVictoryNum() < 150 && user.getVictoryNum() >= 80) {
-			user.setLevel(5);
-		} else if (user.getVictoryNum() < 450 && user.getVictoryNum() >= 150) {
-			user.setLevel(6);
-		} else if (user.getVictoryNum() < 1000 && user.getVictoryNum() <= 450) {
-			user.setLevel(7);
+	public int changeLevelWhenWin(Integer victoryNum) {
+		int level = 1;
+		if (victoryNum == null || victoryNum < 5) {
+			level = 1;
+		} else if (victoryNum < 15 && victoryNum >= 5) {
+			level = 2;
+		} else if (victoryNum < 35 && victoryNum >= 15) {
+			level = 3;
+		} else if (victoryNum < 80 && victoryNum >= 35) {
+			level = 4;
+		} else if (victoryNum < 150 && victoryNum >= 80) {
+			level = 5;
+		} else if (victoryNum < 450 && victoryNum >= 150) {
+			level = 6;
+		} else if (victoryNum < 1000 && victoryNum <= 450) {
+			level = 7;
 		} else {
-			user.setLevel(8);
+			level = 8;
 		}
+		return level;
 	}
 	
 	public int getLevel(Integer winNum) {
@@ -295,9 +301,15 @@ public class RoomLogic {
 			return;
 		}
 		List<OnlineUserDto> users = room.getUsers();
-		for (OnlineUserDto u : users) {
-			if (!u.getId().equals(user.getId())) {
-				u.getSession().write(message);
+		if (CollectionUtils.isNotEmpty(users)) {
+			for (OnlineUserDto u : users) {
+				try {
+					if (!u.getId().equals(user.getId())) {
+						u.getSession().write(message);
+					}
+				} catch (Exception e) {
+					LOG.error(e.getMessage());
+				}
 			}
 		}
 	}

@@ -128,7 +128,6 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		
 		//should locker
 		userService.updateForAwardNextDayAndResponse(user.getId(), map);
-		GameMemory.reloadUser();
 		GameMemory.getCurrentSession().write(map);
 	}
 	
@@ -306,11 +305,7 @@ public class CommonProcessor implements ActionAnotationProcessor {
 		
 		transactionService.createAfterVerified(data, map);	
 		
-		//reload user for online user
-		GameMemory.reloadUser();
 		GameMemory.getCurrentSession().write(map);
-		
-		
 		return;
 	}
 	
@@ -366,24 +361,24 @@ public class CommonProcessor implements ActionAnotationProcessor {
 	@ActionAnnotation(action = "getOnlineUserList")
 	public Map<String, Object> getOnlineUserList(Object message, Map<String, Object> map) throws Exception {
 		// ~ 老代码 需要移植到新的逻辑上去
-			List<OnlineUserDto> users = Lists.newArrayList();
-			int limit = 100;
-			for (Entry<Long, OnlineUserDto> entry : GameMemory.ONLINE_USERS.entrySet()) {
-				limit--;
-				if (limit == 0) {
-					break;
-				}
-				users.add(entry.getValue());
-			}
-			
-			Collections.sort(users, new FieldComparator<OnlineUserDto>("level", false));
-			List<MobileUserDto> mUsers = Lists.newArrayList();
-			for (OnlineUserDto u : users) {
-				MobileUserDto mUser = new MobileUserDto(u);
-				mUsers.add(mUser);
-			}
+//			List<OnlineUserDto> users = Lists.newArrayList();
+//			int limit = 100;
+//			for (Entry<Long, OnlineUserDto> entry : GameMemory.ONLINE_USERS.entrySet()) {
+//				limit--;
+//				if (limit == 0) {
+//					break;
+//				}
+//				users.add(entry.getValue());
+//			}
+//			
+//			Collections.sort(users, new FieldComparator<OnlineUserDto>("level", false));
+//			List<MobileUserDto> mUsers = Lists.newArrayList();
+//			for (OnlineUserDto u : users) {
+//				MobileUserDto mUser = new MobileUserDto(u);
+//				mUsers.add(mUser);
+//			}
 			map.put("code", 200);
-			map.put("result", mUsers);
+			map.put("result", Lists.newArrayList());
 			return map;
 	}
 	
