@@ -28,6 +28,10 @@ public class GameMemory {
 	
 	public static Map<Long, OnlineUserDto> ONLINE_USERS;
 	
+	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
+	public static ThreadLocal<GameSessionContext> LOCAL_SESSION_CONTEXT = new ThreadLocal<GameSessionContext>();
+	
+	
 	public static Map<String, Object> actionMapping = new HashMap<String, Object>();
 	
 	public static Map<String, PlayRoomDto> room;
@@ -52,15 +56,14 @@ public class GameMemory {
 		}
 		
 		User user = userService.getById(getUser().getId());
-		OnlineUserDto onlineUser = new OnlineUserDto(user);
-		onlineUser.setStatus(getUser().getStatus());
-		onlineUser.setSession(getUser().getSession());
-		setUser(onlineUser);
+		getUser().refreshUser(user);
+//		OnlineUserDto onlineUser = new OnlineUserDto(user);
+//		onlineUser.setStatus(getUser().getStatus());
+//		onlineUser.setSession(getUser().getSession());
+//		setUser(onlineUser);
 	}
 	
-	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
-	public static ThreadLocal<GameSessionContext> LOCAL_SESSION_CONTEXT = new ThreadLocal<GameSessionContext>();
-	
+
 	static {
 		//用于用于超时通知
 		executor = Executors.newFixedThreadPool(MAX_PLAYERS);
@@ -69,7 +72,6 @@ public class GameMemory {
 		//key is username , value is user
 		ONLINE_USERS = new ConcurrentHashMap<Long, OnlineUserDto>();
 		room = new ConcurrentHashMap<String, PlayRoomDto>();
-		
 		// for biz context
 		bizContext  = new ConcurrentHashMap<String, Object>();
 	}

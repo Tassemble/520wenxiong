@@ -44,6 +44,25 @@ public class OnlineUserDto {
 		this.inGot = user.getInGot();
 	}
 	
+	
+	public void refreshUser(User user) {
+		this.id = user.getId();
+		this.username = user.getUsername();
+		this.nickname = user.getNickName();
+		this.heartNum = user.getHeartNum();
+		this.level = user.getLevel();
+		this.loserNum = user.getLoserNum();
+		this.nickname = user.getNickName();
+		this.portrait = user.getPortrait();
+		this.runawayNum = user.getRunawayNum();
+		this.victoryNum = user.getVictoryNum();
+		this.inUse = user.getInUse();
+		this.gold = user.getGold();
+		this.inGot = user.getInGot();
+	}
+	
+	
+	
 
 	public Long getInGot() {
 		return inGot;
