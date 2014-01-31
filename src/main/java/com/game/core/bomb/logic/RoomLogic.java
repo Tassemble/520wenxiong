@@ -120,10 +120,7 @@ public class RoomLogic {
 		OnlineUserDto user = GameMemory.getUserById(uid);
 		IoSession session = GameMemory.getSessionById(uid);
 		
-		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
-		ro.setExtAttrs(ImmutableMap.of("user", new MobileUserDto(user)));
-
-		forwardMessageToOtherClientsInRoom(session, user, ro);
+		
 		
 		boolean isLastPlayer = false;
 		synchronized (room.getRoomLock()) {
@@ -146,9 +143,9 @@ public class RoomLogic {
 			}
 		}
 		
+		Map<String, Object> maps = Maps.newHashMap();
 		if (isLastPlayer) {
 			//最后一人胜利 不减红心
-			Map<String, Object> maps = Maps.newHashMap();
 			maps.put("action", "win");
 			maps.put("user", new MobileUserDto(user));
 			maps.put("code", 200);
@@ -166,11 +163,10 @@ public class RoomLogic {
 			userDao.updateSelectiveById(update);
 		} else {
 			user.setHeartNum(user.getHeartNum() - 1);
-			Map<String, Object> maps = Maps.newHashMap();
+			
 			maps.put("action", "lose");
 			maps.put("user", new MobileUserDto(user));
 			maps.put("code", 200);
-			session.write(maps);
 			
 			User update = new User();
 			update.setId(user.getId());
@@ -182,6 +178,14 @@ public class RoomLogic {
 			update.setRunawayNum(user.getRunawayNum());
 			userDao.updateSelectiveById(update);
 		}
+		
+		//广播用户退出消息
+		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
+		ro.setExtAttrs(ImmutableMap.of("user", new MobileUserDto(user)));
+		forwardMessageToOtherClientsInRoom(session, user, ro);
+		 
+		//告诉当前用户胜利或者失败消息
+		session.write(maps);
 		
 		
 		if (!CollectionUtils.isEmpty(room.getUsers())) {
