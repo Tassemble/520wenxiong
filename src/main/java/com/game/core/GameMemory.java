@@ -28,7 +28,12 @@ public class GameMemory {
 	
 	public static Map<Long, OnlineUserDto> ONLINE_USERS;
 	
-	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
+	/** 
+	 * 在一个时间段内，一个线程必然只运行一个sessoin，但并不能保证一个线程一直都在运行这个sessoin,
+	 * 因为一个线程可以运行多个session,
+	 * 所以返回信息的时候要清除session
+	 * 
+	 */
 	public static ThreadLocal<GameSessionContext> LOCAL_SESSION_CONTEXT = new ThreadLocal<GameSessionContext>();
 	
 	

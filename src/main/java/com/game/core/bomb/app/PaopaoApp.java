@@ -26,7 +26,6 @@ public class PaopaoApp {
 				"classpath:/biz/applicationContext-framework-dao-base.xml" });
 		APPLICATION_CONTEXT.refresh();
 		
-		
 		GameMemory.bizContext.put(GameMemory.CONTEXT_NAME, APPLICATION_CONTEXT);
 		
 		IoAcceptor acceptor = (IoAcceptor) APPLICATION_CONTEXT.getBean("ioAcceptor");

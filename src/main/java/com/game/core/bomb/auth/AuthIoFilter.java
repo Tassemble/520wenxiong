@@ -1,6 +1,9 @@
 package com.game.core.bomb.auth;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import net.sf.json.JSONObject;
@@ -14,9 +17,6 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import weibo4j.Users;
-import weibo4j.model.WeiboException;
 
 import com.game.bomb.constant.LoginConstant;
 import com.game.bomb.domain.User;
@@ -64,6 +64,9 @@ public class AuthIoFilter extends IoFilterAdapter {
 
 	@Override
 	public void messageReceived(NextFilter nextFilter, IoSession session, Object message) throws Exception {
+		
+		
+		
 		String action = null;
 		try {
 			// 特殊输出，如果是单纯字节的话========================start
@@ -75,7 +78,12 @@ public class AuthIoFilter extends IoFilterAdapter {
 				LOG.warn("sessionID:" + session.getId()+" parse json exeception, message:" + json, e);
 			}
 			
-		
+			if (action.equals("testThread")) {
+				LOG.info("sessionID:" + session.getId() + ", thread is id:" + Thread.currentThread().getId() + ", name:" +  Thread.currentThread().getName() + ", data:" + json.getString("data") + ", then sleep 10s");
+				Thread.sleep(1000 * 3);
+				return;
+			}
+			
 			
 			
 			
@@ -233,11 +241,19 @@ public class AuthIoFilter extends IoFilterAdapter {
 		}
 	}
 	
-	public static void main(String[] args) throws UnsupportedEncodingException {
-		String result = Base64.encodeBase64String("sjdfoijsofjsoijfsio".getBytes("UTF-8"));
-		System.out.println(result);
-		System.out.println(new String(Base64.decodeBase64(result)));
+	public static void main(String[] args) throws UnknownHostException, IOException {
+//		String result = Base64.encodeBase64String("sjdfoijsofjsoijfsio".getBytes("UTF-8"));
+//		System.out.println(result);
+//		System.out.println(new String(Base64.decodeBase64(result)));
 		
+		final Socket socket = new Socket("127.0.0.1", 8888);
+		
+		for (int i = 0; i < 10000; i++) {
+			String data = new String("{\"action\":\"test\",\"data\":\"" + i + "\"}");
+			System.out.println(data);
+			socket.getOutputStream().write(data.getBytes("UTF-8"));
+			socket.getOutputStream().flush();
+		}
 	}
 
 	

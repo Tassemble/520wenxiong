@@ -8,9 +8,6 @@
 			<param name="ConversionPattern" value="%p [%t] %c{1}.%M(%L) | %m%n" />
 		</layout>
 		<param name="threshold" value="info" />
-		<param name="file" value="console.log" />
-		<param name="append" value="true" />
-		<param name="datePattern" value="'.'yyyy-MM-dd" />
 	</appender>
 
 	<appender name="DailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">
@@ -22,23 +19,6 @@
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
 		</layout>
 	</appender>
-
-	<appender name="crawl_appender" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="threshold" value="info" />
-		<param name="file" value="D:/work/wenxiong/logs/crawl_appender.log" />
-		<param name="append" value="true" />
-		<param name="datePattern" value="'.'yyyy-MM-dd" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
-		</layout>
-	</appender>
-
-	<logger name="crawl_name" additivity="false">
-		<level value="info" />
-		<appender-ref ref="CONSOLE" />
-		<appender-ref ref="crawl_appender" />
-	</logger>
-
 
 	<appender name="game_appender" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="threshold" value="debug" />
