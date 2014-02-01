@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +150,6 @@ public class RoomLogic {
 			maps.put("action", "win");
 			maps.put("user", new MobileUserDto(user));
 			maps.put("code", 200);
-			session.write(maps);
 			
 			changeLevelWhenWin(user);
 			User update = new User();
@@ -182,7 +182,7 @@ public class RoomLogic {
 		//广播用户退出消息
 		ReturnDto ro = new ReturnDto(200, ActionNameEnum.QUIT_GAME.getAction(), ActionNameEnum.QUIT_GAME.getAction());
 		ro.setExtAttrs(ImmutableMap.of("user", new MobileUserDto(user)));
-		forwardMessageToOtherClientsInRoom(session, user, ro);
+		forwardMessageToOtherClientsInRoom(session, user, room.getId(), ro);
 		 
 		//告诉当前用户胜利或者失败消息
 		session.write(maps);
@@ -283,19 +283,17 @@ public class RoomLogic {
 	
 	
 	
-	public static void forwardMessageToOtherClientsInRoom(IoSession session, OnlineUserDto user, Object message) {
+	public static void forwardMessageToOtherClientsInRoom(IoSession session, OnlineUserDto user, String roomId, Object message) {
 		LOG.info("forward message to other clients");
 		// forward to same room clients
-		if (user.getRoomId() == null) {
-			session.write(new ReturnDto(-1,
-					"current user has not joined room, discard messages!!"));
-			return;
-		}
 
-		PlayRoomDto room = GameMemory.getRoom().get(user.getRoomId());
+		
+		if (StringUtils.isBlank(roomId)) {
+			LOG.info("room is closed");
+		}
+		PlayRoomDto room = GameMemory.getRoom().get(roomId);
 		if (room == null) {
-			session.write(new ReturnDto(-1,
-					"current user has not joined room, discard messages!!"));
+			LOG.info("room " +roomId+ " may be closed");
 			return;
 		}
 		List<OnlineUserDto> users = room.getUsers();
