@@ -30,15 +30,12 @@ import com.google.common.collect.Maps;
 
 @Component
 public class RoomLogic {
-
 	
 	@Autowired
 	UserDao userDao;
 	
 	
 	private static final Logger	LOG		= LoggerFactory.getLogger(RoomLogic.class);
-	
-	
 	
 
 	public static void destroyRoom(PlayRoomDto room) {
