@@ -147,7 +147,17 @@ public class PlayRoomDto {
 			}
 		}
 	}
-
+	
+	public void removeUser(OnlineUserDto user) {
+		//必须是在未开始游戏的时候可以这样
+		if (!this.getRoomStatus().equals(PlayRoomDto.ROOM_STATUS_OPEN)) {
+			return;
+		}
+		synchronized (roomEnterLock) {
+			users.remove(user);
+			decreaseReadyNum();
+		}
+	}
 	public Integer getRoomNumLimit() {
 		return roomNumLimit;
 	}

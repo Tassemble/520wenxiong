@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -62,6 +63,7 @@ public class FastJoinAction implements BaseAction {
 		checkUserStatus(user);
 		
 		
+		
 		User userInDB = userService.getById(user.getId());
 		if (userInDB.getHeartNum() == null || userInDB.getHeartNum() <= 0) {
 			session.write(new ReturnDto(BombConstant.NOT_ENOUGH_HEART_CODE, data.getAction(), "no heart, you can wait or buy it"));
@@ -112,16 +114,16 @@ public class FastJoinAction implements BaseAction {
 				// 这里不需要同步，原因是在没有创建好房间的时候，其他用户是看到这个房间的
 				room = new PlayRoomDto(userNumLimit, user, policyLevel);
 				GameMemory.room.put(room.getId(), room);
-				room.addUserCallback(new FastJoinTimeoutCallback(user.getId(), joinData
-						.getTimeoutInSeconds()));
+				FastJoinTimeoutCallback timeoutTask = new FastJoinTimeoutCallback(user.getId(), joinData.getTimeoutInSeconds());
+				user.setTimeoutTask(timeoutTask);
+				room.addUserCallback(timeoutTask);
 				LOG.info("user[" + user.getUsername() + "] create room, rid:" + room.getId());
 			} else {
 				roomLogic.doUserJoin(room, user.getId());
-				room.addUserCallback(new FastJoinTimeoutCallback(user.getId(), joinData
-						.getTimeoutInSeconds()));
-				
+				FastJoinTimeoutCallback timeoutTask = new FastJoinTimeoutCallback(user.getId(), joinData.getTimeoutInSeconds());
+				user.setTimeoutTask(timeoutTask);
+				room.addUserCallback(timeoutTask);
 				LOG.info("user[" + user.getUsername() + "] join room, rid:" + room.getId());
-
 			}
 
 			//send back players infos
@@ -227,10 +229,20 @@ public class FastJoinAction implements BaseAction {
 	}
 
 	private void checkUserStatus(OnlineUserDto user) {
-		
-		
-		
-		if (user.getStatus() != OnlineUserDto.STATUS_ONLINE) {
+		//判断是否等待状态
+		if (user.getStatus().equals(OnlineUserDto.STATUS_IN_ROOM)) {
+			PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
+			synchronized (room.getRoomLock()) {
+				if (user.getStatus().equals(OnlineUserDto.STATUS_IN_ROOM)) { // double check，中断这个等待
+					user.getTimeoutTask().interrupt();
+					user.setStatus(OnlineUserDto.STATUS_ONLINE);
+					room.removeUser(user);
+				} else {
+					//may in playing game
+					throw new BombException(-100, "user status error, may be you are in playing game!");
+				}
+			}
+		} else if (!user.getStatus().equals(OnlineUserDto.STATUS_ONLINE)) { //用户没有在等待, 需要判断是否是在线，如果不是在线状态则不能fast join
 			throw new BombException(-100, "user status error");
 		}
 	}

@@ -13,7 +13,7 @@ import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.bomb.logic.RoomLogic;
 
-public class FastJoinTimeoutCallback implements Runnable {
+public class FastJoinTimeoutCallback extends Thread {
 
 	final static transient Logger		LOG					= LoggerFactory.getLogger(FastJoinTimeoutCallback.class);
 	
@@ -55,7 +55,7 @@ public class FastJoinTimeoutCallback implements Runnable {
 			}
 			// LOG.info("game is started");
 		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error(e.getMessage());
 		}
 	}
 }
