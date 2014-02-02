@@ -60,6 +60,8 @@ public class FastJoinAction implements BaseAction {
 		// check user status
 		OnlineUserDto user = GameMemory.SESSION_USERS.get(session.getId());
 		checkUserStatus(user);
+		
+		
 		User userInDB = userService.getById(user.getId());
 		if (userInDB.getHeartNum() == null || userInDB.getHeartNum() <= 0) {
 			session.write(new ReturnDto(BombConstant.NOT_ENOUGH_HEART_CODE, data.getAction(), "no heart, you can wait or buy it"));
@@ -225,6 +227,9 @@ public class FastJoinAction implements BaseAction {
 	}
 
 	private void checkUserStatus(OnlineUserDto user) {
+		
+		
+		
 		if (user.getStatus() != OnlineUserDto.STATUS_ONLINE) {
 			throw new BombException(-100, "user status error");
 		}

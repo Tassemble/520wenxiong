@@ -6,6 +6,13 @@ import com.game.bomb.domain.User;
 
 public class OnlineUserDto {
 	
+	
+	//
+	/**
+	 * 其实 我对状态的理解是这样的
+	 * 它其实是个冗余，也是一个标识，表示在什么情况下该干什么事情，不该干什么事情
+	 * 也不一定非要它不可，可以通过其他的方式来判断，但相比于用状态来判断实现起来会比较方便点
+	 */
 	public static final String STATUS_ONLINE = "online"; 
 	public static final String STATUS_OFFLINE = "offline"; 
 	public static final String STATUS_PLAYING = "playing"; 
