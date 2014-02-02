@@ -4,14 +4,14 @@
 
 
 	<parent>
-		<groupId>com.wenxiong</groupId>
+		<groupId>com.paopao</groupId>
 		<artifactId>base-app</artifactId>
 		<version>1.0.0</version>
 		<relativePath>poms/base-app/pom.xml</relativePath>
 	</parent>
 
 
-	<artifactId>wenxiong</artifactId>
+	<artifactId>paopao</artifactId>
 	<version>1.0</version>
 	<packaging>jar</packaging>
 
