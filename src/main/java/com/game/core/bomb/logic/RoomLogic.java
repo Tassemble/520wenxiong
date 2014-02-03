@@ -1,5 +1,6 @@
 package com.game.core.bomb.logic;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,8 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.game.bomb.Dao.UserDao;
 import com.game.bomb.domain.User;
+import com.game.bomb.mobile.dto.MobRoomDto;
 import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
@@ -27,6 +31,7 @@ import com.game.core.exception.BombException;
 import com.game.core.exception.ExceptionConstant;
 import com.game.core.exception.GamePlayException;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 @Component
@@ -34,6 +39,9 @@ public class RoomLogic {
 	
 	@Autowired
 	UserDao userDao;
+	
+	@Autowired
+	UserService userService;
 	
 	
 	private static final Logger	LOG		= LoggerFactory.getLogger(RoomLogic.class);
@@ -104,6 +112,39 @@ public class RoomLogic {
 				throw new GamePlayException(ExceptionConstant.GAME_START_EXCEPTION, "game has start but still want to startGame");
 			}
 		}
+	}
+	
+	
+
+	public void sendStartGameInfo(PlayRoomDto room, String action) throws Exception {
+		// online users
+		List<MobileUserDto> players = Lists.newArrayList();
+		List<Long> userIds = Lists.newArrayList();
+		
+		for (OnlineUserDto oUser : room.getUsers()) {
+			userIds.add(oUser.getId());
+		}
+		
+		List<User> users = userService.getByIdList(userIds);
+		for (User userFromDB : users) {
+			MobileUserDto mUser = MobileUserDto.buildMobileUser(userFromDB);
+			players.add(mUser);
+		}
+
+		ReturnDto ro = new ReturnDto(200, action, "players can play game now, game started!");
+		ro.setExtAttrs(ImmutableMap.of("players", players, "room", new MobRoomDto(room)));
+		RoomLogic.forwardMessageInRoom(room.getId(), ro);
+	}
+	
+	public boolean forceStartGame(PlayRoomDto room, String action) throws Exception {
+		synchronized (room.getRoomLock()) {
+			if (!room.hasMinPlayersToStartGame()) { //如果没有到达最低人数就不开始
+				return false;
+			}
+			room.startGame();
+		}
+		sendStartGameInfo(room, action);
+		return true;
 	}
 	
 	

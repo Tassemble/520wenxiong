@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.game.core.GameMemory;
 import com.game.core.bomb.dto.OnlineUserDto;
 
 /**
@@ -132,6 +133,14 @@ public class PlayRoomDto {
 
 	public void setUsers(List<OnlineUserDto> users) {
 		this.users = users;
+	}
+	
+	
+	public boolean hasMinPlayersToStartGame() {
+		if (cntNow.get() >= 2) { //最低游戏开始人数
+			return true;
+		}
+		return false;
 	}
 
 	public void increaseReadyNum() {

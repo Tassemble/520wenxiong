@@ -64,6 +64,7 @@ public class OnlineUserDto {
 		if (task.isDone() || task.isCancelled()) {
 			return;
 		}
+		
 		task.cancel(true);
 	}
 	

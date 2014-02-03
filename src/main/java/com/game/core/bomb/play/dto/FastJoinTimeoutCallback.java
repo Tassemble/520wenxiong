@@ -52,7 +52,19 @@ public class FastJoinTimeoutCallback extends Thread {
 				return;
 			}
 			if (PlayRoomDto.ROOM_STATUS_OPEN.equals(room.getRoomStatus())) {
-				roomLogic.shutdownRoom(room);
+				
+				//判断是否满足最低游戏开始人数 如果满足2人以上 就直接开始 否则超时
+				if (room.hasMinPlayersToStartGame()) {
+					//force start if force start failed then goto timeout
+					boolean success = roomLogic.forceStartGame(room, ActionNameEnum.FAST_JOIN.getAction());
+					if (!success) { //如果强制执行开始失败，就显示超时信息，可能的原因是即将开始的时候有人退出了
+						roomLogic.exitRoomWhenWaiting(user);
+					} else {
+						return;//success
+					}
+				} else {
+					roomLogic.exitRoomWhenWaiting(user); //如果不满足最低开始人数要求 就显示超时信息
+				}
 				IoSession session = GameMemory.getSessionById(this.userId);
 				session.write(new ReturnDto(-20, ActionNameEnum.FAST_JOIN.getAction(), "fast-join timeout"));
 			} else {

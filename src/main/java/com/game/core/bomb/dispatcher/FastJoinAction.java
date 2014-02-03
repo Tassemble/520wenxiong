@@ -1,5 +1,6 @@
 package com.game.core.bomb.dispatcher;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.mina.core.session.IoSession;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,23 +134,7 @@ public class FastJoinAction implements BaseAction {
 
 			//send back players infos
 			if (room.isReadyToStart()) {
-				// online users
-				List<MobileUserDto> players = Lists.newArrayList();
-				List<Long> userIds = Lists.newArrayList();
-				
-				for (OnlineUserDto oUser : room.getUsers()) {
-					userIds.add(oUser.getId());
-				}
-				
-				List<User> users = userService.getByIdList(userIds);
-				for (User userFromDB : users) {
-					MobileUserDto mUser = MobileUserDto.buildMobileUser(userFromDB);
-					players.add(mUser);
-				}
-
-				ReturnDto ro = new ReturnDto(200, this.getAction(), "players can play game now, game started!");
-				ro.setExtAttrs(ImmutableMap.of("players", players, "room", new MobRoomDto(room)));
-				RoomLogic.forwardMessageInRoom(room.getId(), ro);
+				roomLogic.sendStartGameInfo(room, this.getAction());
 			}
 		} catch (Exception e) {
 			//this should not happen
@@ -161,6 +148,7 @@ public class FastJoinAction implements BaseAction {
 		}
 
 	}
+
 
 	private PlayRoomDto matchRoom(List<MatchPolicy> policies, int userNumLimit, PlayRoomDto room, int i) {
 		MatchPolicy policy = findNextPolicy(policies, i);
