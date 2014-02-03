@@ -76,14 +76,6 @@ public class AuthIoFilter extends IoFilterAdapter {
 				LOG.warn("sessionID:" + session.getId()+" parse json exeception, message:" + json, e);
 			}
 			
-			if (action.equals("testThread")) {
-				LOG.info("sessionID:" + session.getId() + ", thread is id:" + Thread.currentThread().getId() + ", name:" +  Thread.currentThread().getName() + ", data:" + json.getString("data") + ", then sleep 10s");
-				Thread.sleep(1000 * 3);
-				return;
-			}
-			
-			
-			
 			
 			JsonSessionWrapper jsonSession = new JsonSessionWrapper(session);;
 			
