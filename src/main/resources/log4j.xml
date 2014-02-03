@@ -12,11 +12,11 @@
 
 	<appender name="DailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="threshold" value="info" />
-		<param name="file" value="D:/work/wenxiong/logs/default.log" />
+		<param name="file" value="logs/default.log" />
 		<param name="append" value="true" />
 		<param name="datePattern" value="'.'yyyy-MM-dd" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
+			<param name="ConversionPattern" value="%p [%t] %c{1}.%M(%L) | %m%n" />
 		</layout>
 	</appender>
 
@@ -26,7 +26,7 @@
 		<param name="append" value="true" />
 		<param name="datePattern" value="'.'yyyy-MM-dd" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
+			<param name="ConversionPattern" value="%p [%t] %c{1}.%M(%L) | %m%n" />
 		</layout>
 	</appender>
 	
@@ -38,7 +38,7 @@
 		<param name="append" value="true" />
 		<param name="datePattern" value="'.'yyyy-MM-dd" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p  [%c] %L %m%n" />
+			<param name="ConversionPattern" value="%p [%t] %c{1}.%M(%L) | %m%n" />
 		</layout>
 	</appender>
 
