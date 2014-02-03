@@ -60,6 +60,11 @@ public class FastJoinAction implements BaseAction {
 	public void doAction(IoSession session, BaseActionDataDto data) throws Exception {
 		// check user status
 		OnlineUserDto user = GameMemory.SESSION_USERS.get(session.getId());
+		
+		//特殊处理 现将用户退出房间，在加入到其他的房间去 同时，如果房间没人就关闭吧
+		if (user.getStatus().equals(OnlineUserDto.STATUS_IN_ROOM)) {
+			roomLogic.exitRoomWhenWaiting(user);
+		}
 		checkUserStatus(user);
 		
 		
@@ -115,14 +120,12 @@ public class FastJoinAction implements BaseAction {
 				room = new PlayRoomDto(userNumLimit, user, policyLevel);
 				GameMemory.room.put(room.getId(), room);
 				FastJoinTimeoutCallback timeoutTask = new FastJoinTimeoutCallback(user.getId(), joinData.getTimeoutInSeconds());
-				user.setTimeoutTask(timeoutTask);
-				room.addUserCallback(timeoutTask);
+				user.setTimeoutTask(room.addUserCallback(timeoutTask));
 				LOG.info("user[" + user.getUsername() + "] create room, rid:" + room.getId());
 			} else {
-				roomLogic.doUserJoin(room, user.getId());
 				FastJoinTimeoutCallback timeoutTask = new FastJoinTimeoutCallback(user.getId(), joinData.getTimeoutInSeconds());
-				user.setTimeoutTask(timeoutTask);
-				room.addUserCallback(timeoutTask);
+				user.setTimeoutTask(room.addUserCallback(timeoutTask));
+				roomLogic.doUserJoin(room, user.getId());
 				LOG.info("user[" + user.getUsername() + "] join room, rid:" + room.getId());
 			}
 
@@ -229,20 +232,7 @@ public class FastJoinAction implements BaseAction {
 	}
 
 	private void checkUserStatus(OnlineUserDto user) {
-		//判断是否等待状态
-		if (user.getStatus().equals(OnlineUserDto.STATUS_IN_ROOM)) {
-			PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
-			synchronized (room.getRoomLock()) {
-				if (user.getStatus().equals(OnlineUserDto.STATUS_IN_ROOM)) { // double check，中断这个等待
-					user.getTimeoutTask().interrupt();
-					user.setStatus(OnlineUserDto.STATUS_ONLINE);
-					room.removeUser(user);
-				} else {
-					//may in playing game
-					throw new BombException(-100, "user status error, may be you are in playing game!");
-				}
-			}
-		} else if (!user.getStatus().equals(OnlineUserDto.STATUS_ONLINE)) { //用户没有在等待, 需要判断是否是在线，如果不是在线状态则不能fast join
+		if (!user.getStatus().equals(OnlineUserDto.STATUS_ONLINE)) { //用户没有在等待, 需要判断是否是在线，如果不是在线状态则不能fast join
 			throw new BombException(-100, "user status error");
 		}
 	}

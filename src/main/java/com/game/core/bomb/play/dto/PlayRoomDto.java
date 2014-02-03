@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -99,8 +100,8 @@ public class PlayRoomDto {
 		this.roomEnterLock = roomLock;
 	}
 
-	public void addUserCallback(Runnable task) {
-		executorService.submit(task);
+	public Future<?> addUserCallback(Runnable task) {
+		return executorService.submit(task);
 	}
 
 	public String getRoomStatus() {
@@ -115,6 +116,10 @@ public class PlayRoomDto {
 	public void startGame() {
 		setRoomStatus(PlayRoomDto.ROOM_STATUS_CLOSED);
 		playerInfoAfterGameStart = new PlayersOfRoomStart(this.getUsers());
+		//interrupt all user waiting status
+		for (OnlineUserDto userDto : this.getUsers()) {
+			userDto.interuptTimeoutTask();
+		}
 	}
 
 	public List<OnlineUserDto> getUsers() {

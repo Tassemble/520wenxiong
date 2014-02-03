@@ -23,6 +23,7 @@ import com.game.core.bomb.dto.GameSessionContext;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnDto;
 import com.game.core.bomb.play.dto.PlayRoomDto;
+import com.game.core.exception.BombException;
 import com.game.core.exception.ExceptionConstant;
 import com.game.core.exception.GamePlayException;
 import com.google.common.collect.ImmutableMap;
@@ -54,6 +55,25 @@ public class RoomLogic {
 
 	public void doUserJoin(PlayRoomDto room, String username, boolean withReady) {
 		
+	}
+	
+	public void exitRoomWhenWaiting(OnlineUserDto user) {
+		if (user.getStatus().equals(OnlineUserDto.STATUS_IN_ROOM)) {
+			PlayRoomDto room = GameMemory.getRoomByRoomId(user.getRoomId());
+			synchronized (room.getRoomLock()) {
+				if (user.getStatus().equals(OnlineUserDto.STATUS_IN_ROOM)) { // double check，中断这个等待
+					user.interuptTimeoutTask();
+					user.setStatus(OnlineUserDto.STATUS_ONLINE);
+					room.removeUser(user);
+					if (room.getReadyNumNow() == 0) {
+						RoomLogic.destroyRoom(room);
+					}
+				} else {
+					//may in playing game
+					throw new BombException(-100, "user status error, may be you are in playing game!");
+				}
+			}
+		}
 	}
 	
 	

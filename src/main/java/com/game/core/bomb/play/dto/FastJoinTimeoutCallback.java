@@ -33,6 +33,10 @@ public class FastJoinTimeoutCallback extends Thread {
 		roomLogic = cxt.getBean(RoomLogic.class);
 	}
 
+	
+	public void halt() {
+		this.interrupt();
+	}
 
 	@Override
 	public void run() {
@@ -54,8 +58,10 @@ public class FastJoinTimeoutCallback extends Thread {
 			} else {
 			}
 			// LOG.info("game is started");
+		} catch(InterruptedException ie) {
+			LOG.info(ie.getMessage());
 		} catch (Exception e) {
-			LOG.error(e.getMessage());
+			LOG.error(e.getMessage(), e);
 		}
 	}
 }
