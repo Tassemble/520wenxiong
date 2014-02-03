@@ -204,7 +204,7 @@ public class FastJoinAction implements BaseAction {
 		if (!pkLevel.equals(roomPkLevel)) {
 			return false;
 		}
-		return room.getReadyNumNow() < room.getRoomNumLimit() && room.getRoomNumLimit() == userNumLimit
+		return room.getReadyNumNow() < room.getRoomNumLimit()/* && room.getRoomNumLimit() == userNumLimit*/
 				&& PlayRoomDto.ROOM_STATUS_OPEN == room.getRoomStatus();
 	}
 	
