@@ -57,6 +57,7 @@ public class FastJoinTimeoutCallback extends Thread {
 				
 				//判断是否满足最低游戏开始人数 如果满足2人以上 就直接开始 否则超时
 				if (room.hasMinPlayersToStartGame()) {
+					Thread.currentThread().setName("user(" +user.getId()+")-room(" + room.getId() + ")");
 					//force start if force start failed then goto timeout
 					boolean success = roomLogic.forceStartGame(room, ActionNameEnum.FAST_JOIN.getAction());
 					if (!success) { //如果强制执行开始失败，就显示超时信息，可能的原因是即将开始的时候有人退出了

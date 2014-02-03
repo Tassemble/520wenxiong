@@ -64,9 +64,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 
 	@Override
 	public void messageReceived(NextFilter nextFilter, IoSession session, Object message) throws Exception {
-		
-		
-		
+		String lastThreadName = Thread.currentThread().getName();
 		String action = null;
 		try {
 			// 特殊输出，如果是单纯字节的话========================start
@@ -105,6 +103,8 @@ public class AuthIoFilter extends IoFilterAdapter {
 			GameMemory.LOCAL_SESSION_CONTEXT.set(context);
 			GameMemory.LOCAL_SESSION_CONTEXT.get().setAction(action);
 
+			
+			
 			OnlineUserDto user = GameMemory.SESSION_USERS.get(jsonSession.getId());
 			if (user == null) {
 
@@ -175,7 +175,8 @@ public class AuthIoFilter extends IoFilterAdapter {
 
 				GameMemory.setUser(user);
 			}
-
+			
+			Thread.currentThread().setName("user(" + user.getId() + ")");
 			super.messageReceived(nextFilter, session, message);
 
 		} catch(Exception  e) {
@@ -188,6 +189,7 @@ public class AuthIoFilter extends IoFilterAdapter {
 			}
 		}
 		finally {
+			Thread.currentThread().setName(lastThreadName);
 			GameMemory.LOCAL_SESSION_CONTEXT.remove();
 		}
 
