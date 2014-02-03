@@ -136,6 +136,10 @@ public class RoomLogic {
 		RoomLogic.forwardMessageInRoom(room.getId(), ro);
 	}
 	
+	
+	/**
+	 * 注意这里面不要有阻塞线程在 包括sleep 文件IO 操作等 不然就会导致自己中断自己
+	 */
 	public boolean forceStartGame(PlayRoomDto room, String action) throws Exception {
 		synchronized (room.getRoomLock()) {
 			if (!room.hasMinPlayersToStartGame()) { //如果没有到达最低人数就不开始

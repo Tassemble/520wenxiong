@@ -1,11 +1,8 @@
 package com.game.core.bomb.dto;
 
-import java.util.concurrent.Future;
-
 import org.apache.mina.core.session.IoSession;
 
 import com.game.bomb.domain.User;
-import com.game.core.bomb.play.dto.FastJoinTimeoutCallback;
 
 public class OnlineUserDto {
 	
@@ -36,7 +33,9 @@ public class OnlineUserDto {
 	Long				gold;
 	private String inUse;
 	transient IoSession session;
-	private transient Future<?>  timeoutTask;
+	
+	
+	private transient TimeoutTaskWrapper timeoutTask;
 	
 	public OnlineUserDto() {}
 	public OnlineUserDto(User user) {
@@ -57,15 +56,9 @@ public class OnlineUserDto {
 	
 	
 	public void interuptTimeoutTask() {
-		Future<?> task = this.getTimeoutTask();
-		if (task == null) {
-			return;
+		if (timeoutTask != null) {
+			timeoutTask.halt();
 		}
-		if (task.isDone() || task.isCancelled()) {
-			return;
-		}
-		
-		task.cancel(true);
 	}
 	
 	public void refreshUser(User user) {
@@ -83,10 +76,6 @@ public class OnlineUserDto {
 		this.gold = user.getGold();
 		this.inGot = user.getInGot();
 	}
-	
-	
-	
-
 	public Long getInGot() {
 		return inGot;
 	}
@@ -229,10 +218,10 @@ public class OnlineUserDto {
 	public void setInUse(String inUse) {
 		this.inUse = inUse;
 	}
-	public Future<?> getTimeoutTask() {
+	public TimeoutTaskWrapper getTimeoutTask() {
 		return timeoutTask;
 	}
-	public void setTimeoutTask(Future<?> timeoutTask) {
+	public void setTimeoutTask(TimeoutTaskWrapper timeoutTask) {
 		this.timeoutTask = timeoutTask;
 	}
 

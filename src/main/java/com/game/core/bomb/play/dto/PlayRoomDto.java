@@ -119,6 +119,16 @@ public class PlayRoomDto {
 		playerInfoAfterGameStart = new PlayersOfRoomStart(this.getUsers());
 		//interrupt all user waiting status
 		for (OnlineUserDto userDto : this.getUsers()) {
+			//这个中断会把自己给中断（如果存在阻塞操作的话)˚
+			//do not interrupt self
+			if (userDto.getTimeoutTask() != null) {
+				if (userDto.getTimeoutTask().getThreadId().equals(Thread.currentThread().getId())) {
+					if (LOG.isDebugEnabled()) {
+						LOG.info("current thread won't interrupt!");
+					}
+					continue;//超时前运行的就是回调线程
+				}
+			}
 			userDto.interuptTimeoutTask();
 		}
 	}

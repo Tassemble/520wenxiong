@@ -1,17 +1,14 @@
 package com.game.core.bomb.dispatcher;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.mina.core.session.IoSession;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +19,6 @@ import com.game.bomb.Dao.MatchPolicyDao;
 import com.game.bomb.constant.BombConstant;
 import com.game.bomb.domain.MatchPolicy;
 import com.game.bomb.domain.User;
-import com.game.bomb.mobile.dto.MobRoomDto;
-import com.game.bomb.mobile.dto.MobileUserDto;
 import com.game.bomb.service.UserService;
 import com.game.core.GameMemory;
 import com.game.core.bomb.dto.ActionNameEnum;
@@ -31,6 +26,7 @@ import com.game.core.bomb.dto.BaseActionDataDto;
 import com.game.core.bomb.dto.BaseActionDataDto.FastJoinData;
 import com.game.core.bomb.dto.OnlineUserDto;
 import com.game.core.bomb.dto.ReturnDto;
+import com.game.core.bomb.dto.TimeoutTaskWrapper;
 import com.game.core.bomb.logic.RoomLogic;
 import com.game.core.bomb.play.dto.FastJoinTimeoutCallback;
 import com.game.core.bomb.play.dto.PlayRoomDto;
@@ -38,8 +34,6 @@ import com.game.core.exception.BombException;
 import com.game.core.exception.ExceptionConstant;
 import com.game.core.exception.GamePlayException;
 import com.game.core.utils.CellLocker;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 @Component
 public class FastJoinAction implements BaseAction {
@@ -123,11 +117,13 @@ public class FastJoinAction implements BaseAction {
 				room = new PlayRoomDto(userNumLimit, user, policyLevel);
 				GameMemory.room.put(room.getId(), room);
 				FastJoinTimeoutCallback timeoutTask = new FastJoinTimeoutCallback(user.getId(), joinData.getTimeoutInSeconds());
-				user.setTimeoutTask(room.addUserCallback(timeoutTask));
+				Future<?> future = room.addUserCallback(timeoutTask);
+				user.setTimeoutTask(new TimeoutTaskWrapper(future, timeoutTask));
 				LOG.info("user[" + user.getUsername() + "] create room, rid:" + room.getId());
 			} else {
 				FastJoinTimeoutCallback timeoutTask = new FastJoinTimeoutCallback(user.getId(), joinData.getTimeoutInSeconds());
-				user.setTimeoutTask(room.addUserCallback(timeoutTask));
+				Future<?> future = room.addUserCallback(timeoutTask);
+				user.setTimeoutTask(new TimeoutTaskWrapper(future, timeoutTask));
 				roomLogic.doUserJoin(room, user.getId());
 				LOG.info("user[" + user.getUsername() + "] join room, rid:" + room.getId());
 			}

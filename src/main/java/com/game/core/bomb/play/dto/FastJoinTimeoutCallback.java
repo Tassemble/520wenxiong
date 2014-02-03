@@ -21,6 +21,8 @@ public class FastJoinTimeoutCallback extends Thread {
 	int			timeoutInSeconds	= 0;
 	Long		userId;
 	RoomLogic	roomLogic;
+	volatile    long currentThreadId = -1L;
+	
 	
 	
 	
@@ -40,7 +42,7 @@ public class FastJoinTimeoutCallback extends Thread {
 
 	@Override
 	public void run() {
-
+		currentThreadId = Thread.currentThread().getId();
 		try {
 			TimeUnit.SECONDS.sleep(timeoutInSeconds);
 			OnlineUserDto user = GameMemory.getUserById(this.userId);
@@ -76,4 +78,17 @@ public class FastJoinTimeoutCallback extends Thread {
 			LOG.error(e.getMessage(), e);
 		}
 	}
+
+
+	public long getCurrentThreadId() {
+		return currentThreadId;
+	}
+
+
+	public void setCurrentThreadId(long currentThreadId) {
+		this.currentThreadId = currentThreadId;
+	}
+	
+	
+	
 }
