@@ -90,7 +90,8 @@ public class BombMessageBizHandler implements BombMessageHandler{
 
 	@Override
 	public void sessionIdle(IoSession session, IdleStatus paramIdleStatus) throws Exception {
-
+		LOG.info("close session for not any operation for a long time");
+		session.close(true);
 	}
 
 	@Override

@@ -29,6 +29,9 @@ public class PaopaoApp {
 		GameMemory.bizContext.put(GameMemory.CONTEXT_NAME, APPLICATION_CONTEXT);
 		
 		IoAcceptor acceptor = (IoAcceptor) APPLICATION_CONTEXT.getBean("ioAcceptor");
+		acceptor.getSessionConfig().setBothIdleTime(30 * 60); //半小时后不操作就关闭了
+//		acceptor.getSessionConfig().setReaderIdleTime(60);
+//		System.out.println(acceptor.getSessionConfig().getWriterIdleTimeInMillis());
 		try {
 			while (acceptor.isActive()) {
 				TimeUnit.SECONDS.sleep(1);
