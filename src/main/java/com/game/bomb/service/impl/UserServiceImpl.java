@@ -130,7 +130,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		wealthBudget.setGmtCreate(new Date());
 		wealthBudget.setGmtModified(new Date());
 		wealthBudget.setOrderId(0L);
-		wealthBudget.setQuantity((long)number);
+		wealthBudget.setQuantity(-(long)number);
 		wealthBudget.setUid(uid);
 		wealthBudgetDao.add(wealthBudget);
 		
@@ -160,7 +160,7 @@ public class UserServiceImpl extends BaseServiceImpl<BaseDao<User>, User> implem
 		wealthBudget.setGmtCreate(new Date());
 		wealthBudget.setGmtModified(new Date());
 		wealthBudget.setOrderId(0L);
-		wealthBudget.setQuantity((long)number);
+		wealthBudget.setQuantity(-(long)number);
 		wealthBudget.setUid(uid);
 		wealthBudgetDao.add(wealthBudget);
 		
