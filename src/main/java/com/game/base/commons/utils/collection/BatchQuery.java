@@ -14,7 +14,7 @@ public class BatchQuery{
      * @param queryParams
      * @param dataProvider
      * @return
-     * @author hzfjd@corp.netease.com
+     * @author @corp.netease.com
      * @date 2013-3-29
      */
     public static <T, D> List<T> queryInBatch(List<D> queryParams, BatchQueryerDataProvider<T, D> dataProvider) {

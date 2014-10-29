@@ -3,7 +3,7 @@ package com.game.base.commons.utils.collection;
 import java.io.Serializable;
 
 /*
- * @author hzfjd@corp.netease.com
+ * @author @corp.netease.com
  * @date 2012-7-12
  */
 public class BaseQuery implements Serializable {

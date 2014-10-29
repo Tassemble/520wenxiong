@@ -11,7 +11,7 @@ import org.springframework.core.Ordered;
 import com.netease.dbsupport.transaction.IDBTransactionManager;
 
 /*
- * @author hzfjd@corp.netease.com
+ * @author @corp.netease.com
  * @date 2012-9-20
  */
 @Aspect
