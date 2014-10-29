@@ -18,6 +18,7 @@ public class TmallProductDto {
 	 * 促销价格
 	 */
 	private Double	promotionPrice;
+	private String  productType;
 
 	/**
 	 * 是否包邮
@@ -91,5 +92,13 @@ public class TmallProductDto {
 
 	public String getProductReferer() {
 		return "http://detail.tmall.com/item.htm?id=" + productId;
+	}
+
+	public String getProductType() {
+		return productType;
+	}
+
+	public void setProductType(String productType) {
+		this.productType = productType;
 	}
 }

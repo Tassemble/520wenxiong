@@ -38,6 +38,7 @@ public interface TmallCrawler {
 	public static final String	KEY_PROMOTE_PRICE	= "promote_price";
 
 	public static final String	KEY_PRODUCT			= "product";
+	public static final String	KEY_PRODUCTS			= "products";
 	
 
 	Map<String, Object> getKeyValue(String url);
@@ -56,5 +57,7 @@ public interface TmallCrawler {
 	
 	
 	List<String> searchWithPhases(String phases, int pageIndex);
+
+	List<TmallProductDto> getTmallProductDtos(String tmallUrl);
 
 }

@@ -25,6 +25,8 @@ import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -49,6 +51,7 @@ import com.wenxiong.blog.dto.TmallCommentURLDto;
 import com.wenxiong.blog.dto.TmallCommentsDto;
 import com.wenxiong.blog.dto.TmallProductDto;
 import com.wenxiong.utils.HttpClientUtils;
+import com.wenxiong.utils.HttpDataProvider;
 import com.wenxiong.utils.HttpDataProviderCandidate;
 import com.wenxiong.utils.ProductScoreUtils;
 import com.wenxiong.utils.TmallCrawlerUtils;
@@ -60,7 +63,7 @@ public class TmallCrawlerImpl implements TmallCrawler {
 	private static final Logger	LOG			= Logger.getLogger(TmallCrawlerImpl.class);
 	public static Pattern		pattern		= Pattern
 													.compile("^background-image:url\\((http://.*.jpg)_[0-9]+x[0-9]+.jpg\\)$");
-	public static Pattern		imgPattern	= Pattern.compile("^(http://.*.jpg)_[0-9]+x[0-9]+.jpg$");
+	public static Pattern		imgPattern	= Pattern.compile("^(http://.*?.jpg)_[0-9]+x[0-9]+.*?jpg$");
 
 	@Autowired
 	HttpClientUtils				httpClientUtils;
@@ -104,7 +107,8 @@ public class TmallCrawlerImpl implements TmallCrawler {
 
 		map.putAll(getProductEvaluation(url));
 
-		map.put(KEY_PRODUCT, getTmallProductDto(url));
+//		map.put(KEY_PRODUCT, getTmallProductDto(url));
+		map.put(KEY_PRODUCTS, getTmallProductDtos(url));
 
 		return map;
 	}
@@ -216,12 +220,12 @@ public class TmallCrawlerImpl implements TmallCrawler {
 	public String getTitleValue(String html) {
 		Document document = Jsoup.parse(html);
 		Elements titleDiv = document.select("div.tb-detail-hd");
-		Elements title = titleDiv.select("h3 > a");
+		Elements title = titleDiv.select("h3");
 		return title.get(0).text();
 	}
 
 	private String getDetailLocation(String html) {
-		Pattern pattern = Pattern.compile("\\(window, document,\\['(.*?)'\\]\\);</script>");
+		Pattern pattern = Pattern.compile("\"descUrl\":\"(http://.*?)\",\"fetchDcUrl\"");
 		Matcher detailUrlMatcher = pattern.matcher(html);
 		if (detailUrlMatcher.find()) {
 			return detailUrlMatcher.group(1);
@@ -345,15 +349,46 @@ public class TmallCrawlerImpl implements TmallCrawler {
 		return map;
 	}
 
+	
 	@Override
-	public TmallProductDto getTmallProductDto(String tmallUrl) {
+	public List<TmallProductDto> getTmallProductDtos(String tmallUrl) {
+		List<TmallProductDto> products = new ArrayList<TmallProductDto>();
 		TmallProductDto dto = null;
 		try {
 			Long itemId = TmallCrawlerUtils.fetchIDfromTmallURL(tmallUrl);
+			//get product type name
+			
+			final String rawURL = TmallCrawlerUtils.reWrapTmallURL(tmallUrl);
+			HttpClient httpClient = httpClientUtils.getTaobaoHttpManager();
+//			String mainPageHtml = HttpClientUtils.getHtmlByGetMethod(httpClient, new HttpDataProvider() {
+//				
+//				@Override
+//				public String getUrl() {
+//					return rawURL;
+//				}
+//				
+//				@Override
+//				public HttpEntity getHttpEntity() {
+//					return null;
+//				}
+//				
+//				@Override
+//				public List<Header> getHeaders() {
+//					return null;
+//				}
+//			});
+//			
+//			//TODO
+//			Document document = Jsoup.parse(mainPageHtml);
+			
+			
+			
+			//get product type ---> price
 			if (itemId == null)
 				return null;
 			dto = new TmallProductDto(itemId);
-			HttpClient httpClient = httpClientUtils.getTaobaoHttpManager();
+			
+			
 
 			String html = HttpClientUtils.getHtmlByGetMethod(httpClient,
 					HttpDataProviderCandidate.getWithReferer(dto.getProductInfoUrl(), dto.getProductReferer()));
@@ -361,6 +396,10 @@ public class TmallCrawlerImpl implements TmallCrawler {
 				LOG.error("http request:" + dto.getProductInfoUrl() + ", return null");
 				return null;
 			}
+			
+			
+			
+			
 
 			JSONObject jsonObject = JSONObject.fromObject(html);
 			if (StringUtils.isBlank(jsonObject.getString("isSuccess"))
@@ -368,6 +407,9 @@ public class TmallCrawlerImpl implements TmallCrawler {
 				LOG.error("http request:" + dto.getProductInfoUrl() + " get data failed");
 				return null;
 			}
+			
+			
+			
 
 			JSONObject items = jsonObject.getJSONObject("defaultModel").getJSONObject("itemPriceResultDO")
 					.getJSONObject("priceInfo");
@@ -375,9 +417,9 @@ public class TmallCrawlerImpl implements TmallCrawler {
 			for (Object object : set) {
 				jsonObject = JSONObject.fromObject(object).getJSONObject("value");
 				dto.setPrice(jsonObject.getDouble("price"));
-				if (jsonObject.getJSONArray("promotionList") != null) {
+				
+				if (jsonObject.get("promotionList") != null && !jsonObject.get("promotionList").equals(null) && jsonObject.getJSONArray("promotionList") != null) {
 					JSONObject promotion = JSONObject.fromObject(jsonObject.getJSONArray("promotionList").get(0));
-					dto.setPostageFree(promotion.getBoolean("postageFree"));
 					dto.setPromotionPrice(promotion.getDouble("price"));
 					if (!promotion.getString("endTime").equals("null")
 							&& !promotion.getString("startTime").equals("null")) {
@@ -385,14 +427,26 @@ public class TmallCrawlerImpl implements TmallCrawler {
 						dto.setPromotionStartTime(promotion.getLong("startTime"));
 					}
 					dto.setPromotionType(promotion.getString("type"));
+					products.add(dto);
+				} else {
+					products.add(dto);
 				}
-				break;
 			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			return null;
 		}
-		return dto;
+		return products;
+	
+	}
+	
+	@Override
+	public TmallProductDto getTmallProductDto(String tmallUrl) {
+		List<TmallProductDto> products = getTmallProductDtos(tmallUrl);
+		if (CollectionUtils.isNotEmpty(products)) {
+			return products.get(0);
+		}
+		return null;
 	}
 
 	static boolean	isMock	= false;
@@ -441,9 +495,18 @@ public class TmallCrawlerImpl implements TmallCrawler {
 	}
 
 	public static void main(String[] args) {
-		isMock = true;
-		TmallCrawlerImpl crawlerImpl = new TmallCrawlerImpl();
-		List<String> ids = crawlerImpl.searchWithPhases("文胸 薄款", 1);
-		WordPressUtils.printJson(ids);
+//		isMock = true;
+//		TmallCrawlerImpl crawlerImpl = new TmallCrawlerImpl();
+//		List<String> ids = crawlerImpl.searchWithPhases("文胸 薄款", 1);
+//		WordPressUtils.printJson(ids);
+		
+		Pattern		newImgPattern	= Pattern.compile("^(http://.*?.jpg)_[0-9]+x[0-9]+.*?.jpg$");
+		
+		Matcher matcher = newImgPattern.matcher("http://gi3.md.alicdn.com/imgextra/i3/555253152/T2392vXbVbXXXXXXXX_!!555253152.jpg_60x60q90.jpg");
+		if (matcher.find()) {
+			System.out.println(matcher.group(0));
+		}
 	}
+	
+	
 }
