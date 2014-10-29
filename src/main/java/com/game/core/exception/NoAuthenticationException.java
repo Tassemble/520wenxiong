@@ -4,7 +4,7 @@ package com.game.core.exception;
  * @author CHQ
  * @since 2013-7-28
  */
-public class NoAuthenticationException extends RuntimeException {
+public class NoAuthenticationException extends BombException {
 
 	
 	/**
@@ -18,7 +18,7 @@ public class NoAuthenticationException extends RuntimeException {
 	String action;
 	
 	public NoAuthenticationException(int code, String message, String action) {
-		super(message);
+		super(code, message);
 		this.code = code;
 		this.message = message;
 		this.action = action;
@@ -26,7 +26,7 @@ public class NoAuthenticationException extends RuntimeException {
 	
 	
 	public NoAuthenticationException(String message, String action) {
-		super(message);
+		super(ExceptionConstant.NO_AUTHENTICATION_CODE, message);
 		this.code = ExceptionConstant.NO_AUTHENTICATION_CODE;
 		this.message = message;
 		this.action = action;
@@ -34,6 +34,7 @@ public class NoAuthenticationException extends RuntimeException {
 	
 	
 	public NoAuthenticationException(String action) {
+		super(ExceptionConstant.NO_AUTHENTICATION_CODE, "action is :" + action);
 		this.code = ExceptionConstant.NO_AUTHENTICATION_CODE;
 		this.action = action;
 	}

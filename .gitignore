@@ -1,3 +1,6 @@
 /target
 .classpath
 .setting
+/bin
+/logs
+/target

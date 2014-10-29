@@ -2,76 +2,120 @@ package com.game.core;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.util.ConcurrentHashSet;
 
-import com.game.core.dto.OnlineUserDto;
-import com.game.core.dto.RoomDto;
-import com.wenxiong.utils.WordPressUtils;
+import com.game.bomb.domain.User;
+import com.game.bomb.service.UserService;
+import com.game.core.bomb.dto.GameSessionContext;
+import com.game.core.bomb.dto.OnlineUserDto;
+import com.game.core.bomb.play.dto.PlayRoomDto;
+import com.game.core.exception.GamePlayException;
 
 
 public class GameMemory {
 	
+	
+	public static final String CONTEXT_NAME = "ctx";
+	
 	static final int MAX_PLAYERS = 5000;
 
-	public static Map<Long, OnlineUserDto> sessionUsers;
+	public static Map<Long, OnlineUserDto> SESSION_USERS;
 	
-	public static Map<String, OnlineUserDto> onlineUsers;
+	public static Map<Long, OnlineUserDto> ONLINE_USERS;
+	
+	/** 
+	 * 在一个时间段内，一个线程必然只运行一个sessoin，但并不能保证一个线程一直都在运行这个sessoin,
+	 * 因为一个线程可以运行多个session,
+	 * 所以返回信息的时候要清除session
+	 * 
+	 */
+	public static ThreadLocal<GameSessionContext> LOCAL_SESSION_CONTEXT = new ThreadLocal<GameSessionContext>();
+	
 	
 	public static Map<String, Object> actionMapping = new HashMap<String, Object>();
 	
-	public static Map<String, RoomDto> room;
+	public static Map<String, PlayRoomDto> room;
 	
 	public static ExecutorService executor = null;
 	
+	public static Map<String, Object> bizContext;
 	
 	
-	//并不能保证一个session一直在同一个线程中，因此，在返回信息的时候要清除session
-	static ThreadLocal<IoSession> LOCAL_SESSION = new ThreadLocal<IoSession>();
 	
-	static ThreadLocal<OnlineUserDto> LOCAL_USER = new ThreadLocal<OnlineUserDto>();
+	public static boolean hasLogin() {
+		if (getUser() != null) {
+			return true;
+		}
+		return false;
+	}
 	
+	public static void reloadUser() {
+		UserService userService = ApplicationContextHolder.get().getBean(UserService.class);
+		if (getUser() == null) {
+			throw new RuntimeException("reload user error due to threadlocal no user find");
+		}
+		
+		User user = userService.getById(getUser().getId());
+		getUser().refreshUser(user);
+//		OnlineUserDto onlineUser = new OnlineUserDto(user);
+//		onlineUser.setStatus(getUser().getStatus());
+//		onlineUser.setSession(getUser().getSession());
+//		setUser(onlineUser);
+	}
+	
+
 	static {
 		//用于用于超时通知
 		executor = Executors.newFixedThreadPool(MAX_PLAYERS);
 		//key is session id , value is user
-		sessionUsers = new ConcurrentHashMap<Long, OnlineUserDto>();
+		SESSION_USERS = new ConcurrentHashMap<Long, OnlineUserDto>();
 		//key is username , value is user
-		onlineUsers = new ConcurrentHashMap<String, OnlineUserDto>();
-		room = new ConcurrentHashMap<String, RoomDto>();
+		ONLINE_USERS = new ConcurrentHashMap<Long, OnlineUserDto>();
+		room = new ConcurrentHashMap<String, PlayRoomDto>();
+		// for biz context
+		bizContext  = new ConcurrentHashMap<String, Object>();
 	}
 	
+	
+	
 	public static IoSession getCurrentSession() {
-		return LOCAL_SESSION.get();
+		return LOCAL_SESSION_CONTEXT.get().getSession();
 	}
 	
 	public static void write(Object message) {
-		String strMessage = WordPressUtils.toJson(message);
-		LOCAL_SESSION.get().write(strMessage);
+		LOCAL_SESSION_CONTEXT.get().getSession().write(message);
 	}
 	
 	
-	public static OnlineUserDto getUserByUsername(String username) {
-		return onlineUsers.get(username);
+	
+	
+	public static OnlineUserDto getUserById(Long uid) {
+		return ONLINE_USERS.get(uid);
 	}
 	
 	
 	public static OnlineUserDto getUser() {
-		return LOCAL_USER.get();
+		GameSessionContext gsession = LOCAL_SESSION_CONTEXT.get();
+		if (gsession == null) {
+			throw new GamePlayException(-1, "user not online");
+		}
+		return gsession.getOnlineUser();
+	}
+	
+	public static void setUser(OnlineUserDto user) {
+		LOCAL_SESSION_CONTEXT.get().setOnlineUser(user);
 	}
 	
 	public static OnlineUserDto getOnlineUserBySessionId(Long id) {
-		return sessionUsers.get(id);
+		return SESSION_USERS.get(id);
 	}
 	
-	public static RoomDto getRoomByRoomId(String id) {
+	public static PlayRoomDto getRoomByRoomId(String id) {
 		if (StringUtils.isBlank(id)) {
 			return null;
 		}
@@ -83,32 +127,32 @@ public class GameMemory {
 	}
 	
 	public static void put(Long key, OnlineUserDto value) {
-		sessionUsers.put(key, value);
+		SESSION_USERS.put(key, value);
 	}
 	
 	
 	public static Object get(Long key) {
-		return sessionUsers.get(key);
+		return SESSION_USERS.get(key);
 	}
 	
 	
 	public static void removeSessionUserByKey(Long key) {
-		sessionUsers.remove(key);
+		SESSION_USERS.remove(key);
 	}
 
 
 	public static Map<Long, OnlineUserDto> getMap() {
-		return sessionUsers;
+		return SESSION_USERS;
 	}
 
 
-	public static Map<String, RoomDto> getRoom() {
+	public static Map<String, PlayRoomDto> getRoom() {
 		return room;
 	}
 	
 	
-	public static IoSession getSessionByUsername(String username) {
-		OnlineUserDto dto = onlineUsers.get(username);
+	public static IoSession getSessionById(Long uid) {
+		OnlineUserDto dto = ONLINE_USERS.get(uid);
 		if (dto != null) {
 			return dto.getSession();
 		}

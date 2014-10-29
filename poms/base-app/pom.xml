@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.wenxiong</groupId>
+	<groupId>com.paopao</groupId>
 	<artifactId>base-app</artifactId>
 	<packaging>pom</packaging>
 	<name>base-app</name>

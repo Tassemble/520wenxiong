@@ -24,17 +24,41 @@
 		<property name="pass">
 		<value>${mysql.pass}</value>
 		</property>
+		<property name="initialSize">
+			<value>${mysql.initialSize}</value>
+		</property>
+		<!-- 设置最大空闲连接 -->
+		<property name="maxIdle">
+			<value>
+			${mysql.maxIdle}
+			</value>
+		</property>
+		<!-- 设置最小空闲连接 -->
+		<property name="minIdle">
+			<value>
+			${mysql.minIdle}
+			</value>
+		</property>
+		<!-- 设置最大连接数量 -->
+		<property name="maxActive">
+			<value>
+			${mysql.maxActive}
+			</value>
+		</property>
+		
+		
+		
 	</bean>
 
 
 	<bean id="mysqlTransactionManagerAdapter"
-		class="com.wenxiong.blog.commons.dao.transaction.MysqlTransactionManagerAdapter">
+		class="com.game.base.commons.dao.transaction.MysqlTransactionManagerAdapter">
 	</bean>
 
 	<bean id="runtimeStatCounter" class="com.netease.framework.stat.RuntimeStatCounterImpl">
 	</bean>
 
-	<bean id="sqlManager" class="com.wenxiong.blog.commons.dao.sql.SqlManagerEduProxy">
+	<bean id="sqlManager" class="com.game.base.commons.dao.sql.SqlManagerEduProxy">
 		<property name="connectionPool">
 			<ref bean="mysqlDataSource" />
 		</property>
